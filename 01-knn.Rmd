@@ -3,11 +3,19 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-```{r}
+```{r setup}
 library(mlr3)           # For the basics
 library(mlr3learners)   # For k-nn learner
 library(palmerpenguins) # For penguins
+library(ggplot2)        # For plotting
 
+# remove NAs for simplicity in this example
+penguins <- na.omit(penguins)
+```
+
+# Creating a task
+
+```{r penguins-task}
 # Creating a task from our penguin data
 penguin_task <- TaskClassif$new(
   id = "penguins", 
@@ -32,6 +40,10 @@ penguin_task$missings()
 # penguin_task <- tsk("penguins")
 ```
 
+# Creating a learner
+
+We'll use the `kknn` package in the background for the classification task.
+
 ```{r}
 # Lots of learners to choose from
 mlr_learners
@@ -51,25 +63,65 @@ knn_learner$help()
 knn_learner$param_set
 ```
 
-### Train- and test-split
+## Train and test split
 
 ```{r}
+set.seed(26)
 penguin_train_set = sample(penguin_task$nrow, 0.8 * penguin_task$nrow)
-penguin_test_set = setdiff(seq_len(penguin_task$nrow), train_set)
+penguin_test_set = setdiff(seq_len(penguin_task$nrow), penguin_train_set)
 ```
+
+# Trainign and evaluating
+
+We can train the learner with default parameters once to see if it works.
 
 ```{r}
 knn_learner$train(penguin_task, row_ids = penguin_train_set)
-
 knn_learner$model
 ```
+And we can make predictions:
 
 ```{r}
-penguins_prediction = knn_learner$predict(penguin_task, row_ids = penguin_test_set)
+penguins_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_test_set)
 penguins_prediction
 ```
 
-```{r}
+Our predictions are looking good - too good...
 
+```{r}
+penguins_prediction$confusion
 ```
 
+```{r}
+measure_acc <- msr("classif.acc")
+penguins_prediction$score(measure_acc)
+```
+Rule of thumb: Perfect classification accuracy is _too good to be true_.  
+Always.  
+Mostly.  
+In general.
+
+## Resampling
+
+Instead of training our model just once, we're going to train it 5 times, which should give us a better idea of the accuracy we can expect:
+
+```{r}
+resampling <- rsmp("cv", folds = 5)
+rr <- resample(penguin_task, knn_learner, resampling)
+```
+
+Now we have a look at our predictions again, per resampling iteration:
+
+```{r}
+rr$score(measure_acc)[, .(iteration, classif.acc)]
+```
+
+And on average over the resampling iterations:
+
+```{r}
+rr$aggregate(measure_acc)
+
+autoplot(rr, measure = measure_acc)
+```
+
+Much more realistic. Still confusingly good!
