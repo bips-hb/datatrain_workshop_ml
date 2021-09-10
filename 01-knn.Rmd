@@ -1,22 +1,42 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "01: KNN classification"
+date: "`r Sys.time()`"
+output: 
+  html_notebook: 
+    toc: yes
+    theme: flatly
+    number_sections: yes
 ---
 
 ```{r setup}
 library(mlr3)           # For the basics
 library(mlr3learners)   # For k-nn learner
 library(palmerpenguins) # For penguins
+library(mlr3viz)        # For plotting
 library(ggplot2)        # For plotting
 
 # remove NAs for simplicity in this example
+# (handling missing data is a can of worms for another time :)
 penguins <- na.omit(penguins)
 ```
 
 # Creating a task
 
-```{r penguins-task}
-# Creating a task from our penguin data
+The task encapsulates our data, including which variables we're using to learn and which we want to predict. Tasks can be created in [multiple ways and some standard example tasks are available in mlr3](https://mlr3book.mlr-org.com/tasks.html), but we're taking the long way around.
+
+Questions a task answers:
+
+- What kind of prediction are we doing?
+    - Here: Classification (instead of e.g. regression)
+- What are we predicting on?
+    - The dataset given to `backend`
+- What variable are we predicting?
+    - The `target` variable, here `species`
+- Which variables are we using for predictions?
+    - The `feature` variables
+
+```{r penguins-task-creation}
+# Creating a classification task from our penguin data
 penguin_task <- TaskClassif$new(
   id = "penguins", 
   backend = penguins, 
@@ -32,70 +52,81 @@ penguin_task$col_roles[c("feature", "target")]
 # Maybe not all variables are useful for this task
 penguin_task$set_col_roles(cols = c("island", "sex", "year"), remove_from = "feature")
 penguin_task$col_roles[c("feature", "target")]
-
-# Some variables have missing values
-penguin_task$missings()
-
-
-# penguin_task <- tsk("penguins")
 ```
+
+Some variables may have missing values - if we had not excluded them in the beginning, you'd find them here:
+
+```{r penguins-task-missings}
+penguin_task$missings()
+```
+
+Always check for missing values to avoid unpleasant surprises!  
+Knowing your data is the first step to doing anything useful with it :)
+
 
 # Creating a learner
 
-We'll use the `kknn` package in the background for the classification task.
+We'll use the `kknn` package in the background for the classification task.  
+So first, we have to find the learner we're looking for.  
+There's a lot more [about learners in the mlr3 book](https://mlr3book.mlr-org.com/learners.html), but for now we're happy with the basics.
 
-```{r}
-# Lots of learners to choose from
+```{r learners, eval=FALSE}
+# Lots of learners to choose from here:
 mlr_learners
 
 # But we only want classifiers for now
 mlr_learners$keys(pattern = "classif")
 
-# More specifically, the knn one
-mlr_learners$get("classif.kknn")
+# Or more specifically, the knn one
+mlr_learners$keys(pattern = "knn")
+```
 
-# We can also access it more quickly with lrn()
+Now that we've identified our learner, we can get it quickly via the `lrn()` helper function:
+
+```{r knn-learner}
 knn_learner <- lrn("classif.kknn")
 
-knn_learner$help()
-
 # What parameters does this learner have?
-knn_learner$param_set
+knn_learner$param_set$ids()
+
+# Setting k to 7 just to mix it up
+knn_learner$param_set$values <- list(k = 7)
 ```
 
 ## Train and test split
 
-```{r}
+```{r penguin-split}
 set.seed(26)
-penguin_train_set = sample(penguin_task$nrow, 0.8 * penguin_task$nrow)
-penguin_test_set = setdiff(seq_len(penguin_task$nrow), penguin_train_set)
+penguin_train_set <- sample(penguin_task$nrow, 0.8 * penguin_task$nrow)
+penguin_test_set <- setdiff(seq_len(penguin_task$nrow), penguin_train_set)
 ```
 
-# Trainign and evaluating
+# Training and evaluating
 
-We can train the learner with default parameters once to see if it works.
+We can train the learner with default parameters once to see if it works as we expect it to.  
 
-```{r}
+```{r knn-train-once}
 knn_learner$train(penguin_task, row_ids = penguin_train_set)
 knn_learner$model
 ```
 And we can make predictions:
 
-```{r}
+```{r knn-predict-once}
 penguins_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_test_set)
 penguins_prediction
 ```
 
 Our predictions are looking good - too good...
 
-```{r}
+```{r knn-confusion-matrix}
 penguins_prediction$confusion
 ```
 
-```{r}
+```{r knn-accuracy-once}
 measure_acc <- msr("classif.acc")
 penguins_prediction$score(measure_acc)
 ```
+
 Rule of thumb: Perfect classification accuracy is _too good to be true_.  
 Always.  
 Mostly.  
@@ -103,25 +134,50 @@ In general.
 
 ## Resampling
 
+There's [lots of resampling strategies](https://mlr3book.mlr-org.com/resampling.html), but you usually can't go too wrong with cross validation (CV), as long as the scope is fairly small at least.
+
 Instead of training our model just once, we're going to train it 5 times, which should give us a better idea of the accuracy we can expect:
 
-```{r}
+```{r knn-resample-cv}
 resampling <- rsmp("cv", folds = 5)
 rr <- resample(penguin_task, knn_learner, resampling)
 ```
 
 Now we have a look at our predictions again, per resampling iteration:
 
-```{r}
+```{r knn-resample-acc}
 rr$score(measure_acc)[, .(iteration, classif.acc)]
 ```
 
 And on average over the resampling iterations:
 
-```{r}
+```{r knn-resample-acc-avg}
 rr$aggregate(measure_acc)
 
-autoplot(rr, measure = measure_acc)
+autoplot(rr, measure = measure_acc) +
+  coord_flip()
 ```
 
+
 Much more realistic. Still confusingly good!
+
+# Comparing against a baseline
+
+```{r}
+learners <- list(
+  lrn("classif.kknn", id = "knn"),
+  lrn("classif.featureless", id = "Baseline")
+) 
+
+design <- benchmark_grid(
+  penguin_task, # Still the same task
+  learners,     # The new list of learners
+  resampling    # Same resampling strategy as before
+) 
+
+bmr = benchmark(design)
+
+bmr$score(measure_acc)[1:5, .(learner_id, iteration, classif.acc)]
+
+bmr$aggregate(measure_acc)[, .(learner_id, classif.acc)]
+```
