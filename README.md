@@ -8,13 +8,31 @@ Workshop component to the Machine Learning workshop in the Data Train
 
 Repository contains Rmd notebooks for hands-on ML exercises.
 
-## Agenda (WIP)
+## [Agenda](https://github.com/bips-hb/lehre_datatrain)
 
-1.  KNN (`{kknn}`) classification w/ `{mlr3}` basics
-    -   Setting up tasks and learners
-    -   Training and predicting once and with resampling (CV)
-    -   Realizing how KNN works pretty well for this kind of problem
-2.  Trees: Single trees via `{rpart}`, many trees via `{ranger}`
-    -   Benchmarking both algorithms
-    -   Maybe tuning for `{rpart}`?
-3.  Boosting maybe?
+### Schedule
+20.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00
+21.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00
+
+### Concept
+* 4 3-hour blocks, each ~90min Theory, short break, ~90min Hands-on
+* Hands-on in RStudio server! 
+
+### Day 1, morning
+* Machine: k-nearest neighbors
+* Concept: Supervised learning; Learner, model, etc.
+* Machine: Decision trees
+
+### Day 1, afternoon
+* Machine: Random forest
+* Concept: Model evaluation, Resampling
+* Machine: Boosting
+
+### Day 2, morning
+* Machine: SVMs 
+* Concept: Parameter tuning
+* Machine: Neural nets
+
+### Day 2, afternoon
+* Concept: Specific endpoints; Regression, Multiclass, survival
+* Concept: Variable importance, variable selection, IML (outlook)
