@@ -1,5 +1,5 @@
 ---
-title: "02: Growing Trees"
+title: "03: SVMs & Neural Networks"
 date: "`r Sys.time()`"
 output: 
   html_notebook: 
@@ -42,12 +42,5 @@ penguin_task$col_roles[c("feature", "target")]
 set.seed(26)
 penguin_train_set <- sample(penguin_task$nrow, 0.8 * penguin_task$nrow)
 penguin_test_set <- setdiff(seq_len(penguin_task$nrow), penguin_train_set)
-```
-
-# Learner: Single Tree
-
-```{r}
-learner_tree <- lrn("classif.rpart")
-learner_forest <- lrn("classif.ranger")
 ```
 

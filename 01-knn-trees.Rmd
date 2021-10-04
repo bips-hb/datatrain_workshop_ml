@@ -1,5 +1,5 @@
 ---
-title: "01: KNN classification"
+title: "01: kNN & Trees"
 date: "`r Sys.time()`"
 output: 
   html_notebook: 
@@ -11,7 +11,6 @@ output:
 ```{r setup}
 library(ggplot2)        # For plotting
 theme_set(theme_minimal())
-
 
 library(kknn)           # For kNN models
 ```
