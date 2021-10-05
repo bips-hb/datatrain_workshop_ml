@@ -44,3 +44,82 @@ penguin_train_set <- sample(penguin_task$nrow, 0.8 * penguin_task$nrow)
 penguin_test_set <- setdiff(seq_len(penguin_task$nrow), penguin_train_set)
 ```
 
+
+## Resampling
+
+There's [lots of resampling strategies](https://mlr3book.mlr-org.com/resampling.html), but you usually can't go too wrong with cross validation (CV), which should not take too much time and computing power on small datasets like ours.
+
+Instead of training our model just once, we're going to train it 5 times, which should give us a better idea of the accuracy we can expect:
+
+```{r knn-resample-cv}
+resampling <- rsmp("cv", folds = 5)
+rr <- resample(penguin_task, lrn("classif.kknn"), resampling)
+```
+
+Now we have a look at our predictions again, per resampling iteration:
+
+```{r knn-resample-acc}
+measure_acc <- msr("classif.acc")
+rr$score(measure_acc)[, .(iteration, classif.acc)]
+```
+
+And on average over the resampling iterations:
+
+```{r knn-resample-acc-avg}
+rr$aggregate(measure_acc)
+
+autoplot(rr, measure = measure_acc) +
+  coord_flip()
+```
+
+
+Much more realistic. Still confusingly good!
+
+Also, note how we got to train our learner, do cross validate and get accuracy scores
+all without having to do any extra work.
+That's why we use mlr3 instead of doing everything manually - abstraction is nice.
+
+## Comparing against a baseline
+
+```{r}
+learners <- list(
+  lrn("classif.kknn", id = "knn"),
+  lrn("classif.rpart", id = "tree"),
+  lrn("classif.featureless", id = "Baseline")
+) 
+
+design <- benchmark_grid(
+  tasks = penguin_task,    # Still the same task
+  learners = learners,     # The new list of learners
+  resamplings = resampling # Same resampling strategy as before
+) 
+
+# Run the benchmark and save the results
+bmr <- benchmark(design)
+```
+
+`bmr` contains all we'd like to know about out comparison, let's take a look:
+
+```{r}
+# Extract per-iteration accuracy per learner
+bmr$score(measure_acc)[1:5, .(learner_id, iteration, classif.acc)]
+```
+
+And if we want to see what worked better overall:
+
+```{r}
+bmr$aggregate(measure_acc)[, .(learner_id, classif.acc)]
+
+autoplot(bmr, measure = measure_acc) +
+  coord_flip()
+```
+
+## Comparing more learners
+
+We haven't touched decision trees yet, but mlr3 makes it really easy to add them to the mix!
+
+This is the classification tree learner from the `rpart` package:
+
+```{r}
+lrn("classif.rpart")
+```

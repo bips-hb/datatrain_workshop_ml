@@ -15,6 +15,13 @@ theme_set(theme_minimal())
 library(kknn)           # For kNN models
 ```
 
+Goals of this part:
+
+  1. Taking a look at our example dataset
+  2. Introduce kNN via `{kknn}` and decision trees via `{rpart}`
+  3. Train some models, look at some results
+  4. Introduce `{mlr3}` and do 3. again but nicer
+
 # The dataset: Pengiuns!
 
 See [their website](https://allisonhorst.github.io/palmerpenguins/) for some more
@@ -41,11 +48,11 @@ We can take a look at the different species across two numeric features: Bill le
 library(ggplot2)        # For plotting
 theme_set(theme_minimal()) # Setting a default theme
 
-ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
   geom_point() +
   labs(
     title = "Palmer Penguins: Species by bill size",
-    x = "Bill Length [mm]", y = "Bill Depth [mm]",
+    x = "Flipper Length [mm]", y = "Body Mass [g]",
     color = "Species"
   )
 ```
@@ -61,25 +68,32 @@ train_ids <- sample(penguin_N, replace = FALSE, size = penguin_N * 2/3)
 test_ids <- setdiff(1:penguin_N, train_ids)
 
 # Assemble our train/test set using the indices we just randomized
-penguin_train <- penguins[train_ids, ]
+penguins_train <- penguins[train_ids, ]
 penguins_test <- penguins[test_ids, ]
 ```
 
-# kNN, manually
+# kNN and trees, step by step
 
-No that we have some data, we can start fitting a kNN model, just to see how it goes!
-Given the plot from earlier, we may have a rough idea that the bill- and flipper 
-measurements are already giving us a pretty good picture about the species.
+Now that we have some data, we can start fitting models, just to see how it goes!
+Given the plot from earlier, we may have a rough idea that the flipper length and body mass
+measurements are already giving us a somewhat decent good picture about the species.
 
-```{r}
+## kNN
+
+Let's start with the nearest-neighbor approach via the `{kknn}` package.
+It takes a `formula` argument like you may know from `lm()` and other common modeling functions in R,
+where the format is `predict_this ~ on_this + and_that + ...`.
+
+```{r kknn-fit}
+library(kknn)
 knn_penguins <- kknn(
-  formula = species ~ bill_length_mm + bill_depth_mm,
-  k = 3,
-  train = penguins_train,
-  test = penguins_test
+  formula = species ~ flipper_length_mm + body_mass_g,
+  k = 3,                  # Hyperparameter: How many neighbors to consider
+  train = penguins_train, # Training data used to make predictions
+  test = penguins_test    # Date to make predictions on
 )
 
-# The model seems pretty confident
+# Peek at the predictions
 head(summary(knn_penguins))
 ```
 
@@ -96,15 +110,68 @@ sum(penguins_test$species == penguins_test$knn_predicted_species) / nrow(penguin
 
 ## Your turn!
 
-Above you have working code for an oddly accurate kNN model.  
+Above you have working code for an acceptable but *not great* kNN model.  
 Can you make it even better?
 Can you change something to make it *worse*?
 
-Tweak some of the following:
-  - Try different predictors, maybe leave some out, or use all of them (`formula = species ~ .`)
-  - Try different `k` values. Is higher == better? (You can stick to odd numbers)
+Some things to try:
 
-# Switching to mlr3
+  1. Try different predictors, maybe leave some out
+      - Which seems to work best?
+  2. Try using all available predictors (`formula = species ~ .`)
+      - Would you recommend doing that? Does it work well?
+  3. Try different `k` values. Is higher == better? (You can stick to odd numbers)
+      - After you've tried a couple `k`'s, does it get cumbersome yet?
+
+  
+## Growing a decision tree
+
+Now that we've played around with kNN a little, let's grow some trees!
+We'll use the `{rpart}` (**R**ecursive **Part**itioning) package and start
+with the same model specification as before and use the default parameters.
+
+```{r tree-fit}
+library(rpart)
+
+rpart_penguins <- rpart(
+  formula = species ~ flipper_length_mm + body_mass_g,
+  data = penguins_train, # Train data
+  method = "class"      # Grow a classification tree (don't change this here)
+)
+```
+The nice thing about a single tree is that you can just look at it and know exactly what it did:
+
+```{r tree-model}
+rpart_penguins
+
+# Looking at the tree as a... tree.
+plot(rpart_penguins)
+```
+
+If we cant to know how accurate we are with our model we need to make predictions on our test data manually:
+
+```{r tree-predict}
+rpart_predictions <- predict(
+  rpart_penguins,          # The model we just fit
+  newdata = penguins_test, # New data to predict species on
+  type = "class"           # We want class predictions (the species), not probabilities
+)
+
+penguins_test$rpart_predicted_species <- rpart_predictions
+
+# Same procedure as with kNN before
+table(penguins_test$species, penguins_test$rpart_predicted_species)
+
+# And our accuracy score
+sum(penguins_test$species == penguins_test$rpart_predicted_species) / nrow(penguins_test)
+```
+
+Now, imagine you want to try out some more hyperparameters for either `rpart()`
+or `kknn()` or both, and then you want to compare the two - that would probably
+be kind of tedious unless to write some wrapper functions, right?
+Well, luckily we're not the first people to do some machine learning!
+
+# Introducing `{mlr3}`
 
 ```{r setup-mlr3}
 library(mlr3)           # For the basics
@@ -113,8 +180,8 @@ library(mlr3viz)        # For plotting
 ```
 
 Our code above works (hopefully), but for any given model or algorithm, there's
-different R packages with slightly different interfaces. `mlr3` and add-on packages
-unify all the common tasks with a consistent interface, 
+different R packages with slightly different interfaces as you've seen. 
+`{mlr3}` and add-on packages unify all the common tasks with a consistent interface.
 
 ## Creating a task
 
@@ -126,11 +193,11 @@ Questions a task object answers:
 - What kind of prediction are we doing?
     - Here: Classification (instead of e.g. regression)
 - What are we predicting on?
-    - The dataset given to `backend`
+    - The dataset given to `backend =`
 - What variable are we predicting?
     - The `target` variable, here `species`
 - Which variables are we using for predictions?
-    - The `feature` variables
+    - The `feature` variables, which we can adjust
 
 ```{r penguins-task-creation}
 # Creating a classification task from our penguin data
@@ -144,12 +211,19 @@ penguin_task <- TaskClassif$new(
 penguin_task$data()
 # We can ask it about e.g. our sample size
 penguin_task$nrow
+# And what the classes are
+penguin_task$class_names
+```
 
+
+```{r penguins-task-modification}
 # Display feature and target variable assignment
 penguin_task$col_roles[c("feature", "target")]
 
-# Maybe not all variables are useful for this task
+# Maybe not all variables are useful for this task, let's remove some
 penguin_task$set_col_roles(cols = c("island", "sex", "year"), remove_from = "feature")
+
+# Check what our current variables and roles are
 penguin_task$col_roles[c("feature", "target")]
 ```
 
@@ -161,7 +235,6 @@ penguin_task$missings()
 
 Always check for missing values to avoid unpleasant surprises!  
 Knowing your data is the first step to doing anything useful with it :)
-
 
 ## Creating a learner
 
@@ -203,7 +276,7 @@ penguin_train <- sample(penguin_task$nrow, 2/3 * penguin_task$nrow)
 penguin_test <- setdiff(seq_len(penguin_task$nrow), penguin_train)
 ```
 
-# Training and evaluating
+## Training and evaluating
 
 We can train the learner with default parameters once to see if it works as we expect it to.  
 
@@ -235,79 +308,4 @@ Rule of thumb: Perfect classification accuracy is _too good to be true_.
 Always.  
 Mostly.  
 In general.
-
-## Resampling
-
-There's [lots of resampling strategies](https://mlr3book.mlr-org.com/resampling.html), but you usually can't go too wrong with cross validation (CV), as long as the scope is fairly small at least.
-
-Instead of training our model just once, we're going to train it 5 times, which should give us a better idea of the accuracy we can expect:
-
-```{r knn-resample-cv}
-resampling <- rsmp("cv", folds = 5)
-rr <- resample(penguin_task, knn_learner, resampling)
-```
-
-Now we have a look at our predictions again, per resampling iteration:
-
-```{r knn-resample-acc}
-rr$score(measure_acc)[, .(iteration, classif.acc)]
-```
-
-And on average over the resampling iterations:
-
-```{r knn-resample-acc-avg}
-rr$aggregate(measure_acc)
-
-autoplot(rr, measure = measure_acc) +
-  coord_flip()
-```
-
-
-Much more realistic. Still confusingly good!
-
-Also, note how we got to train our learner, do cross validate and get accuracy scores
-all without having to do any extra work.
-That's why we use mlr3 instead of doing everything manually - abstraction is nice.
-
-## Comparing against a baseline
-
-```{r}
-learners <- list(
-  lrn("classif.kknn", id = "knn"),
-  lrn("classif.rpart", id = "tree"),
-  lrn("classif.featureless", id = "Baseline")
-) 
-
-design <- benchmark_grid(
-  tasks = penguin_task,    # Still the same task
-  learners = learners,     # The new list of learners
-  resamplings = resampling # Same resampling strategy as before
-) 
-
-# Run the benchmark and save the results
-bmr <- benchmark(design)
-```
-
-`bmr` contains all we'd like to know about out comparison, let's take a look:
-
-```{r}
-# Extract per-iteration accuracy per learner
-bmr$score(measure_acc)[1:5, .(learner_id, iteration, classif.acc)]
-```
-
-And if we want to see what worked better overall:
-
-```{r}
-bmr$aggregate(measure_acc)[, .(learner_id, classif.acc)]
-```
-
-## Comparing more learners
-
-We haven't touched decision trees yet, but mlr3 makes it really easy to add them to the mix!
-
-This is the classification tree learner from the `rpart` package:
-
-```{r}
-lrn("classif.rpart")
-```
 
