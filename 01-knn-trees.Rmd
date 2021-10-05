@@ -139,6 +139,7 @@ rpart_penguins <- rpart(
   method = "class"      # Grow a classification tree (don't change this here)
 )
 ```
+
 The nice thing about a single tree is that you can just look at it and know exactly what it did:
 
 ```{r tree-model}
@@ -146,6 +147,10 @@ rpart_penguins
 
 # Looking at the tree as a... tree.
 plot(rpart_penguins)
+
+# Much nice to use the rpart.plot package
+library(rpart.plot)
+rpart.plot(rpart_penguins)
 ```
 
 If we cant to know how accurate we are with our model we need to make predictions on our test data manually:
@@ -166,10 +171,20 @@ table(penguins_test$species, penguins_test$rpart_predicted_species)
 sum(penguins_test$species == penguins_test$rpart_predicted_species) / nrow(penguins_test)
 ```
 
-Now, imagine you want to try out some more hyperparameters for either `rpart()`
-or `kknn()` or both, and then you want to compare the two - that would probably
-be kind of tedious unless to write some wrapper functions, right?
-Well, luckily we're not the first people to do some machine learning!
+
+## Your turn!
+
+We haven't picked any hyperparameter settings for our tree yet, maybe we should try?
+
+1. What hyperparameters does `rpart()` offer? Do you recognize some from the lecture? 
+    - You can check via `?rpart.control`
+    - `minsplit`, `maxdepth` and `cp` seem easy enough to tweak, when in doubt, start there
+2. Try out trees with different sizes (`max.depth`) and other parameters, including more predictors (`formula =`)
+    - Would you prefer simple or complex trees?
+    - How far can you improve the tree's accuracy?
+    
+So, what seems to work better here? kNN or trees?
+
 
 # Introducing `{mlr3}`
 
@@ -178,6 +193,11 @@ library(mlr3)           # For the basics
 library(mlr3learners)   # For learners
 library(mlr3viz)        # For plotting
 ```
+
+Now, imagine you want to try out some more hyperparameters for either `rpart()`
+or `kknn()` or both, and then you want to compare the two - that would probably
+be kind of tedious unless to write some wrapper functions, right?
+Well, luckily we're not the first people to do some machine learning!
 
 Our code above works (hopefully), but for any given model or algorithm, there's
 different R packages with slightly different interfaces as you've seen. 
@@ -233,12 +253,10 @@ Some variables may have missing values - if we had not excluded them in the begi
 penguin_task$missings()
 ```
 
-Always check for missing values to avoid unpleasant surprises!  
-Knowing your data is the first step to doing anything useful with it :)
 
 ## Creating a learner
 
-We'll use the `kknn` package in the background for the classification task.  
+We'll keep using `{kknn}` and `{rpart}` in the background for the classification task.  
 So first, we have to find the learner we're looking for.  
 There's a lot more [about learners in the mlr3 book](https://mlr3book.mlr-org.com/learners.html), but for now we're happy with the basics.
 
@@ -246,11 +264,11 @@ There's a lot more [about learners in the mlr3 book](https://mlr3book.mlr-org.co
 # Lots of learners to choose from here:
 mlr_learners
 
-# But we only want classifiers for now
+# To show all classification learners
 mlr_learners$keys(pattern = "classif")
 
-# Or more specifically, the knn one
-mlr_learners$keys(pattern = "knn")
+# Or more specifically, the kknn and rpart learners
+mlr_learners$keys(pattern = "knn|rpart")
 ```
 
 Now that we've identified our learner, we can get it quickly via the `lrn()` helper function:
