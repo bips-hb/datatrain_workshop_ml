@@ -39,9 +39,11 @@ Repository contains Rmd notebooks for hands-on ML exercises.
 * Machine: Boosting
 
 - Hands-on:
-  - Forests and Boosting
+  - Introduce more mlr3 premade tasks, switch to spam task
   - CV-based model evaluation
-  - Comparing RF and xgboost, maybe with single trees and kNN as reference?
+    - Introduce with kknn and rpart
+  - Forests and Boosting
+  - Comparing RF and xgboost with kNN and trees?
 
 ### Day 2, morning
 
@@ -51,9 +53,7 @@ Repository contains Rmd notebooks for hands-on ML exercises.
 
 - Hands-on:
   - SVMs
-  - Introduce a complex dataset
-    - Maybe use some `{mlr3data}` datasets with various outcome types?
-  - Parameter tuning on SVM and kNN
+  - Parameter tuning on kNN, xgboost? SVM?
 
 ### Day 2, afternoon
 * Concept: Specific endpoints; Regression, Multiclass, survival
@@ -61,4 +61,4 @@ Repository contains Rmd notebooks for hands-on ML exercises.
 
 - Hands-on:
   - Not sure what to do here yet
-  - 
+  - Maybe use some `{mlr3data}` datasets with various outcome types?

@@ -105,7 +105,7 @@ penguins_test$knn_predicted_species <- fitted(knn_penguins)
 table(penguins_test$species, penguins_test$knn_predicted_species)
 
 # Proportion of correct prediction (accuracy)
-sum(penguins_test$species == penguins_test$knn_predicted_species) / nrow(penguins_test)
+mean(penguins_test$species == penguins_test$knn_predicted_species)
 ```
 
 ## Your turn!
@@ -168,7 +168,7 @@ penguins_test$rpart_predicted_species <- rpart_predictions
 table(penguins_test$species, penguins_test$rpart_predicted_species)
 
 # And our accuracy score
-sum(penguins_test$species == penguins_test$rpart_predicted_species) / nrow(penguins_test)
+mean(penguins_test$species == penguins_test$rpart_predicted_species)
 ```
 
 
@@ -252,13 +252,28 @@ Some variables may have missing values - if we had not excluded them in the begi
 ```{r penguins-task-missings}
 penguin_task$missings()
 ```
+### Train and test split
+
+We're mixing things up with a new train/test split, just for completeness in the example.
+For mlr3, we only need to save the indices.
+
+```{r penguin-split}
+set.seed(26)
+penguin_train <- sample(penguin_task$nrow, 2/3 * penguin_task$nrow)
+penguin_test <- setdiff(seq_len(penguin_task$nrow), penguin_train)
+```
 
 
-## Creating a learner
+## Picking a Learner
 
-We'll keep using `{kknn}` and `{rpart}` in the background for the classification task.  
-So first, we have to find the learner we're looking for.  
-There's a lot more [about learners in the mlr3 book](https://mlr3book.mlr-org.com/learners.html), but for now we're happy with the basics.
+A learner encapsulates the fitting algorithm as well as any relevant hyperparameters,
+and `{mlr3}` supports a whole lot of learners to choose from.
+We'll keep using `{kknn}` and `{rpart}` in the background for the classification task,
+but we'll use `{mlr3}` on top of them for a consistent interface.
+So first, we have to find the learners we're looking for.  
+
+There's a lot more [about learners in the mlr3 book](https://mlr3book.mlr-org.com/learners.html), 
+but for now we're happy with the basics.
 
 ```{r learners, eval=FALSE}
 # Lots of learners to choose from here:
@@ -271,7 +286,7 @@ mlr_learners$keys(pattern = "classif")
 mlr_learners$keys(pattern = "knn|rpart")
 ```
 
-Now that we've identified our learner, we can get it quickly via the `lrn()` helper function:
+Now that we've identified our learners, we can get it quickly via the `lrn()` helper function:
 
 ```{r knn-learner}
 knn_learner <- lrn("classif.kknn")
@@ -279,20 +294,11 @@ knn_learner <- lrn("classif.kknn")
 # What parameters does this learner have?
 knn_learner$param_set$ids()
 
-# Setting k to 7 just to mix it up
-knn_learner$param_set$values <- list(k = 7)
+# Setting parameters leaves the others as default
+knn_learner$param_set$values <- list(k = 9)
 ```
 
-## Train and test split
-
-We're mixing things up with a new train/test split, just for completeness in the example.
-For mlr3, we only need to save the indices.
-
-```{r penguin-split}
-set.seed(26)
-penguin_train <- sample(penguin_task$nrow, 2/3 * penguin_task$nrow)
-penguin_test <- setdiff(seq_len(penguin_task$nrow), penguin_train)
-```
+We'll save the `rpart` learner for later.
 
 ## Training and evaluating
 
@@ -302,28 +308,67 @@ We can train the learner with default parameters once to see if it works as we e
 knn_learner$train(penguin_task, row_ids = penguin_train)
 knn_learner$model
 ```
+
 And we can make predictions:
 
 ```{r knn-predict-once}
-penguins_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_test)
-penguins_prediction
+knn_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_test)
+knn_prediction
 ```
 
 Our predictions are looking quite good.
 
 ```{r knn-confusion-matrix}
-penguins_prediction$confusion
+knn_prediction$confusion
 ```
+
+To calculate the prediction accuracy, we don't have to do any math in small steps.
+`{mlr3}` comes with lots of measures (like accuracy) we can use, they're organized 
+in the `mlr_measures` object (just like `mlr_learners`).
+We're using `"classif.acc"` here with the shorthand function `msr()`.
+The we score our predictions with this measure, using the `$score()` method.
 
 ```{r knn-accuracy-once}
-# Saving the accuracy measure, we'll use it a bunch
+# Saving the accuracy measure
 measure_acc <- msr("classif.acc")
 # Scores according to the selected measure
-penguins_prediction$score(measure_acc)
+knn_prediction$score(measure_acc)
 ```
 
-Rule of thumb: Perfect classification accuracy is _too good to be true_.  
-Always.  
-Mostly.  
-In general.
+## Your turn!
 
+Now that we've done the kNN fitting with `{mlr3}`, you can easily do the same thing
+with the `rpart`-learner! All you have to do is switch the learner objects.
+
+Here's the same code as above but compacted for you to play around with,
+just make it do the same steps (training, predicting) with the `rpart_learner`.
+
+```{r switch-rpart-learner}
+# Picking the learner
+knn_learner <- lrn("classif.kknn")
+
+# What parameters does this learner have?
+knn_learner$param_set$ids()
+
+# Setting parameters (omit to use a defaults)
+knn_learner$param_set$values <- list(k = 15)
+
+# Train
+knn_learner$train(penguin_task, row_ids = penguin_train)
+# Optional: peek at the model
+knn_learner$model
+
+# Predict
+knn_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_test)
+
+knn_prediction$confusion
+
+# Accuracy
+knn_prediction$score(measure_acc)
+```
+
+
+# Useful links
+
+- [mlr3 cheatsheet with basic syntax](https://cheatsheets.mlr-org.com/mlr3.pdf)
+- [mlr3 book](https://mlr3book.mlr-org.com/) (not complete yet but useful)

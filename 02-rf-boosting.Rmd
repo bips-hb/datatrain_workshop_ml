@@ -9,43 +9,84 @@ output:
 ---
 
 ```{r setup}
-library(mlr3)           # For the basics
-library(mlr3learners)   # For k-nn learner
-library(palmerpenguins) # For penguins
-library(mlr3viz)        # For plotting
-library(ggplot2)        # For plotting
+library(mlr3verse) # Loads all the mlr3 stuff
+library(ggplot2)   # For plotting
 
-# remove NAs for simplicity in this example
-# (handling missing data is a can of worms for another time :)
-penguins <- na.omit(penguins)
+# Just telling mlr3 to be quiet unless something broke
+lgr::get_logger("mlr3")$set_threshold("error")
 ```
 
 # Task Setup
 
-```{r penguins-task-creation}
-# Creating a classification task from our penguin data
-penguin_task <- TaskClassif$new(
-  id = "penguins", 
-  backend = penguins, 
-  target = "species"
-)
+As we've seen last time, our penguin data is pretty easy for our learners.
+We need something a little more complex, meaning more observations (n)
+and a couple more predictors (p).  
+If you're looking for ready-made example tasks for your own experimentation,
+mlr3 comes with a couple you can try. The procedure is similar to `mlr_learners`
+and `mlr_measures`, but this time it's, you guessed it,  
 
-# Display feature and target variable assignment
-penguin_task$col_roles[c("feature", "target")]
+```{r task-dictionary}
+mlr_tasks
 
-# This time we're only dropping the year column
-penguin_task$set_col_roles(cols = c("year"), remove_from = "feature")
+# As a neat little table with all the relevant info
+as.data.table(mlr_tasks)
+```
 
-penguin_task$col_roles[c("feature", "target")]
+I suggest we try a two-class (i.e. binary) classification problem next, and
+maybe something we can probably all somewhat relate to: Spam detection.
 
-# Train/test split
+```{r task-spam}
+spam_task <- tsk("spam")
+
+# Outcome categories
+spam_task$class_names
+```
+
+## Your turn!
+
+Explore the task a little (you can use its built-in methods `spam_task$...`)
+You're given a new analysis problem, what are the important properties here?
+
+## Train & Test split
+
+```{r}
 set.seed(26)
-penguin_train_set <- sample(penguin_task$nrow, 0.8 * penguin_task$nrow)
-penguin_test_set <- setdiff(seq_len(penguin_task$nrow), penguin_train_set)
+spam_train <- sample(spam_task$nrow, 2/3 * spam_task$nrow)
+spam_test <- setdiff(seq_len(spam_task$nrow), spam_train)
 ```
 
 
-## Resampling
+# Random Forests & Boosting
+
+```{r}
+lrn_ranger <- lrn("classif.ranger", predict_type = "prob")
+
+lrn_ranger$train(spam_task, row_ids = spam_train)
+
+spam_pred_ranger <- lrn_ranger$predict(spam_task, row_ids = spam_test)
+
+spam_pred_ranger$score(msr("classif.acc"))
+autoplot(spam_pred_ranger, type = "roc")
+```
+
+```{r}
+lrn_xgboost <- lrn("classif.xgboost", predict_type = "prob")
+
+lrn_xgboost$train(spam_task, row_ids = spam_train)
+
+spam_pred_xgboost <- lrn_xgboost$predict(spam_task, row_ids = spam_test)
+
+spam_pred_xgboost$score(msr("classif.acc"))
+```
+
+
+```{r}
+autoplot(spam_pred_xgboost, type = "roc")
+
+spam_pred_xgboost$score(msr("classif.auc"))
+```
+
+# Resampling
 
 There's [lots of resampling strategies](https://mlr3book.mlr-org.com/resampling.html), but you usually can't go too wrong with cross validation (CV), which should not take too much time and computing power on small datasets like ours.
 
@@ -53,7 +94,11 @@ Instead of training our model just once, we're going to train it 5 times, which 
 
 ```{r knn-resample-cv}
 resampling <- rsmp("cv", folds = 5)
-rr <- resample(penguin_task, lrn("classif.kknn"), resampling)
+rr <- resample(
+  spam_task$filter(spam_train), 
+  lrn("classif.kknn", k = 9),
+  resampling
+)
 ```
 
 Now we have a look at our predictions again, per resampling iteration:
@@ -68,14 +113,13 @@ And on average over the resampling iterations:
 ```{r knn-resample-acc-avg}
 rr$aggregate(measure_acc)
 
-autoplot(rr, measure = measure_acc) +
-  coord_flip()
+autoplot(rr, measure = measure_acc)
+
+autoplot(rr$prediction(), type = "roc")
 ```
 
 
-Much more realistic. Still confusingly good!
-
-Also, note how we got to train our learner, do cross validate and get accuracy scores
+Note how we got to train our learner, do cross validate and get accuracy scores
 all without having to do any extra work.
 That's why we use mlr3 instead of doing everything manually - abstraction is nice.
 
