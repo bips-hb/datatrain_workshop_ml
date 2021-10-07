@@ -55,8 +55,81 @@ spam_train <- sample(spam_task$nrow, 2/3 * spam_task$nrow)
 spam_test <- setdiff(seq_len(spam_task$nrow), spam_train)
 ```
 
+# Resampling
+
+There's [lots of resampling strategies](https://mlr3book.mlr-org.com/resampling.html), but you usually can't go too wrong with cross validation (CV), which should not take too much time and computing power on small datasets like ours.
+
+Instead of training our model just once, we're going to train it 5 times, which should give us a better idea of the accuracy we can expect:
+
+```{r knn-resample-cv}
+resampcv5 <- rsmp("cv", folds = 5)
+rr <- resample(
+  task = spam_task, 
+  learner = lrn("classif.kknn", k = 9),
+  resampling = resampcv5
+)
+```
+
+Now we have a look at our predictions again, per resampling iteration:
+
+```{r knn-resample-acc}
+measure_auc <- msr("classif.auc")
+rr$score(measure_auc)[, .(iteration, classif.auc)]
+```
+
+And on average over the resampling iterations:
+
+```{r knn-resample-acc-avg}
+rr$aggregate(measure_acc)
+
+autoplot(rr, measure = measure_acc)
+
+autoplot(rr$prediction(), type = "roc")
+```
+
+
+Note how we got to train our learner, do cross validate and get scores
+all without having to do any extra work.
+That's why we use mlr3 instead of doing everything manually - abstraction is nice.
+
+## Comparing against a baseline
+
+```{r}
+learners <- list(
+  lrn("classif.kknn", id = "knn", predict_type = "prob"),
+  lrn("classif.rpart", id = "tree", predict_type = "prob"),
+  lrn("classif.featureless", id = "Baseline", predict_type = "prob")
+) 
+
+design <- benchmark_grid(
+  tasks = spam_task,       # Still the same task
+  learners = learners,     # The new list of learners
+  resamplings = resampcv5  # Same resampling strategy as before
+) 
+
+# Run the benchmark and save the results
+bmr <- benchmark(design)
+```
+
+`bmr` contains all we'd like to know about out comparison, let's take a look:
+
+```{r}
+# Extract per-iteration accuracy per learner
+bmr$score(measure_auc)[1:5, .(learner_id, iteration, classif.auc)]
+```
+
+And if we want to see what worked better overall:
+
+```{r}
+bmr$aggregate(measure_auc)[, .(learner_id, classif.auc)]
+
+autoplot(bmr, measure = measure_auc)
+```
 
 # Random Forests & Boosting
+
+Armed with our new model comparison skills, we can add Random Forests and
+Gradient Boosting to the mix!
 
 ```{r}
 lrn_ranger <- lrn("classif.ranger", predict_type = "prob")
@@ -86,84 +159,27 @@ autoplot(spam_pred_xgboost, type = "roc")
 spam_pred_xgboost$score(msr("classif.auc"))
 ```
 
-# Resampling
-
-There's [lots of resampling strategies](https://mlr3book.mlr-org.com/resampling.html), but you usually can't go too wrong with cross validation (CV), which should not take too much time and computing power on small datasets like ours.
-
-Instead of training our model just once, we're going to train it 5 times, which should give us a better idea of the accuracy we can expect:
-
-```{r knn-resample-cv}
-resampling <- rsmp("cv", folds = 5)
-rr <- resample(
-  spam_task$filter(spam_train), 
-  lrn("classif.kknn", k = 9),
-  resampling
-)
-```
-
-Now we have a look at our predictions again, per resampling iteration:
-
-```{r knn-resample-acc}
-measure_acc <- msr("classif.acc")
-rr$score(measure_acc)[, .(iteration, classif.acc)]
-```
-
-And on average over the resampling iterations:
-
-```{r knn-resample-acc-avg}
-rr$aggregate(measure_acc)
-
-autoplot(rr, measure = measure_acc)
-
-autoplot(rr$prediction(), type = "roc")
-```
-
-
-Note how we got to train our learner, do cross validate and get accuracy scores
-all without having to do any extra work.
-That's why we use mlr3 instead of doing everything manually - abstraction is nice.
-
-## Comparing against a baseline
+## Comparing all methods
 
 ```{r}
 learners <- list(
-  lrn("classif.kknn", id = "knn"),
-  lrn("classif.rpart", id = "tree"),
-  lrn("classif.featureless", id = "Baseline")
+  lrn("classif.kknn", id = "knn", predict_type = "prob"),
+  lrn("classif.rpart", id = "tree", predict_type = "prob"),
+  lrn("classif.ranger", id = "forest", predict_type = "prob"),
+  lrn("classif.xgboost", id = "boost", predict_type = "prob")
 ) 
 
 design <- benchmark_grid(
-  tasks = penguin_task,    # Still the same task
+  tasks = spam_task,       # Still the same task
   learners = learners,     # The new list of learners
-  resamplings = resampling # Same resampling strategy as before
+  resamplings = resampcv5  # Same resampling strategy as before
 ) 
 
 # Run the benchmark and save the results
 bmr <- benchmark(design)
 ```
 
-`bmr` contains all we'd like to know about out comparison, let's take a look:
-
 ```{r}
-# Extract per-iteration accuracy per learner
-bmr$score(measure_acc)[1:5, .(learner_id, iteration, classif.acc)]
+autoplot(bmr, measure = measure_auc)
 ```
 
-And if we want to see what worked better overall:
-
-```{r}
-bmr$aggregate(measure_acc)[, .(learner_id, classif.acc)]
-
-autoplot(bmr, measure = measure_acc) +
-  coord_flip()
-```
-
-## Comparing more learners
-
-We haven't touched decision trees yet, but mlr3 makes it really easy to add them to the mix!
-
-This is the classification tree learner from the `rpart` package:
-
-```{r}
-lrn("classif.rpart")
-```

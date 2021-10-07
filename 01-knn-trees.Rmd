@@ -1,11 +1,14 @@
 ---
-title: "01: kNN & Trees"
+title: '01: kNN & Trees'
 date: "`r Sys.time()`"
-output: 
-  html_notebook: 
+output:
+  html_notebook:
     toc: yes
     theme: flatly
     number_sections: yes
+  html_document:
+    toc: yes
+    df_print: paged
 ---
 
 ```{r setup}
@@ -49,9 +52,10 @@ library(ggplot2)        # For plotting
 theme_set(theme_minimal()) # Setting a default theme
 
 ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+# ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
   geom_point() +
   labs(
-    title = "Palmer Penguins: Species by bill size",
+    title = "Palmer Penguins",
     x = "Flipper Length [mm]", y = "Body Mass [g]",
     color = "Species"
   )
@@ -123,7 +127,7 @@ Some things to try:
   3. Try different `k` values. Is higher == better? (You can stick to odd numbers)
       - After you've tried a couple `k`'s, does it get cumbersome yet?
 
-  
+
 ## Growing a decision tree
 
 Now that we've played around with kNN a little, let's grow some trees!
@@ -147,8 +151,9 @@ rpart_penguins
 
 # Looking at the tree as a... tree.
 plot(rpart_penguins)
+text(rpart_penguins)
 
-# Much nice to use the rpart.plot package
+# Much nicer to use the rpart.plot package
 library(rpart.plot)
 rpart.plot(rpart_penguins)
 ```
@@ -185,6 +190,29 @@ We haven't picked any hyperparameter settings for our tree yet, maybe we should 
     
 So, what seems to work better here? kNN or trees?
 
+## Plotting decision boundaries (for 2 predictors)
+
+```{r}
+flipper_range <- range(penguins$flipper_length_mm)
+mass_range <- range(penguins$body_mass_g)
+
+pred_grid <- expand.grid(
+  flipper_length_mm = seq(flipper_range[1], flipper_range[2], length.out = 200),
+  body_mass_g = seq(mass_range[1], mass_range[2], length.out = 200)
+)
+
+pred_grid$rpart_prediction <- predict(rpart_penguins, newdata = pred_grid, type = "class")
+
+ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g, color = rpart_prediction)) +
+  geom_point(alpha = .1) +
+  geom_point(data = penguins_train, aes(color = species)) +
+  labs(
+    title = "Palmer Penguins",
+    subtitle = "Species predicted by decision tree",
+    x = "Flipper Length [mm]", y = "Body Mass [g]",
+    color = "[Predicted] Species"
+  )
+```
 
 # Introducing `{mlr3}`
 

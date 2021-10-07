@@ -4,5 +4,6 @@
 .Ruserdata
 README.html
 
-# Notebook previews
+# Notebook previews & renders
 *.nb.html
+0*.html
