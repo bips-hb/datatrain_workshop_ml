@@ -1,0 +1,31 @@
+---
+title: "04: Feature Selection & Importance"
+date: "`r Sys.time()`"
+output:
+  html_notebook:
+  toc: yes
+theme: flatly
+number_sections: yes
+---
+
+```{r setup}
+library(mlr3verse)  # All the mlr3 things
+library(ggplot2)    # For plotting
+library(iml)        # Interpretability methods
+
+# Spam Task setup
+spam_task <- tsk("spam")
+set.seed(26)
+spam_train <- sample(spam_task$nrow, 2/3 * spam_task$nrow)
+spam_test <- setdiff(seq_len(spam_task$nrow), spam_train)
+
+# Penguin Task setup
+penguin_task <- TaskClassif$new(
+  id = "penguins", 
+  backend = na.omit(palmerpenguins::penguins), 
+  target = "species"
+)
+set.seed(26)
+penguin_train <- sample(penguin_task$nrow, 2/3 * penguin_task$nrow)
+penguin_test <- setdiff(seq_len(penguin_task$nrow), penguin_train)
+```

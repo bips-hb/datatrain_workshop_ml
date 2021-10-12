@@ -1,5 +1,5 @@
 ---
-title: "02: Random Forest & Boosting"
+title: "02: Resampling, Random Forest & Boosting"
 date: "`r Sys.time()`"
 output: 
   html_notebook: 
@@ -76,13 +76,10 @@ strategy with `rsmp()` and that define out setup with `resample()` based on
 our task and resampling strategy:
 
 ```{r knn-resample-cv}
-# 5-fold CV
-resampcv5 <- rsmp("cv", folds = 5)
-
 rr <- resample(
   task = spam_task, 
   learner = lrn("classif.kknn", k = 13), # Optional: Adjust learner parameters
-  resampling = resampcv5
+  resampling = rsmp("cv", folds = 5) # 5-fold CV
 )
 ```
 
@@ -124,7 +121,7 @@ rr <- resample(
   task = spam_task, 
   # Important: set predict_type to "prob", set other parameters as desired.
   learner = lrn("classif.kknn", predict_type = "prob", k = 13),
-  resampling = resampcv5
+  resampling = rsmp("cv", folds = 5)
 )
 
 autoplot(rr$prediction(), type = "roc")
@@ -142,12 +139,12 @@ we probably overfit.
 
 To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forward.
 
-## Comparing against a baseline
+## Benchmarking against a baseline
 
 Let's set up our learners with default parameters and compare them against
 a dummy *featureless* learner, which serves as a naive baseline.
 
-```{r benchmark-grid}
+```{r bm-setup}
 learners <- list(
   lrn("classif.kknn", id = "knn", predict_type = "prob"),
   lrn("classif.rpart", id = "tree", predict_type = "prob"),
@@ -157,33 +154,40 @@ learners <- list(
 design <- benchmark_grid(
   tasks = spam_task,       # Still the same task
   learners = learners,     # The new list of learners
-  resamplings = resampcv5  # Same resampling strategy as before
+  resamplings = rsmp("cv", folds = 5)  # Same resampling strategy as before
 ) 
 
 # Run the benchmark and save the results
 bmr <- benchmark(design)
 ```
 
-`bmr` contains all we'd like to know about out comparison, let's take a look:
+`bmr` contains all we'd like to know about out comparison. We extract the scores
+and take a look:
 
-```{r rr-results-full}
-# Extract per-iteration accuracy per learner
-bmr$score(msr("classif.auc"))[1:5, .(learner_id, iteration, classif.auc)]
+```{r bm-results-full}
+bm_scores <- bmr$score(msr("classif.auc"))
+
+# Extract per-iteration accuracy per learner (only first five rows shows)
+bm_scores[1:5, .(learner_id, iteration, classif.auc)]
 
 # To get all results for the tree learner
-bmr$score(msr("classif.auc"))[learner_id == "tree", .(learner_id, iteration, classif.auc)]
+bm_scores[learner_id == "tree", .(learner_id, iteration, classif.auc)]
 
 # Or the results of the first iteration
-bmr$score(msr("classif.auc"))[iteration == 1, .(learner_id, iteration, classif.auc)]
+bm_scores[iteration == 1, .(learner_id, iteration, classif.auc)]
 ```
 
 And if we want to see what worked better overall:
 
-```{r rr-results-aggregate}
+```{r bm-results-aggregate}
 bmr$aggregate(msr("classif.auc"))[, .(learner_id, classif.auc)]
 
 autoplot(bmr, measure = msr("classif.auc"))
 ```
+```{r bm-roc}
+autoplot(bmr, type = "roc")
+```
+
 
 We see what we'd expect regarding the featureless learner - it's the same as
 a coin toss. 
@@ -206,7 +210,7 @@ lrn_ranger$train(spam_task, row_ids = spam_train)
 
 spam_pred_ranger <- lrn_ranger$predict(spam_task, row_ids = spam_test)
 
-spam_pred_ranger$score(msr("classif.acc"))
+spam_pred_ranger$score(msr("classif.auc"))
 autoplot(spam_pred_ranger, type = "roc")
 ```
 
@@ -217,7 +221,7 @@ lrn_xgboost$train(spam_task, row_ids = spam_train)
 
 spam_pred_xgboost <- lrn_xgboost$predict(spam_task, row_ids = spam_test)
 
-spam_pred_xgboost$score(msr("classif.acc"))
+spam_pred_xgboost$score(msr("classif.auc"))
 ```
 
 
@@ -240,7 +244,7 @@ learners <- list(
 design <- benchmark_grid(
   tasks = spam_task,       # Still the same task
   learners = learners,     # The new list of learners
-  resamplings = resampcv5  # Same resampling strategy as before
+  resamplings = rsmp("cv", folds = 5)  # Same resampling strategy as before
 ) 
 
 # Run the benchmark and save the results
@@ -248,6 +252,9 @@ bmr <- benchmark(design)
 ```
 
 ```{r}
-autoplot(bmr, measure = measure_auc)
+autoplot(bmr, measure = msr("classif.auc"))
+```
+```{r}
+autoplot(bmr, type = "roc")
 ```
 
