@@ -52,7 +52,6 @@ library(ggplot2)        # For plotting
 theme_set(theme_minimal()) # Setting a default theme
 
 ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-# ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
   geom_point() +
   labs(
     title = "Palmer Penguins",
@@ -192,7 +191,7 @@ So, what seems to work better here? kNN or trees?
 
 ## Plotting decision boundaries (for 2 predictors)
 
-```{r}
+```{r decision-boundary-plot}
 flipper_range <- range(penguins$flipper_length_mm)
 mass_range <- range(penguins$body_mass_g)
 
@@ -204,15 +203,16 @@ pred_grid <- expand.grid(
 pred_grid$rpart_prediction <- predict(rpart_penguins, newdata = pred_grid, type = "class")
 
 ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g, color = rpart_prediction)) +
-  geom_point(alpha = .1) +
-  geom_point(data = penguins_train, aes(color = species)) +
+  geom_point(alpha = .1, shape = 15) +
+  geom_point(data = penguins_train, aes(fill = species), shape = 21, color = "black") +
   labs(
     title = "Palmer Penguins",
     subtitle = "Species predicted by decision tree",
     x = "Flipper Length [mm]", y = "Body Mass [g]",
-    color = "[Predicted] Species"
+    color = "Species (predicted)", fill = "Species (Observed)"
   )
 ```
+
 
 # Introducing `{mlr3}`
 
