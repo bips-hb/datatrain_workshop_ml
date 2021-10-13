@@ -9,6 +9,8 @@ output:
   html_document:
     toc: yes
     df_print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup}
@@ -268,6 +270,9 @@ penguin_task$col_roles[c("feature", "target")]
 # Maybe not all variables are useful for this task, let's remove some
 penguin_task$set_col_roles(cols = c("island", "sex", "year"), remove_from = "feature")
 
+# We can also explicitly assign the feature colums
+penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
+
 # Check what our current variables and roles are
 penguin_task$col_roles[c("feature", "target")]
 ```
@@ -301,7 +306,7 @@ mlr_learners
 # To show all classification learners
 mlr_learners$keys(pattern = "classif")
 
-# Or more specifically, the kknn and rpart learners
+# Or more specifically, the kknn OR rpart learners
 mlr_learners$keys(pattern = "knn|rpart")
 ```
 
@@ -314,7 +319,7 @@ knn_learner <- lrn("classif.kknn")
 knn_learner$param_set$ids()
 
 # Setting parameters leaves the others as default
-knn_learner$param_set$values <- list(k = 9)
+knn_learner$param_set$values <- list(k = 5)
 ```
 
 We'll save the `rpart` learner for later.
@@ -344,40 +349,50 @@ knn_prediction$confusion
 To calculate the prediction accuracy, we don't have to do any math in small steps. `{mlr3}` comes with lots of measures (like accuracy) we can use, they're organized in the `mlr_measures` object (just like `mlr_learners`). We're using `"classif.acc"` here with the shorthand function `msr()`. The we score our predictions with this measure, using the `$score()` method.
 
 ```{r knn-accuracy-once}
-# Saving the accuracy measure
-measure_acc <- msr("classif.acc")
 # Scores according to the selected measure
-knn_prediction$score(measure_acc)
+knn_prediction$score(msr("classif.acc"))
 ```
+
+As a bonus feature, mlr3 also makes it easy for us to plot the decision boundaries
+for a two-predictor case, so we don't have to manually predict on a grid anymore.  
+
+```{r mlr3-plot-decision-boundaries}
+plot_learner_prediction(
+  learner = knn_learner, 
+  task = penguin_task
+)
+```
+
 
 ## Your turn!
 
-Now that we've done the kNN fitting with `{mlr3}`, you can easily do the same thing with the `rpart`-learner! All you have to do is switch the learner objects.
+Now that we've done the kNN fitting with `{mlr3}`, you can easily do the same thing with the `rpart`-learner! 
+All you have to do is switch the learner objects and give it a more fitting name.
 
-Here's the same code as above but compacted for you to play around with, just make it do the same steps (training, predicting) with the `rpart_learner`.
+## Example Code
 
 ```{r switch-rpart-learner}
 # Picking the learner
-knn_learner <- lrn("classif.kknn")
+rpart_learner <- lrn("classif.rpart")
 
 # What parameters does this learner have?
-knn_learner$param_set$ids()
+rpart_learner$param_set$ids()
 
 # Setting parameters (omit to use a defaults)
-knn_learner$param_set$values <- list(k = 15)
+rpart_learner$param_set$values <- list(maxdepth = 15)
 
 # Train
-knn_learner$train(penguin_task, row_ids = penguin_train)
-# Optional: peek at the model
-knn_learner$model
+rpart_learner$train(penguin_task, row_ids = penguin_train)
 
 # Predict
-knn_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_test)
+rpart_prediction <- rpart_learner$predict(penguin_task, row_ids = penguin_test)
 
-knn_prediction$confusion
+rpart_prediction$confusion
 
 # Accuracy
-knn_prediction$score(measure_acc)
+rpart_prediction$score(msr("classif.acc"))
+
+plot_learner_prediction(rpart_learner, penguin_task)
 ```
 
 # Useful links

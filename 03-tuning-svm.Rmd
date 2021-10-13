@@ -6,10 +6,11 @@ output:
     toc: yes
     theme: flatly
     number_sections: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup}
-library(e1071)       # For SVMs (outside of mlr3)
 library(mlr3verse)   # All the mlr3 things
 library(ggplot2)     # For plotting
 
@@ -62,8 +63,8 @@ tuned_knn = AutoTuner$new(
   measure = msr("classif.auc"),
   # Setting the search space we defined above
   search_space = search_space,
-  # Budget: Try 20 different values
-  terminator = trm("evals", n_evals = 20),
+  # Budget: Try n_evals different values
+  terminator = trm("evals", n_evals = 30),
   # Strategy: Randomly try parameter values in the space
   tuner = tnr("random_search")
 )
@@ -73,23 +74,33 @@ tuned_knn
 ```
 
 Now `tuned_knn` behaves the same way as any other Learner that has not been
-trained on any data yet - first we have to train it on our spam training data.
-The result will be the best hyperparameter confiugration of those we tried:
+trained on any data yet - first we have to train (and tune!) it on our spam training data.
+The result will be the best hyperparameter configuration of those we tried:
 
 ```{r tune-knn}
 # Setting a seed so we get the same result in the workshop
 set.seed(2398)
 tuned_knn$train(spam_task, row_ids = spam_train)
 ```
-In this case, we get a `k` of 32, with an AUC of 0.96 in the inner resampling 
+
+In this case, we get a `k` of 25, with an AUC of about 0.96 in the inner resampling 
 (the holdout set during tuning).
 
-Now we've tuned on the training set, time to evaluate on the test set, and
+We can visualize the performance across all the `k`s we tried by accessing the
+tuning instance now included in the `tuned_knn` learner object:
+
+```{r plot-knn-tuning-result}
+autoplot(tuned_knn$tuning_instance)
+```
+
+
+Now that we've tuned on the training set, it's time to evaluate on the test set, and
 to shorten it a little we'll do prediction and scoring in one line:
 
 ```{r knn-eval}
 tuned_knn$predict(spam_task, row_ids = spam_test)$score(msr("classif.auc"))
 ```
+
 Seems like a decent result?  
 Let's try to beat it with some other learner!
 
@@ -120,8 +131,35 @@ Some pointers:
         - `num.trees` (integer) (default is 500)
         - `max.depth` (integer) (ranger has no limit here :)
 
+Note: Instead of randomly picking parameters from the design space, we can also
+generate a grid of parameters and try those. See `?mlr_tuners_grid_search`.
+
 
 ### Example Code
+
+```{r tuned-rpart}
+# Tuning setup
+tuned_rpart = AutoTuner$new(
+  learner = lrn("classif.rpart", predict_type = "prob"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.auc"),
+  search_space = ps(
+    cp = p_dbl(lower = 0.001, upper = 0.03),
+    maxdepth = p_int(lower = 1, upper = 30)
+  ),
+  terminator = trm("evals", n_evals = 40),
+  tuner = tnr("random_search")
+)
+
+# Tune!
+tuned_rpart$train(spam_task, row_ids = spam_train)
+
+# Evaluate!
+tuned_rpart$predict(spam_task, row_ids = spam_test)$score(msr("classif.auc"))
+
+# Check parameter results
+autoplot(tuned_rpart$tuning_instance)
+```
 
 ```{r tuned-xgboost}
 # Tuning setup
@@ -131,39 +169,24 @@ tuned_xgboost = AutoTuner$new(
   measure = msr("classif.auc"),
   search_space = ps(
     eta = p_dbl(lower = 0.001, upper = 1),
-    nrounds = p_int(lower = 1, upper = 10)
+    nrounds = p_int(lower = 1, upper = 20)
   ),
-  terminator = trm("evals", n_evals = 20),
+  terminator = trm("evals", n_evals = 50),
   tuner = tnr("random_search")
 )
 
 # Tune!
 tuned_xgboost$train(spam_task, row_ids = spam_train)
 
+autoplot(tuned_xgboost$tuning_instance, cols_x = c("nrounds", "eta"))
+
 # Evaluate!
 tuned_xgboost$predict(spam_task, row_ids = spam_test)$score(msr("classif.auc"))
+
+# Check parameter results
+autoplot(tuned_xgboost$tuning_instance)
 ```
 
-```{r tuned-rpart}
-# Tuning setup
-tuned_rpart = AutoTuner$new(
-  learner = lrn("classif.rpart", predict_type = "prob"),
-  resampling = rsmp("holdout"),
-  measure = msr("classif.auc"),
-  search_space = ps(
-    cp = p_dbl(lower = 0.001, upper = 0.5),
-    maxdepth = p_int(lower = 1, upper = 25)
-  ),
-  terminator = trm("evals", n_evals = 20),
-  tuner = tnr("random_search")
-)
-
-# Tune!
-tuned_rpart$train(spam_task, row_ids = spam_train)
-
-# Evaluate!
-tuned_rpart$predict(spam_task, row_ids = spam_test)$score(msr("classif.auc"))
-```
 
 ```{r tuned-ranger}
 # Tuning setup
@@ -172,8 +195,7 @@ tuned_ranger = AutoTuner$new(
   resampling = rsmp("holdout"),
   measure = msr("classif.auc"),
   search_space = ps(
-    num.trees = p_int(lower = 200, upper = 700),
-    max.depth = p_int(lower = 1, upper = 25)
+    num.trees = p_int(lower = 200, upper = 700)
   ),
   terminator = trm("evals", n_evals = 20),
   tuner = tnr("random_search")
@@ -184,6 +206,9 @@ tuned_ranger$train(spam_task, row_ids = spam_train)
 
 # Evaluate!
 tuned_ranger$predict(spam_task, row_ids = spam_test)$score(msr("classif.auc"))
+
+# Check parameter results
+autoplot(tuned_ranger$tuning_instance)
 ```
 
 # Support Vector Machines
@@ -192,8 +217,7 @@ Let's circle back to new learners and explore SVMs a little by trying
 out different kernels at the example of our penguin dataset we used in the beginning:
 
 ```{r penguins}
-library(palmerpenguins)
-penguins <- na.omit(penguins)
+penguins <- na.omit(palmerpenguins::penguins)
 
 ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
   geom_point() +
@@ -207,10 +231,10 @@ ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
 Since we don't care about prediction accuracy for now, we'll use the whole dataset
 for training and prediction. Please only do this with toy data 🙃.
 
-For the SVM algorithm itself, we use the `e1071` package (great name, I know)
-with the reasonably named `svm()` function.
+For the SVM algorithm itself, we use `svm()` from the `e1071` package (great name, I know)
+but once again use mlr3's interface
 
-According to the docs (`?svm`) we have the choice of the following kernels:
+According to the docs (`?e1071::svm`) we have the choice of the following kernels:
 
 - `"linear"`: $u'v$
 - `"polynomial"`: $(\mathtt{gamma} \cdot u' \cdot v + \mathtt{coef0})^\mathtt{degree}$
@@ -219,92 +243,55 @@ According to the docs (`?svm`) we have the choice of the following kernels:
 
 Where `gamma`, `degree`, and `coef0` are further hyperparameters.
 
+```{r svm-learner-default}
+svm_learner <- lrn("classif.svm")
+
+# What parameters do we have?
+svm_learner$param_set$ids()
+
+# Default kernel
+svm_learner$param_set$default$kernel
+```
+
+
 ## Your Turn!
 
 Below you have a boilerplate for
 
-a) Creating an SVM model based on the penguin dataset with 2 predictors
-b) Code to plot decision boundaries with it (similar to what we did for trees)
+a) Creating an SVM learner and train it on the penguin dataset with 2 predictors
+b) Plotting decision boundaries with it (using the mlr3 helper function)
 
 Run the code below once to see what linear decision boundaries look like, then
 pick different kernels from the list above and run it again.
-What kernel would you pick just by the looks of the boundaries?
 
-How do the boundaries change if you also adjust the other hyperparameters?
+- What kernel would you pick just by the looks of the boundaries?
+- How do the boundaries change if you also adjust the other hyperparameters?
+- Try picking any other two variables as features (`penguin_task$col_info`)
+
+```{r penguin-task-2-predictors}
+penguin_task <- TaskClassif$new(
+  id = "penguins", 
+  backend = na.omit(palmerpenguins::penguins), 
+  target = "species"
+)
+
+penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
+```
+
 
 ```{r svm-decision-boundaries}
-# Make a model
-pengu_svm  <- svm(
-  species ~ flipper_length_mm + body_mass_g, 
-  data = penguins, 
-  kernel = "linear", # <- pick different kernels here
-  degree = 3, # For "polynomial"
-  gamma = 1/2, # For all except "linear". Default is 1/(number of predictors)
-  coef0 = 0 # For "polynomial" and "sigmoid"
+# Create the learner, picking a kernel and/or other hyperparams
+svm_learner <- lrn("classif.svm", kernel = "polynomial", degree = 7)
+
+# Train the learner
+svm_learner$train(penguin_task)
+
+# Plot decision boundaries
+plot_learner_prediction(
+  learner = svm_learner, 
+  task = penguin_task
 )
-
-# Prediction grid
-flipper_range <- range(penguins$flipper_length_mm)
-mass_range <- range(penguins$body_mass_g)
-
-pred_grid <- expand.grid(
-  flipper_length_mm = seq(flipper_range[1], flipper_range[2], length.out = 200),
-  body_mass_g = seq(mass_range[1], mass_range[2], length.out = 200)
-)
-
-# Add predictions for the grid
-pred_grid$prediction <- predict(pengu_svm, newdata = pred_grid, type = "response")
-
-# Plot decision boudnaries
-ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g, color = prediction)) +
-  geom_point(alpha = .1, shape = 15) +
-  geom_point(data = penguins, aes(fill = species), shape = 21, color = "black") +
-  labs(
-    title = "Palmer Penguins",
-    subtitle = "Species predicted by SVM",
-    x = "Flipper Length [mm]", y = "Body Mass [g]",
-    color = "Species (predicted)", fill = "Species (Observed)"
-  )
 ```
-
-### Example Code
-
-```{r solution-decision-boundaries}
-# Iterate over kernels, make predictions, add to big prediction grid
-# and bind it together to one data frame
-pred_df <- purrr::map_df(c("linear", "polynomial", "radial", "sigmoid"), ~{
-  mod <- svm(
-    species ~ flipper_length_mm + body_mass_g, 
-    data = penguins, 
-    kernel = .x,
-    degree = 3,
-    gamma = 1/2,
-    coef0 = 0 
-  )
-  
-  # Copy prediction grid from above
-  xdf <- pred_grid
-  
-  xdf$prediction <- predict(mod, newdata = pred_grid, type = "response")
-  xdf$kernel <- .x
-  
-  xdf
-})
-
-ggplot(pred_df, aes(x = flipper_length_mm, y = body_mass_g, color = prediction)) +
-  facet_wrap(vars(kernel)) +
-  geom_point(alpha = .1, shape = 15) +
-  geom_point(data = penguins, aes(fill = species), shape = 21, color = "black") +
-  labs(
-    title = "Palmer Penguins",
-    subtitle = "Species predicted by different SVMs",
-    x = "Flipper Length [mm]", y = "Body Mass [g]",
-    color = "Species (predicted)", fill = "Species (Observed)"
-  ) +
-  theme_minimal()
-```
-
-
 
 
 ## SVM-Tuning (move/shorten?)
@@ -314,17 +301,8 @@ spam_task <- tsk("spam")
 ```
 
 ```{r svm-learner}
-# Pick our SVM learner, still using that e-numbers package
+# Pick our SVM learner, now with more explicit options
 svm_learner <- lrn("classif.svm", predict_type = "prob", type = "C-classification")
-
-# What parameters do we have?
-svm_learner$param_set$ids()
-
-# Default kernel
-svm_learner$param_set$default$kernel
-
-# Help
-svm_learner$help()
 ```
 
 
@@ -339,7 +317,7 @@ search_space_svm = ps(
   degree = p_int(1, 7, depends = kernel == "polynomial")
 )
 
-generate_design_grid(search_space, resolution = 3)
+generate_design_grid(search_space_svm, resolution = 3)
 ```
 
 
@@ -352,7 +330,7 @@ search_space_svm = ps(
   gamma = p_dbl(lower = 0.01, upper = 0.2, depends = kernel %in% c("polynomial", "radial", "sigmoid"))
 )
 
-generate_design_grid(search_space, resolution = 6)
+generate_design_grid(search_space_svm, resolution = 6)
 ```
 
 ```{r}
@@ -361,11 +339,12 @@ tuned_svm = AutoTuner$new(
   resampling = rsmp("holdout"),
   measure = msr("classif.auc"),
   search_space = search_space_svm,
-  terminator = trm("evals", n_evals = 20),
+  terminator = trm("evals", n_evals = 50),
   tuner = tnr("random_search")
 )
 
 # Tune!
+set.seed(313)
 tuned_svm$train(spam_task, row_ids = spam_train)
 
 # Evaluate!
