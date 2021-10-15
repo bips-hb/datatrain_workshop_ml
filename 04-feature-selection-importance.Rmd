@@ -129,12 +129,13 @@ Interpretability is a huge topic, and there's a lot to explore - we'll cover som
 
 - The [`{iml}` package](https://christophm.github.io/iml/articles/intro.html)
 - The [Interpretable Machine Learning book](https://christophm.github.io/interpretable-ml-book)
+- The [`{mlr3}` book](https://mlr3book.mlr-org.com/interpretation.html)
 
 Before we get started with the general methods, it should be noted that some learners bring their own method-specific importance measures.
 Random Forests (via `{ranger}`) for example has some built-in importance
 metrics, like the corrected Gini impurity:
 
-```{r vip-ranger}
+```{r ranger-importance}
 lrn_ranger <- lrn("classif.ranger", importance = "impurity_corrected")
 lrn_ranger$train(penguin_task)
 
@@ -152,30 +153,129 @@ We can to the same (or a similar) thing with a general approach provided by the 
 It has a similar object-oriented approach as `{mlr3}` with a `Predictor` object
 we create using our learner and our data, separately for predictors and target:
 
-```{r}
+```{r iml-predictor}
 lrn_ranger <- lrn("classif.ranger", predict_type = "prob")
-penguin_rf <- lrn_ranger$train(penguin_task)
+lrn_ranger$train(penguin_task)
 
 penguin_x <- penguins[names(penguins) != "species"]
-predictor_rf <- Predictor$new(penguin_rf, data = penguin_x, y = penguins$species)
+predictor_rf <- Predictor$new(lrn_ranger, data = penguin_x, y = penguins$species)
 ```
 
 We can then create a `FeatureImp` object for our importance values:
 
-```{r}
+```{r iml-importance}
 penguin_importance <- FeatureImp$new(predictor_rf, loss = "ce")
 
 plot(penguin_importance)
 ```
 
-## Penguin Feature Effects
+This type of feature importance is based on permutation, i.e. how much the prediction
+error changes after a feature was randomly shuffled. 
+It's not the same approach as the one we saw with ranger, but it's model-agnostic,
+meaning it can be applied to any method.
 
-`FeatureEffects` gives us accumulated local effects (ALE) for all features
-or just one specifically when specified via `feature =`:
+In some cases, different methods may disagree.  
+As an example, let's look at the Boston Housing dataset.  
+This dataset contains, well, housing data for various towns which can be used to predict the 
+median value of homes (variable `medv`, see also `?MASS::Boston`).  
+Since this is a regression problem, we switch to `regr.ranger` as our learner:
 
-```{r}
-penguin_effects <- FeatureEffects$new(predictor_rf, feature = "bill_depth_mm")
-plot(penguin_effects)
+```{r boston-omportance-example}
+boston_task <- tsk("boston_housing")
+
+# Ranger: Gini impurity
+lrn_ranger <- lrn("regr.ranger", importance = "impurity_corrected")
+
+lrn_ranger$train(boston_task)
+
+sort(lrn_ranger$importance(), decreasing = TRUE)
+
+# iml: Permutation feature importance
+boston_predictor <- Predictor$new(
+  model = lrn("regr.ranger")$train(boston_task), 
+  data = boston_task$data(cols = boston_task$feature_names), 
+  y = boston_task$data(cols = "medv"))
+
+boston_importance <- FeatureImp$new(boston_predictor, loss = "mse")
+
+# Merging importance results
+# Also rescaling importance measures for visual comparison
+importance_ranger <- data.frame(
+  feature = names(lrn_ranger$importance()),
+  importance = lrn_ranger$importance(),
+  method = "Gini",
+  row.names = NULL
+)
+importance_ranger$importance <- importance_ranger$importance/max(importance_ranger$importance)
+
+importance_iml <- boston_importance$results[c("feature", "importance")]
+importance_iml$importance <- importance_iml$importance/max(importance_iml$importance)
+importance_iml$method <- "Permutation"
+
+# Binding them together & plotting
+importance_df <- rbind(importance_ranger, importance_iml)
+
+ggplot(importance_df, aes(y = feature, x = importance, fill = method)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Feature importance comparison",
+    subtitle = "Boston Housing regression task w/ Random Forest",
+    x = "Importance (Rescaled within method)",
+    y = "Feature", fill = "Importance Method"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
 ```
 
+## Your Turn!
+
+So far we've only looked at feature importance based on a Random Forest learner,
+but it's also possible that importance scores vary when different learners are applied.
+
+Based on the `{iml}` code above, train two or more different learners on a task
+of your choice (`tsk("boston")`, `tsk("spam")`, ...) and calculate feature importances
+for both learners.
+
+Do they agree?
+
+## Example Code
+
+```{r example-featureimp-comparison}
+# Boston housing, but only numeric features due do SVM limitation
+boston_task$col_roles$feature <- c("age", "b", "crim", "dis", "indus", "lat", "lon", 
+"lstat", "nox", "ptratio", "rad", "rm", "tax", "tract", "zn")
+
+# A bag of predictors
+predictor_rf <- Predictor$new(
+  model = lrn("regr.ranger")$train(boston_task), 
+  data = boston_task$data(cols = boston_task$feature_names), 
+  y = boston_task$data(cols = "medv"))
+
+predictor_svm <- Predictor$new(
+  model = lrn("regr.svm")$train(boston_task), 
+  data = boston_task$data(cols = boston_task$feature_names), 
+  y = boston_task$data(cols = "medv"))
+
+predictor_lm <- Predictor$new(
+  model = lrn("regr.lm")$train(boston_task), 
+  data = boston_task$data(cols = boston_task$feature_names), 
+  y = boston_task$data(cols = "medv"))
+
+predictor_xgboost <- Predictor$new(
+  model = lrn("regr.xgboost")$train(boston_task), 
+  data = boston_task$data(cols = boston_task$feature_names), 
+  y = boston_task$data(cols = "medv"))
+
+# An assortment of importances
+importance_rf <- FeatureImp$new(predictor_rf, loss = "mse")
+importance_svm <- FeatureImp$new(predictor_svm, loss = "mse")
+importance_lm <- FeatureImp$new(predictor_lm, loss = "mse")
+importance_xgboost <- FeatureImp$new(predictor_xgboost, loss = "mse")
+
+# An entanglement of plots
+plot(importance_rf)
+plot(importance_svm)
+plot(importance_lm)
+plot(importance_xgboost)
+```
 
