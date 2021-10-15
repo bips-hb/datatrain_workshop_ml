@@ -6,6 +6,8 @@ output:
   toc: yes
 theme: flatly
 number_sections: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup}
@@ -20,12 +22,160 @@ spam_train <- sample(spam_task$nrow, 2/3 * spam_task$nrow)
 spam_test <- setdiff(seq_len(spam_task$nrow), spam_train)
 
 # Penguin Task setup
+penguins <- na.omit(palmerpenguins::penguins)
 penguin_task <- TaskClassif$new(
   id = "penguins", 
-  backend = na.omit(palmerpenguins::penguins), 
+  backend = penguins, 
   target = "species"
 )
+# penguin_task$col_roles$feature <- c("bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm")
 set.seed(26)
 penguin_train <- sample(penguin_task$nrow, 2/3 * penguin_task$nrow)
 penguin_test <- setdiff(seq_len(penguin_task$nrow), penguin_train)
 ```
+
+
+
+# Feature Selection
+
+See also: 
+
+- [mlr3gallery post with example](https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/)
+- [mlr3book](https://mlr3book.mlr-org.com/optimization.html#fs)
+
+Selecting features with `{mlr3}` is similar to parameter tuning: We need to set
+a budget (e.g. 20 evaluations like before) and a criterion (like the auc.)
+with a resampling strategy (here holdout for simplicity).
+
+```{r}
+fselect_instance = FSelectInstanceSingleCrit$new(
+  task = spam_task,
+  learner = lrn("classif.rpart", predict_type = "prob"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.auc"),
+  terminator = trm("evals", n_evals = 20)
+)
+
+fselect_instance
+```
+
+There are multiple feature selection methods available:
+- Random Search (`FSelectorRandomSearch`)
+- Exhaustive Search (`FSelectorExhaustiveSearch`)
+- Sequential Search (`FSelectorSequential`)
+- Recursive Feature Elimination (`FSelectorRFE`)
+- Design Points (`FSelectorDesignPoints`)
+
+```{r}
+mlr_fselectors
+```
+
+As you might be able to imagine, doing an exhaustive search is not often feasible when we're working with a lot of features. For a dataset with 10
+features, examining every possible subset of features would yield over 50 possible combinations, and for our spam dataset with over 50 features we're well past 1500 combinations.
+Random search it is, then!
+
+```{r}
+fselector <- fs("random_search")
+
+fselector$optimize(fselect_instance)
+```
+
+```{r}
+fselect_instance$result_feature_set
+
+fselect_instance$result_y
+```
+
+```{r}
+as.data.table(fselect_instance$archive)[1:5, ]
+```
+
+Similar to the `AutoTuner` we used for parameter tuning, there's also
+an `AutoFSelector` which basically works the same way, giving us an optimized
+learner as a result
+
+```{r}
+fselected_rpart <- AutoFSelector$new(
+  learner = lrn("classif.rpart", predict_type = "prob"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.ce"),
+  terminator = trm("evals", n_evals = 20),
+  fselector = fs("random_search")
+)
+
+fselected_rpart
+```
+
+And of course it should be worth it to compare our variable-selected learner
+with a learner that uses all variables, just to make sure we're not sacrificing any predictive performance:
+
+```{r}
+bmgrid <- benchmark_grid(
+  task = spam_task,
+  learner = list(
+    fselected_rpart, 
+    lrn("classif.rpart", predict_type = "prob")
+  ),
+  resampling = rsmp("cv", folds = 3)
+)
+
+bmr <- benchmark(bmgrid)
+bmr$aggregate(msr("classif.auc"))
+```
+
+# Feature Importance
+
+Interpretability is a huge topic, and there's a lot to explore - we'll cover some basics and if you're interested, you can always finde more at
+
+- The [`{iml}` package](https://christophm.github.io/iml/articles/intro.html)
+- The [Interpretable Machine Learning book](https://christophm.github.io/interpretable-ml-book)
+
+Before we get started with the general methods, it should be noted that some learners bring their own method-specific importance measures.
+Random Forests (via `{ranger}`) for example has some built-in importance
+metrics, like the corrected Gini impurity:
+
+```{r vip-ranger}
+lrn_ranger <- lrn("classif.ranger", importance = "impurity_corrected")
+lrn_ranger$train(penguin_task)
+
+sort(lrn_ranger$importance(), decreasing = TRUE)
+```
+
+Which shows us that for our penguins, `bill_length_mm` is probably the most relevant feature, whereas `body_mass_g` does not turn out to be as important
+with regard to species classification.
+
+
+## Feature Importance with `{iml}`
+
+We can to the same (or a similar) thing with a general approach provided by the `{iml}` package, which lets us analyze any given learner wrapped by `{mlr3}` (and many other models created outside `mlr3`).
+
+It has a similar object-oriented approach as `{mlr3}` with a `Predictor` object
+we create using our learner and our data, separately for predictors and target:
+
+```{r}
+lrn_ranger <- lrn("classif.ranger", predict_type = "prob")
+penguin_rf <- lrn_ranger$train(penguin_task)
+
+penguin_x <- penguins[names(penguins) != "species"]
+predictor_rf <- Predictor$new(penguin_rf, data = penguin_x, y = penguins$species)
+```
+
+We can then create a `FeatureImp` object for our importance values:
+
+```{r}
+penguin_importance <- FeatureImp$new(predictor_rf, loss = "ce")
+
+plot(penguin_importance)
+```
+
+## Penguin Feature Effects
+
+`FeatureEffects` gives us accumulated local effects (ALE) for all features
+or just one specifically when specified via `feature =`:
+
+```{r}
+penguin_effects <- FeatureEffects$new(predictor_rf, feature = "bill_depth_mm")
+plot(penguin_effects)
+```
+
+
