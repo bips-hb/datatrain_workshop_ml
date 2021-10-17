@@ -51,7 +51,7 @@ Explore the task a little (you can use its built-in methods `spam_task$...`)
 to check the data, get column types, the dataset dimensions etc.
 Think about this as a new analysis problem, so what do we need to know here?
 
-(If you'd like a simpler overview, you can just read the help with `spam_task$help()`)
+(If you'd like a simpler overview, you can read the help with `spam_task$help()`)
 
 ## Train & Test split
 
@@ -74,38 +74,46 @@ but you usually can't go too wrong with cross validation (CV), which should not
 take too much time and computing power on small datasets like ours.
 
 Instead of training our model just once, we're going to train it 5 times with 
-different training- and test-datasets. In mlr3, we first pick a resampling
+different training- and test-datasets. In `{mlr3}`, we first pick a resampling
 strategy with `rsmp()` and that define out setup with `resample()` based on
 our task and resampling strategy:
 
 ```{r knn-resample-cv}
 rr <- resample(
   task = spam_task, 
-  learner = lrn("classif.kknn", k = 13), # Optional: Adjust learner parameters
+  # Optional: Adjust learner parameters
+  learner = lrn("classif.kknn", k = 13, predict_sets = c("train", "test")),
   resampling = rsmp("cv", folds = 5) # 5-fold CV
 )
 ```
 
-Now we have a look at our predictions, but *per resampling iteration*:
+We also tell our learner to predict both on train- and test sets.  
+Now we have a look at our predictions, but *per resampling iteration*, for both
+train- and test-set accuracy:
 
 ```{r knn-resample-acc}
-rr$score(msr("classif.acc"))[, .(iteration, classif.acc)]
+traintest_acc <- list(
+  msr("classif.acc", predict_sets = "train", id = "acc_train"),
+  msr("classif.acc", id = "acc_test")
+)
+rr$score(traintest_acc)[, .(iteration, acc_train, acc_test)]
 ```
 
 And on average over the resampling iterations:
 
 ```{r knn-resample-acc-avg}
-rr$aggregate(msr("classif.acc"))
+rr$aggregate(traintest_acc)
 ```
 
-```{r knn-resample-plot}
-autoplot(rr, measure = msr("classifc.acc"))
-```
+As expected, our learner performed better on the training data than on the test data.
+By default, `{mlr3}` only gives us the results for the test data, which we'll be
+focusing on going forward.
+Being able to comprae train-/test-performance is useful though to make sure you're
+not hopelessly overfitting on your training data!
 
-
-Note how we got to train our learner, do cross validate and get scores
+Also note how we got to train our learner, do cross validation and get scores
 all without having to do any extra work.
-That's why we use mlr3 instead of doing everything manually - abstraction is nice.
+That's why we use `{mlr3}` instead of doing everything manually - abstraction is nice.
 
 ## One more thing: Measures
 
@@ -117,6 +125,26 @@ For a class prediction we might say that if `prob(is_spam) > 0.5` the message is
 as spam, but maybe we'd rather be more conservative and only consider a message to 
 be spam at a probability over, let's say, 95%.
 
+```{r knn-binary-thresholds}
+knn_learner <- lrn("classif.kknn", predict_type = "prob", k = 13)
+knn_pred <- knn_learner$train(spam_task)$predict(spam_task)
+
+# Measures: True Positive Rate (sensitivity) and True Negative Rate (1 - Specificity)
+measures <- msrs(c("classif.tpr", "classif.tnr"))
+knn_pred$confusion
+knn_pred$score(measures)
+
+# Threshold of 60% probability of spam:
+knn_pred$set_threshold(0.6)
+knn_pred$confusion
+knn_pred$score(measures)
+
+# If we were happy with only 20% probability of spam to mark a message as spam:
+knn_pred$set_threshold(0.2)
+knn_pred$confusion
+knn_pred$score(measures)
+```
+
 For that, we can use [ROC curves](https://en.wikipedia.org/wiki/Receiver_operating_characteristic).
 
 To do so, we first have to adjust our Learner to predict the spam *probability*
@@ -124,18 +152,9 @@ instead of already simplifying the prediction to `"spam"` or `"nonspam"`.
 We re-do our resampling set-up and use the `autoplot()` function based on the
 prediction, specifying `type = "roc"` to give us an ROC curve:
 
+
 ```{r knn-roc}
-rr <- resample(
-  task = spam_task, 
-  # Important: set predict_type to "prob", set other parameters as desired.
-  learner = lrn("classif.kknn", predict_type = "prob", k = 13),
-  resampling = rsmp("cv", folds = 5)
-)
-
-autoplot(rr$prediction(), type = "roc")
-
-# Get the area under the ROC curve
-rr$aggregate(msr("classif.auc"))
+autoplot(knn_pred, type = "roc")
 ```
 
 This gives us the false positive rate (FPR, 1 - Specificity) and the
@@ -166,8 +185,8 @@ more convenient (and methodologically sound) way in the next part :)
 rr <- resample(
   task = spam_task, 
   # Important: set predict_type to "prob", set other parameters as desired.
-  learner = lrn("classif.rpart", predict_type = "prob", maxdepth = 3),
-  resampling = rsmp("cv", folds = 5)
+  learner = lrn("classif.rpart", predict_type = "prob", maxdepth = 15, cp = 0.003),
+  resampling = rsmp("cv", folds = 3)
 )
 
 autoplot(rr$prediction(), type = "roc")
@@ -195,7 +214,7 @@ learners <- list(
 design <- benchmark_grid(
   tasks = spam_task,       # Still the same task
   learners = learners,     # The new list of learners
-  resamplings = rsmp("cv", folds = 5)  # Same resampling strategy as before
+  resamplings = rsmp("cv", folds = 3)  # Same resampling strategy as before
 ) 
 
 # Run the benchmark and save the results

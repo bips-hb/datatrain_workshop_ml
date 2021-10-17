@@ -62,3 +62,16 @@ Repository contains Rmd notebooks for hands-on ML exercises.
 - Hands-on:
   - Not sure what to do here yet
   - Maybe use some `{mlr3data}` datasets with various outcome types?
+
+
+## Local Setup
+
+If you want to follow the course on your own machine, first install the following packages:
+
+```r
+
+
+```
+
+Assuming you already have a recent version of R installed. If not, see [CRAN](https://cran.r-project.org/)
+for instructions appropriate to your platform.
