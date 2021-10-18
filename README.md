@@ -9,6 +9,19 @@ Workshop component to the [Machine Learning workshop in the Data Train
 Repository contains `.Rmd` notebooks for hands-on ML demos & exercises.  
 Example code for exercises will be made available after the exercises.
 
+## Workshop instructions:
+
+In RStudio, enter
+
+```r
+usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")
+```
+
+This will create a new RStudio project with the workshop materials.  
+On the prepared RStudio server installation (<https://rstudio.informatik.uni-bremen.de/>),
+all required R packages should be available.  
+For local setup instructions, see further instructions below.
+
 ## Agenda
 
 - 20.10.2021 + 21.10.2021
@@ -21,32 +34,6 @@ Example code for exercises will be made available after the exercises.
 - 4 * 3-hour blocks, each ~90min Theory, short break, ~90min Hands-on
 - Hands-on locally or on RStudio server!
 - Notebooks in this repository correspond to blocks in workshop
-
-### 01: Day 1, morning
-
-- Introduce penguin data for familiarity
-- kNN via `{kknn}` and penguins
-- Decision trees via `{rpart}`
-- Switching gears to `{mlr3}`, repeating/expanding on kNN + trees
-
-### 02: Day 1, afternoon
-
-- Introduce more `{mlr3}` pre-made tasks, switch to spam task
-- CV-based model evaluation
-  - Introduce with `{kknn}` and `{rpart}`
-- Forests and Boosting
-- Comparing `{ranger}` and `{xgboost}` with others
-
-### 03: Day 2, morning
-
-- Parameter tuning on previous learners
-- SVMs
-- Tuning an SVM
-
-### 04: Day 2, afternoon
-
-- Feature selection with `{mlr3}`
-- Feature importance with `{ranger}` and `{iml}`
 
 ## Local Setup
 
