@@ -3,66 +3,47 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-Workshop component to the Machine Learning workshop in the Data Train
-2021 series.
+Workshop component to the [Machine Learning workshop in the Data Train
+2021 series](https://www.uni-bremen.de/research-alliance/forschungsdaten/data-train/data-train-curriculum/data-scientist-track/ot-sc-ws-03-machine-learning).
 
-Repository contains Rmd notebooks for hands-on ML exercises.
+Repository contains `.Rmd` notebooks for hands-on ML demos & exercises.
 
-## [Agenda](https://github.com/bips-hb/lehre_datatrain)
+## Agenda
 
-### Schedule
+- 20.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00  
+- 21.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00
 
-20.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00
-21.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00
+### Structure
 
-### Concept
+- 4 3-hour blocks, each ~90min Theory, short break, ~90min Hands-on
+- Hands-on in locally or on RStudio server!
+- Notebooks in this repository correspond to blocks in workshop
 
-* 4 3-hour blocks, each ~90min Theory, short break, ~90min Hands-on
-* Hands-on in RStudio server! 
+### 01: Day 1, morning
 
-### Day 1, morning
+- Introduce penguin data for familiarity
+- kNN via `{kknn}` and penguins
+- Decision trees via `{rpart}`
+- Switching gears to `{mlr3}`, repeating/expanding on kNN + trees
 
-* Machine: k-nearest neighbors
-* Concept: Supervised learning; Learner, model, etc.
-* Machine: Decision trees
+### 02: Day 1, afternoon
 
-- Hands-on:
-  - Introduce penguin data for familiarity
-  - kNN via `{kknn}` and penguins
-  - Decision trees via `rpart`
-  - Switching gears to `{mlr3}`, repeating/expanding on kNN + trees
+- Introduce more `{mlr3}` pre-made tasks, switch to spam task
+- CV-based model evaluation
+  - Introduce with `{kknn}` and `{rpart}`
+- Forests and Boosting
+- Comparing `{ranger}` and `{xgboost}` with others
 
-### Day 1, afternoon
+### 03: Day 2, morning
 
-* Machine: Random forest
-* Concept: Model evaluation, Resampling
-* Machine: Boosting
+- Parameter tuning on previous learners
+- SVMs
+- Tuning an SVM
 
-- Hands-on:
-  - Introduce more mlr3 premade tasks, switch to spam task
-  - CV-based model evaluation
-    - Introduce with `{kknn}` and `{rpart}`
-  - Forests and Boosting
-  - Comparing `{ranger}` and `{xgboost}` with others
+### 04: Day 2, afternoon
 
-### Day 2, morning
-
-* Machine: SVMs 
-* Concept: Parameter tuning
-* Machine: Neural nets
-
-- Hands-on:
-  - Parameter tuning on previous learners
-  - SVMs
-  - Tuning an SVM
-
-### Day 2, afternoon
-* Concept: Specific endpoints; Regression, Multiclass, survival
-* Concept: Variable importance, variable selection, IML (outlook)
-
-- Hands-on:
-  - Feature selection
-  - Feature importance with `{ranger}` and `{iml}`
+- Feature selection with `{mlr3}`
+- Feature importance with `{ranger}` and `{iml}`
 
 ## Local Setup
 
