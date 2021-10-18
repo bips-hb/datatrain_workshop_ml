@@ -105,4 +105,21 @@ pkgs <- sapply(packages, function(x) remotes::system_requirements("ubuntu-20.04"
 cat(unique(unlist(pkgs)), sep = "\n")
 ```
 
-Which will output the required `apt-get install` lines you can run to install everything.
+Which will output the required `apt-get install` lines you can run to install everything.  
+For Ubuntu 20.04, it would look like this, which you can run in the Terminal of your choice:
+
+```sh
+sudo apt-get install -y make
+sudo apt-get install -y zlib1g-dev
+sudo apt-get install -y libglpk-dev
+sudo apt-get install -y libgmp3-dev
+sudo apt-get install -y libxml2-dev
+sudo apt-get install -y libpng-dev
+sudo apt-get install -y python
+sudo apt-get install -y pandoc
+sudo apt-get install -y libicu-dev
+sudo apt-get install -y git
+sudo apt-get install -y libcurl4-openssl-dev
+sudo apt-get install -y libssl-dev
+sudo apt-get install -y libgit2-dev
+```
