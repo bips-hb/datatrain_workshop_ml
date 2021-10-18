@@ -6,17 +6,20 @@
 Workshop component to the [Machine Learning workshop in the Data Train
 2021 series](https://www.uni-bremen.de/research-alliance/forschungsdaten/data-train/data-train-curriculum/data-scientist-track/ot-sc-ws-03-machine-learning).
 
-Repository contains `.Rmd` notebooks for hands-on ML demos & exercises.
+Repository contains `.Rmd` notebooks for hands-on ML demos & exercises.  
+Example code for exercises will be made available after the exercises.
 
 ## Agenda
 
-- 20.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00  
-- 21.10.2021: 9:00-12:00 | 12:00-13:00 Break | 13:00-16:00
+- 20.10.2021 + 21.10.2021
+  - 9:00 - 12:00
+  - 12:00 - 13:00 Break
+  - 13:00 - 16:00
 
 ### Structure
 
-- 4 3-hour blocks, each ~90min Theory, short break, ~90min Hands-on
-- Hands-on in locally or on RStudio server!
+- 4 * 3-hour blocks, each ~90min Theory, short break, ~90min Hands-on
+- Hands-on locally or on RStudio server!
 - Notebooks in this repository correspond to blocks in workshop
 
 ### 01: Day 1, morning

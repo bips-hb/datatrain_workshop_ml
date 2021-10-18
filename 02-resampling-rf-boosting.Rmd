@@ -254,9 +254,9 @@ Since we have a binary classification problem, we might even get away with using
 plain old logistic regression.
 
 Instead of benchmarking against the featureless learner, compare kNN and decision trees
-to the logistic regression learner `"classif.log_reg"` with out any hyperparameters.
+to the *logistic regression* learner `"classif.log_reg"` with out any hyperparameters.
 
-Do our fancy ML methods beat the good old GLM?
+Can our fancy ML methods beat the good old GLM?
 
 # Random Forests & Boosting
 
