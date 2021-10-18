@@ -19,6 +19,12 @@ lgr::get_logger("mlr3")$set_threshold("error")
 lgr::get_logger("bbotk")$set_threshold("error")
 ```
 
+Goals of this part:
+
+1. A Quick look at other tasks available and the spam task specifically
+2. Resampling for model evaluation
+3. Comparing learners with resampling
+
 # Task Setup
 
 As we've seen last time, our penguin data is pretty easy for our learners.
@@ -152,7 +158,6 @@ instead of already simplifying the prediction to `"spam"` or `"nonspam"`.
 We re-do our resampling set-up and use the `autoplot()` function based on the
 prediction, specifying `type = "roc"` to give us an ROC curve:
 
-
 ```{r knn-roc}
 autoplot(knn_pred, type = "roc")
 ```
@@ -172,27 +177,12 @@ To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forw
 
 ## Your Turn!
 
-1. Repeat the same steps for the `rpart` decision tree learner.
+1. Repeat the same steps for the `{rpart}` decision tree learner.
   - Does it fare better than kNN with default parameters?
 2. Repeat either learner resampling with different hyperparameters
 
 This is technically peck-and-find hyperparameter tuning which we'll do in a
 more convenient (and methodologically sound) way in the next part :)
-
-## Example Code
-
-```{r example-rr-roc}
-rr <- resample(
-  task = spam_task, 
-  # Important: set predict_type to "prob", set other parameters as desired.
-  learner = lrn("classif.rpart", predict_type = "prob", maxdepth = 15, cp = 0.003),
-  resampling = rsmp("cv", folds = 3)
-)
-
-autoplot(rr$prediction(), type = "roc")
-rr$aggregate(msr("classif.auc"))
-```
-
 
 ## Benchmarking
 
@@ -249,7 +239,6 @@ autoplot(bmr, measure = msr("classif.auc"))
 autoplot(bmr, type = "roc")
 ```
 
-
 We see what we'd expect regarding the featureless learner - it's the same as
 a coin toss. 
 Also, kNN does quite a bit better than the decision tree with the default 
@@ -269,29 +258,6 @@ to the logistic regression learner `"classif.log_reg"` with out any hyperparamet
 
 Do our fancy ML methods beat the good old GLM?
 
-## Example Code
-
-```{r bm-setup-logreg}
-learners <- list(
-  lrn("classif.kknn", id = "knn", predict_type = "prob", k = 25),
-  lrn("classif.rpart", id = "tree", predict_type = "prob", maxdepth = 11, cp = 0.0036),
-  lrn("classif.log_reg", id = "LogReg", predict_type = "prob")
-) 
-
-design <- benchmark_grid(
-  tasks = spam_task,       # Still the same task
-  learners = learners,     # The new list of learners
-  resamplings = rsmp("cv", folds = 5)  # Same resampling strategy as before
-) 
-
-# Run the benchmark and save the results
-bmr <- benchmark(design)
-
-autoplot(bmr, type = "roc")
-bmr$aggregate(msr("classif.auc"))[, .(learner_id, classif.auc)]
-```
-
-
 # Random Forests & Boosting
 
 Armed with our new model comparison skills, we can add Random Forests and
@@ -302,41 +268,18 @@ Our new learner IDs are
 - `"classif.ranger"` for Random Forest, see `?ranger::ranger`
 - `"classif.xgboost"` for (eXtreme) Gradient Boosting, see `?xgboost::xgboost`
 
-You know it has to be fancy if it has "extreme" in the name!
+(You know it has to be fancy if it has "extreme" in the name!)
 
 Both learners can already do fairly well without tweaking hyperparameters, except
 for the `nrounds` value in `xgboost` which sets the number of boosting iterations.
-The default in the mlr3 learner is 1, which kind of defeats the purpose of boosting.
+The default in the `{mlr3}` learner is 1, which kind of defeats the purpose of boosting.
 
 ## Your Turn!
 
-Use the benchmark setup from above and add the Random Forest and Boosting learners
-to the mix. Maybe reduce the number of CV folds to 3 to speed the process up a little
-and make sure to set `nrounds` to something greater than 1 for `xgboost`.
+Use the benchmark setup from above and switch the `kknn` and `rpart` learners
+with the Random Forest and Boosting learners.
+
+Maybe switch to holdout resampling to speed the process up a little and make 
+sure to set `nrounds` to something greater than 1 for `xgboost`.
 
 What about now? Can we beat logistic regression?
-
-
-## Example Code
-
-```{r benchmark-rf-boosting-logreg}
-learners <- list(
-  lrn("classif.kknn", id = "knn", predict_type = "prob", k = 25),
-  lrn("classif.rpart", id = "tree", predict_type = "prob", maxdepth = 11, cp = 0.0036),
-  lrn("classif.ranger", id = "forest", predict_type = "prob"),
-  lrn("classif.xgboost", id = "xgboost", predict_type = "prob", nrounds = 5),
-  lrn("classif.log_reg", id = "LogReg", predict_type = "prob")
-) 
-
-design <- benchmark_grid(
-  tasks = spam_task,       # Still the same task
-  learners = learners,     # The new list of learners
-  resamplings = rsmp("cv", folds = 3)
-) 
-
-# Run the benchmark and save the results
-bmr <- benchmark(design)
-
-autoplot(bmr, type = "roc")
-bmr$aggregate(msr("classif.auc"))[, .(learner_id, classif.auc)]
-```
