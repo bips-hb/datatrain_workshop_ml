@@ -1,4 +1,4 @@
-# Workshop: Data Train Intro to ML
+# Workshop: Data Train - Intro to ML
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -41,9 +41,9 @@ Repository contains Rmd notebooks for hands-on ML exercises.
 - Hands-on:
   - Introduce more mlr3 premade tasks, switch to spam task
   - CV-based model evaluation
-    - Introduce with kknn and rpart
+    - Introduce with `{kknn}` and `{rpart}`
   - Forests and Boosting
-  - Comparing RF and xgboost with kNN and trees?
+  - Comparing `{ranger}` and `{xgboost}` with others
 
 ### Day 2, morning
 
@@ -52,26 +52,57 @@ Repository contains Rmd notebooks for hands-on ML exercises.
 * Machine: Neural nets
 
 - Hands-on:
+  - Parameter tuning on previous learners
   - SVMs
-  - Parameter tuning on kNN, xgboost? SVM?
+  - Tuning an SVM
 
 ### Day 2, afternoon
 * Concept: Specific endpoints; Regression, Multiclass, survival
 * Concept: Variable importance, variable selection, IML (outlook)
 
 - Hands-on:
-  - Not sure what to do here yet
-  - Maybe use some `{mlr3data}` datasets with various outcome types?
-
+  - Feature selection
+  - Feature importance with `{ranger}` and `{iml}`
 
 ## Local Setup
 
 If you want to follow the course on your own machine, first install the following packages:
 
 ```r
+packages <- c(
+  # Data
+  "palmerpenguins", "mlr3data",
+  # Learner backends
+  "ranger", "xgboost", "kknn", "rpart", "e1071", "randomForest",
+  "mlr3verse", # installs "mlr3", "mlr3learners", "mlr3viz", "mlr3tuning" ...
+  "precrec", # ROC plots via mlr3, not auto-installed with mlr3viz
+  # Viz / interpretability
+  "rpart.plot", "iml", "vip", "pdp",
+  # Plotting / infrastructure
+  "rmarkdown", "ggplot2", "usethis", "dplyr", "purrr"
+)
 
-
+# Install packages if not available already
+sapply(packages, function(x) {
+  if (!requireNamespace(x)) install.packages(x)
+})
 ```
 
 Assuming you already have a recent version of R installed. If not, see [CRAN](https://cran.r-project.org/)
 for instructions appropriate to your platform.
+
+### Linux Note
+
+If you're working on a Linux distribution such as Ubuntu (or something Ubuntu-based),
+you may have to install some system packages with `sudo apt-get install ...` beforehand.
+To get the system requirements needed, you can use the `{remotes}` package like so:
+
+```r
+install.packages("remotes")
+
+# Get system requirements for Ubuntu 20.04
+pkgs <- sapply(packages, function(x) remotes::system_requirements("ubuntu-20.04", package = x))
+cat(unique(unlist(pkgs)), sep = "\n")
+```
+
+Which will output the required `apt-get install` lines you can run to install everything.
