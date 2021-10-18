@@ -60,7 +60,17 @@ sapply(packages, function(x) {
 ```
 
 Assuming you already have a recent version of R installed. If not, see [CRAN](https://cran.r-project.org/)
-for instructions appropriate to your platform.
+for instructions appropriate to your platform.  
+
+Afterwards you can create a local copy of this repository with the same method
+as during the workshop (`usethis:: ...` see above) or clone the repository 
+manually with 
+
+```sh
+git clone https://github.com/bips-hb/datatrain_workshop_ml.git
+```
+
+or via RStudio's `New Project -> Version Control` dialog.
 
 ### Linux Note
 
