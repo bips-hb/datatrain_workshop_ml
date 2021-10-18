@@ -60,7 +60,7 @@ packages <- c(
   # Viz / interpretability
   "rpart.plot", "iml", "vip", "pdp",
   # Plotting / infrastructure
-  "rmarkdown", "ggplot2", "usethis", "dplyr", "purrr"
+  "rmarkdown", "ggplot2", "patchwork", "usethis", "dplyr", "purrr"
 )
 
 # Install packages if not available already

@@ -7,3 +7,9 @@ README.html
 # Notebook previews & renders
 *.nb.html
 0*.html
+
+# Solutions to be unignored incrementally
+01-solution*.Rmd
+02-solution*.Rmd
+03-solution*.Rmd
+04-solution*.Rmd
