@@ -225,7 +225,7 @@ and take a look:
 ```{r bm-results-full}
 bm_scores <- bmr$score(msr("classif.auc"))
 
-# Extract per-iteration accuracy per learner (only first five rows shows)
+# Extract per-iteration accuracy per learner (only first five rows shown)
 bm_scores[1:5, .(learner_id, iteration, classif.auc)]
 
 # To get all results for the tree learner
@@ -239,7 +239,9 @@ And if we want to see what worked better overall:
 
 ```{r bm-results-aggregate}
 bmr$aggregate(msr("classif.auc"))[, .(learner_id, classif.auc)]
+```
 
+```{r bm-results-boxplot}
 autoplot(bmr, measure = msr("classif.auc"))
 ```
 
