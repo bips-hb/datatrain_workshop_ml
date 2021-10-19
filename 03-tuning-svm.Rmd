@@ -12,6 +12,7 @@ editor_options:
 
 ```{r setup}
 library(mlr3verse)   # All the mlr3 things
+library(mlr3viz)     # Explicitly for plot_learner_prediction()
 library(ggplot2)     # For plotting
 
 # Spam Task setup
