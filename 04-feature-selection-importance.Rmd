@@ -254,47 +254,6 @@ boston_task$col_roles$feature <- c("age", "b", "crim", "dis", "indus", "lat", "l
 
 This only include numeric features.
 
-## Example Code
-
-```{r example-featureimp-comparison}
-# Boston housing, but only numeric features due do SVM limitation
-boston_task$col_roles$feature <- c("age", "b", "crim", "dis", "indus", "lat", "lon", 
-"lstat", "nox", "ptratio", "rad", "rm", "tax", "tract", "zn")
-
-# A bag of predictors (all default params for simplicity)
-predictor_rf <- Predictor$new(
-  model = lrn("regr.ranger")$train(boston_task), 
-  data = boston_task$data(cols = boston_task$feature_names), 
-  y = boston_task$data(cols = "medv"))
-
-predictor_svm <- Predictor$new(
-  model = lrn("regr.svm")$train(boston_task), 
-  data = boston_task$data(cols = boston_task$feature_names), 
-  y = boston_task$data(cols = "medv"))
-
-predictor_lm <- Predictor$new(
-  model = lrn("regr.lm")$train(boston_task), 
-  data = boston_task$data(cols = boston_task$feature_names), 
-  y = boston_task$data(cols = "medv"))
-
-predictor_xgboost <- Predictor$new(
-  model = lrn("regr.xgboost")$train(boston_task), 
-  data = boston_task$data(cols = boston_task$feature_names), 
-  y = boston_task$data(cols = "medv"))
-
-# An assortment of importances
-importance_rf <- FeatureImp$new(predictor_rf, loss = "mse")
-importance_svm <- FeatureImp$new(predictor_svm, loss = "mse")
-importance_lm <- FeatureImp$new(predictor_lm, loss = "mse")
-importance_xgboost <- FeatureImp$new(predictor_xgboost, loss = "mse")
-
-# An entanglement of plots
-plot(importance_rf)
-plot(importance_svm)
-plot(importance_lm)
-plot(importance_xgboost)
-```
-
 ## Feature Effects
 
 Getting a number for "is this feature important" is nice, but often we want a better picture of the
