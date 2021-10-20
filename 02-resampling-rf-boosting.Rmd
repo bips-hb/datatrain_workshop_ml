@@ -31,7 +31,7 @@ As we've seen last time, our penguin data is pretty easy for our learners.
 We need something a little more complex, meaning more observations (n)
 and a couple more predictors (p).  
 If you're looking for ready-made example tasks for your own experimentation,
-mlr3 comes with a couple you can try. The procedure is similar to `mlr_learners`
+`{mlr3}` comes with a couple you can try. The procedure is similar to `mlr_learners`
 and `mlr_measures`, but this time it's, you guessed it,  
 
 ```{r task-dictionary}
@@ -72,11 +72,11 @@ spam_test <- setdiff(seq_len(spam_task$nrow), spam_train)
 # Resampling
 
 To continue with our kNN and tree experiments, we'll now enter resampling territory.  
-You probably realized that predictiong on just one test dataset doesn't give us
+You probably realized that predicting on just one test dataset doesn't give us
 too much of a useful idea of our model, which is why we use resampling.
 
 There's [lots of resampling strategies](https://mlr3book.mlr-org.com/resampling.html), 
-but you usually can't go too wrong with cross validation (CV), which should not 
+but you usually can't go too wrong with cross validation (`cv`), which should not 
 take too much time and computing power on small datasets like ours.
 
 Instead of training our model just once, we're going to train it 5 times with 
@@ -114,7 +114,7 @@ rr$aggregate(traintest_acc)
 As expected, our learner performed better on the training data than on the test data.
 By default, `{mlr3}` only gives us the results for the test data, which we'll be
 focusing on going forward.
-Being able to comprae train-/test-performance is useful though to make sure you're
+Being able to compare train-/test-performance is useful though to make sure you're
 not hopelessly overfitting on your training data!
 
 Also note how we got to train our learner, do cross validation and get scores
@@ -127,6 +127,7 @@ So far we've always used the accuracy, i.e. the proportion of correct classifica
 as our measure. For a problem such as spam detection that might not be the best choice,
 because it might be better to consider the **probability** that an e-mail is spam
 and maybe adjust the **threshold** at which we start rejecting mail.  
+
 For a class prediction we might say that if `prob(is_spam) > 0.5` the message is classified
 as spam, but maybe we'd rather be more conservative and only consider a message to 
 be spam at a probability over, let's say, 95%.
@@ -151,9 +152,10 @@ knn_pred$confusion
 knn_pred$score(measures)
 ```
 
-For that, we can use [ROC curves](https://en.wikipedia.org/wiki/Receiver_operating_characteristic).
+For an alternative that considers varying thresholds, we can use 
+[ROC curves](https://en.wikipedia.org/wiki/Receiver_operating_characteristic).
 
-To do so, we first have to adjust our Learner to predict the spam *probability*
+To do so, we first have to adjust our Learner to return the spam *probability*
 instead of already simplifying the prediction to `"spam"` or `"nonspam"`.
 We re-do our resampling set-up and use the `autoplot()` function based on the
 prediction, specifying `type = "roc"` to give us an ROC curve:
@@ -171,15 +173,21 @@ in grey in the plot). Everything in the upper-left is at least better than rando
 To condense this to a single number, we use the AUC, the *area under the (ROC) curve*.
 If this AUC is 0.5, our model is basically a coin toss - and if it's 1, that
 means our model is *perfect*, which is usually too good to be true and means
-we overfit in some way or the data is weird.
+we overfit in some way or the data is weird (technical term).
 
-To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forward.
+To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forward:
+
+```{r knn-auc}
+knn_pred$score(msr("classif.auc"))
+```
+
 
 ## Your Turn!
 
-1. Repeat the same steps for the `{rpart}` decision tree learner.
+1. Repeat the same steps (train learner, get AUC) for the `{rpart}` decision tree learner.
   - Does it fare better than kNN with default parameters?
-2. Repeat either learner resampling with different hyperparameters
+2. Repeat either learner resampling with different hyperparameters. 
+  - (Don't worry, in the next section we're doing that less manually)
 
 This is technically peck-and-find hyperparameter tuning which we'll do in a
 more convenient (and methodologically sound) way in the next part :)
@@ -217,7 +225,7 @@ and take a look:
 ```{r bm-results-full}
 bm_scores <- bmr$score(msr("classif.auc"))
 
-# Extract per-iteration accuracy per learner (only first five rows shows)
+# Extract per-iteration accuracy per learner (only first five rows shown)
 bm_scores[1:5, .(learner_id, iteration, classif.auc)]
 
 # To get all results for the tree learner
@@ -231,7 +239,9 @@ And if we want to see what worked better overall:
 
 ```{r bm-results-aggregate}
 bmr$aggregate(msr("classif.auc"))[, .(learner_id, classif.auc)]
+```
 
+```{r bm-results-boxplot}
 autoplot(bmr, measure = msr("classif.auc"))
 ```
 
