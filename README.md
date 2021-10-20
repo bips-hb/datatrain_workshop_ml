@@ -14,7 +14,7 @@ Example code for exercises will be made available after the exercises.
 In RStudio, enter
 
 ```r
-usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")
+usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git", fork = FALSE)
 ```
 
 This will create a new RStudio project with the workshop materials.  
