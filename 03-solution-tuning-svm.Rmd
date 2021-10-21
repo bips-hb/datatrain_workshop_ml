@@ -431,7 +431,11 @@ search_space_svm = ps(
   gamma = p_dbl(lower = 0.01, upper = 0.2, depends = kernel %in% c("polynomial", "radial", "sigmoid"))
 )
 
-generate_design_grid(search_space_svm, resolution = 3)
+grid <- generate_design_grid(search_space_svm, resolution = 6)
+
+# Look at grid with transformed cost param (manual way, there's probably a better one)
+grid$data$cost_trafo <- 10^grid$data$cost
+grid$data
 ```
 
 ```{r example-svm-tuning}
