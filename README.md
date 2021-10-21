@@ -104,3 +104,11 @@ sudo apt-get install -y libcurl4-openssl-dev
 sudo apt-get install -y libssl-dev
 sudo apt-get install -y libgit2-dev
 ```
+
+## Reproducibility
+
+As of the conclusion of the workshop, this repository includes an [`{renv}`](https://rstudio.github.io/renv/)
+lock file to capture the specific package versions used. 
+If this material is revisited in the future, running `renv::restore()` should
+restore the appropriate package versions to ensure all the code examples 
+still run as originally intended.
