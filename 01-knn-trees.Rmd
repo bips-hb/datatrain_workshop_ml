@@ -29,7 +29,7 @@ Goals of this part:
 See [their website](https://allisonhorst.github.io/palmerpenguins/) for some more information if you're interested.  
 For now it's enough to know that we have a bunch of data about 3 species of penguins.
 
-![](https://github.com/allisonhorst/palmerpenguins/raw/master/man/figures/lter_penguins.png)
+![](img/lter_penguins.png)
 
 ```{r penguins}
 # remove missing values for simplicity in this example
@@ -39,7 +39,7 @@ penguins <- na.omit(penguins)
 str(penguins)
 ```
 
-![](https://github.com/allisonhorst/palmerpenguins/raw/master/man/figures/culmen_depth.png)
+![](img/culmen_depth.png)
 
 We can take a look at the different species across two numeric features, starting with flipper length and body mass (for reasons that may become clear later):
 
@@ -127,7 +127,6 @@ Some things to try:
     Is higher == better? (You can stick to odd numbers)
     - After you've tried a couple `k`'s, does it get cumbersome yet?
 
-
 ## Growing a decision tree
 
 Now that we've played around with kNN a little, let's grow some trees!
@@ -192,7 +191,7 @@ We haven't picked any hyperparameter settings for our tree yet, maybe we should 
 So, what seems to work better here?  
 kNN or trees?
 
-## Bonus: Plotting decision boundaries (for 2 predictors)
+## Plotting decision boundaries (for 2 predictors)
 
 This is a rather cumbersome manual approach - there's a nicer way we'll see later, but we'll do it the manual way at least once so you know how it works:
 
@@ -335,6 +334,8 @@ but for now we're happy with the basics.
 ```{r learners, eval=FALSE}
 # Lots of learners to choose from here:
 mlr_learners
+# Or as a large table:
+as.data.table(mlr_learners)
 
 # To show all classification learners
 mlr_learners$keys(pattern = "classif")
@@ -427,7 +428,8 @@ plot_learner_prediction(
 Now that we've done the kNN fitting with `{mlr3}`, you can easily do the same thing with the `rpart`-learner!
 All you have to do is switch the learner objects and give it a more fitting name.
 
+
 # Useful links
 
 - [mlr3 cheatsheet with basic syntax](https://cheatsheets.mlr-org.com/mlr3.pdf)
-- [mlr3 book](https://mlr3book.mlr-org.com/) (not complete yet but useful)
+- [mlr3 book](https://mlr3book.mlr-org.com/) 

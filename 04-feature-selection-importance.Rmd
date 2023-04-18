@@ -255,7 +255,7 @@ boston_task$col_roles$feature <- c("age", "b", "crim", "dis", "indus", "lat", "l
 "lstat", "nox", "ptratio", "rad", "rm", "tax", "tract", "zn")
 ```
 
-This only include numeric features.
+This only includes numeric features.
 
 ## Feature Effects
 
