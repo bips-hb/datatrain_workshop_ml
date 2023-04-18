@@ -22,7 +22,7 @@ Goals of this part:
 1.  Taking a look at our example dataset
 2.  Introduce kNN via `{kknn}` and decision trees via `{rpart}`
 3.  Train some models, look at some results
-4.  Introduce `{mlr3}` and do 3. again but nicer
+4.  Introduce `{mlr3}` and do 3. again, but nicer
 
 # The dataset: Pengiuns!
 

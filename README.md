@@ -53,12 +53,14 @@ Possibly subject to change:
   - Installation instructions depend in whether you're using Windows, Linux (whichever flavor), or macOS.
 2. Install RStudio Desktop: https://posit.co/download/rstudio-desktop/
 3. Create a local copy of this workshop repository (`https://github.com/bips-hb/datatrain_workshop_ml.git`), using one of these options:
-  - `usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git", fork = FALSE)` (as listed above)
+  - `usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git", fork = FALSE)`
   - Running `git clone https://github.com/bips-hb/datatrain_workshop_ml.git` in the terminal to clone the repository.
-  - Using RStudio's `New Project -> Version Control` dialog.
+  - Using RStudio's `New Project -> Version Control` dialog.  
   Use whichever option you are most familiar with, or the first one if unsure.
 
-4. Install R packages required for the workshop by opening the workshop repository in RStudio (e.g. double-clicking the `datatrain_workshop_ml.Rproj` file) and run `renv::restore(prompt - = FALSE)`. [`{renv}`](https://rstudio.github.io/renv/) will automatically install all R packages with the correct versions listed in `renv.lock`.
+4. Install R packages required for the workshop by opening the workshop repository in RStudio (e.g. double-clicking the `datatrain_workshop_ml.Rproj` file)  
+and run `renv::restore(prompt - = FALSE)`.  
+[`{renv}`](https://rstudio.github.io/renv/) will automatically install all R packages with the correct versions listed in `renv.lock`.
 
 In some cases, installation with `renv` might fail.
 Should that be the case, delete the `.Rprofile` file or comment out the line `source("renv/activate.R")` in that file, and then refer to the manual package installation instructions below.
