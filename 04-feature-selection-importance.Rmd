@@ -18,8 +18,7 @@ library(iml)        # Interpretability methods
 # Spam Task setup
 spam_task <- tsk("spam")
 set.seed(26)
-spam_train <- sample(spam_task$nrow, 2/3 * spam_task$nrow)
-spam_test <- setdiff(seq_len(spam_task$nrow), spam_train)
+spam_split <- partition(spam_task, ratio = 2/3)
 
 # Penguin Task setup
 penguins <- na.omit(palmerpenguins::penguins)
@@ -30,8 +29,7 @@ penguin_task <- TaskClassif$new(
 )
 # penguin_task$col_roles$feature <- c("bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm")
 set.seed(26)
-penguin_train <- sample(penguin_task$nrow, 2/3 * penguin_task$nrow)
-penguin_test <- setdiff(seq_len(penguin_task$nrow), penguin_train)
+penguin_split <- partition(penguin_task, ratio = 2/3)
 ```
 
 Goals of this part:
@@ -97,12 +95,12 @@ fselect_instance$result_y
 as.data.table(fselect_instance$archive)[1:5, ]
 ```
 
-Similar to the `AutoTuner` we used for parameter tuning, there's also
-an `AutoFSelector` which basically works the same way, giving us an optimized
+Similar to the `auto_tuner` we used for parameter tuning, there's also
+an `auto_fselector` which basically works the same way, giving us an optimized
 learner as a result
 
 ```{r auto-fselect}
-fselected_rpart <- AutoFSelector$new(
+fselected_rpart <- auto_fselector(
   learner = lrn("classif.rpart", predict_type = "prob"),
   resampling = rsmp("holdout"),
   measure = msr("classif.ce"),
@@ -118,8 +116,8 @@ with a learner that uses all variables, just to make sure we're not sacrificing 
 
 ```{r fselect-bm}
 bmgrid <- benchmark_grid(
-  task = spam_task,
-  learner = list(
+  tasks = spam_task,
+  learners = list(
     fselected_rpart, 
     lrn("classif.rpart", predict_type = "prob")
   ),
@@ -182,31 +180,30 @@ It's not the same approach as the one we saw with ranger, but it's model-agnosti
 meaning it can be applied to any method.
 
 In some cases, different methods may disagree.  
-As an example, let's look at the Boston Housing dataset.  
-This dataset contains, well, housing data for various towns which can be used to predict the 
-median value of homes (variable `medv`, see also `?MASS::Boston`).  
+As an example, let's look at the Bikesharing dataset.  
+This dataset contains,--- see also `ISLR2::Bikeshare`.  
 Since this is a regression problem, we switch to `regr.ranger` as our learner:
 
-```{r boston-omportance-example}
-boston_task <- tsk("boston_housing")
-
-# Remove cmedv as it is a corrected version of the outcome, we don't want to use it as a feature
-boston_task$set_col_roles(cols = c("cmedv"), remove_from = "feature")
+```{r bike-importance-example}
+bikeshare <- tsk("bike_sharing")
+# Remove variables of unsopported types (for iml Predictor)
+bikeshare$set_col_roles(c("date", "working_day", "holiday"), remove_from = "feature")
 
 # Ranger: Gini impurity
 lrn_ranger <- lrn("regr.ranger", importance = "impurity_corrected")
 
-lrn_ranger$train(boston_task)
+lrn_ranger$train(bikeshare)
 
 sort(lrn_ranger$importance(), decreasing = TRUE)
 
 # iml: Permutation feature importance
-boston_predictor <- Predictor$new(
-  model = lrn("regr.ranger")$train(boston_task), 
-  data = boston_task$data(cols = boston_task$feature_names), 
-  y = boston_task$data(cols = "medv"))
+bike_predictor <- Predictor$new(
+  model = lrn_ranger, 
+  data = bikeshare$data(cols = bikeshare$feature_names), 
+  y = bikeshare$data(cols = "count")
+)
 
-boston_importance <- FeatureImp$new(boston_predictor, loss = "mse")
+bike_importance <- FeatureImp$new(bike_predictor, loss = "mse")
 
 # Merging importance results
 # Also rescaling importance measures for visual comparison
@@ -218,7 +215,7 @@ importance_ranger <- data.frame(
 )
 importance_ranger$importance <- importance_ranger$importance/max(importance_ranger$importance)
 
-importance_iml <- boston_importance$results[c("feature", "importance")]
+importance_iml <- bike_importance$results[c("feature", "importance")]
 importance_iml$importance <- importance_iml$importance/max(importance_iml$importance)
 importance_iml$method <- "Permutation"
 
@@ -229,7 +226,7 @@ ggplot(importance_df, aes(y = feature, x = importance, fill = method)) +
   geom_col(position = "dodge") +
   labs(
     title = "Feature importance comparison",
-    subtitle = "Boston Housing regression task w/ Random Forest",
+    subtitle = "Bike Sharing regression task w/ Random Forest",
     x = "Importance (Rescaled within method)",
     y = "Feature", fill = "Importance Method"
   ) +
@@ -248,14 +245,11 @@ for both learners.
 
 Do they agree?
 
-Hint: If you want to train an SVM on the boston dataset, use this set of features:
+Hint: If you want to train an SVM on the bikeshare dataset, use this set of numeric-only features:
 
-```{r boston-numeric-features}
-boston_task$col_roles$feature <- c("age", "b", "crim", "dis", "indus", "lat", "lon", 
-"lstat", "nox", "ptratio", "rad", "rm", "tax", "tract", "zn")
+```{r task-numeric-features}
+bikeshare$col_roles$feature <- c("hour", "month", "weekday", "year", "humidity", "temperature", "windspeed")
 ```
-
-This only includes numeric features.
 
 ## Feature Effects
 
@@ -269,18 +263,14 @@ One approach to visualize feature effects is via *Partial Dependence Plots* or p
 Let's recycle our `ranger` learner and plot some effects:
 
 ```{r feature-effects-ale}
-boston_task <- tsk("boston_housing")
-
-# Remove cmedv as it is a corrected version of the outcome, we don't want to use it as a feature
-boston_task$set_col_roles(cols = c("cmedv"), remove_from = "feature")
-
 lrn_ranger <- lrn("regr.ranger")
-lrn_ranger$train(boston_task)
+lrn_ranger$train(bikeshare)
 
 predictor_rf <- Predictor$new(
-  model = lrn("regr.ranger")$train(boston_task), 
-  data = boston_task$data(cols = boston_task$feature_names), 
-  y = boston_task$data(cols = "medv"))
+  model = lrn("regr.ranger")$train(bikeshare), 
+  data = bikeshare$data(cols = bikeshare$feature_names), 
+  y = bikeshare$data(cols = "count")
+)
 
 # Compute all feature effects (use FeatureEffect$new() for singular effects)
 # Per default calculates ALE
@@ -289,23 +279,23 @@ ranger_effects <- FeatureEffects$new(predictor_rf)
 
 For the average number of rooms: More rooms, higher value:
 
-```{r feature-effects-ale-rooms}
-ranger_effects$plot(feature = "rm")
+```{r feature-effects-ale-hour}
+ranger_effects$plot(feature = "hour")
 ```
 
 Or the crime rate: More crime, lower home value.
 
-```{r feature-effects-ale-crime}
-ranger_effects$plot(feature = "crim")
+```{r feature-effects-ale-temp}
+ranger_effects$plot(feature = "temperature")
 ```
 
 To only get one effect as PDP or ALE
 
 ```{r feature-effects-pdp-vs-ale}
-ranger_effects_rm_ale <- FeatureEffect$new(predictor_rf, feature = "rm", method = "ale")
-ranger_effects_rm_pdp <- FeatureEffect$new(predictor_rf, feature = "rm", method = "pdp")
+ranger_effects_rm_ale <- FeatureEffect$new(predictor_rf, feature = "temperature", method = "ale")
+ranger_effects_rm_pdp <- FeatureEffect$new(predictor_rf, feature = "temperature", method = "pdp")
 
-ranger_effects_rm_ale$plot() + labs(title = "ALE of room number on home value")
-ranger_effects_rm_pdp$plot() + labs(title = "PDP of room number on home value")
+ranger_effects_rm_ale$plot() + labs(title = "ALE of temperature on cyclist count")
+ranger_effects_rm_pdp$plot() + labs(title = "PDP of temperature on cyclist count")
 ```
 

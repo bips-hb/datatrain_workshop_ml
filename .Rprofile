@@ -12,6 +12,7 @@ if (FALSE) {
   library(xgboost)
   library(patchwork)
   library(e1071)
+  library(apcluster)
   library(remotes)
   library(usethis)
   library(styler)

@@ -60,7 +60,7 @@ We split our penguin data in a roughly 2/3 to 1/3 training- and test dataset for
 ```{r penguin-split-manual}
 penguin_N <- nrow(penguins) # Our total sample size
 
-# We draw indices randomly with our sampling proportion with a fixed seed
+# We draw 2/3 of all indices randomly with our sampling proportion with a fixed seed
 set.seed(234)
 train_ids <- sample(penguin_N, replace = FALSE, size = penguin_N * 2/3)
 # Our test set are the indices not in the training set
@@ -234,9 +234,7 @@ ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g, color = rpart_pred
 # Introducing `{mlr3}`
 
 ```{r setup-mlr3}
-library(mlr3)           # For the basics
-library(mlr3learners)   # For learners
-library(mlr3viz)        # For plotting
+library(mlr3verse) # includes mlr3, mlr3learners, mlr3tuning, mlr3viz, ...
 ```
 
 Now, imagine you want to try out some more hyperparameters for either `rpart()` 

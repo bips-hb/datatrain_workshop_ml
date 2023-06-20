@@ -12,14 +12,14 @@ editor_options:
 
 ```{r setup}
 library(mlr3verse) # All the mlr3 things
-library(mlr3viz)   # Explicitly for plot_learner_prediction()
 library(ggplot2)   # For plotting
 
 # Spam Task setup
 spam_task <- tsk("spam")
 set.seed(26)
-spam_train <- sample(spam_task$nrow, 2/3 * spam_task$nrow)
-spam_test <- setdiff(seq_len(spam_task$nrow), spam_train)
+
+# train/test split
+spam_split <- partition(spam_task, ratio = 2/3)
 ```
 
 Goals of this part:
@@ -49,7 +49,7 @@ We saw that `k` is an important parameter, and it's an integer greater than 1 at
 -   How long to we tune? What's our *budget*?
 -   What's our tuning strategy?
 
-We'll use `{mlr3}`'s [`AutoTuner`](https://mlr3book.mlr-org.com/optimization.html#autotuner) for this because it's just so convenient:
+We'll use `{mlr3}`'s [`auto_tuner`](https://mlr3book.mlr-org.com/chapters/chapter4/hyperparameter_optimization.html#sec-autotuner) for this because it's just so convenient:
 
 ```{r knn-tuning-setup}
 # Defining a search space: k is an integer, we look in range 3 to 51
@@ -57,7 +57,7 @@ search_space_knn = ps(
   k = p_int(lower = 3, upper = 51)
 )
 
-tuned_knn <- AutoTuner$new(
+tuned_knn <- auto_tuner(
   # The base learner we want to tune, optionally setting other parameters
   learner = lrn("classif.kknn", predict_type = "prob"),
   # Resampling strategy for the tuning
@@ -84,7 +84,7 @@ future::plan("multisession")
 
 # Setting a seed so we get the same result in the workshop
 set.seed(2398)
-tuned_knn$train(spam_task, row_ids = spam_train)
+tuned_knn$train(spam_task, row_ids = spam_split$train)
 ```
 
 In this case, we get a `k` of 25, with an AUC of about 0.96 in the inner resampling (the holdout set during tuning).
@@ -106,7 +106,7 @@ tuned_knn$tuning_instance$result_learner_param_vals
 Now that we've tuned on the training set, it's time to evaluate on the test set, and to shorten it a little we'll do prediction and scoring in one line:
 
 ```{r knn-eval}
-tuned_knn$predict(spam_task, row_ids = spam_test)$score(msr("classif.auc"))
+tuned_knn$predict(spam_task, row_ids = spam_split$test)$score(msr("classif.auc"))
 ```
 
 That was basically the manual way of doing nested resampling with an inner resampling strategy (CV) and an outer resampling strategy of holdout (the `spam_train` and `spam_test` sets).
@@ -146,7 +146,7 @@ knn_nested_tune$score(msr("classif.auc"))[, .(iteration, classif.auc)]
 knn_nested_tune$aggregate(msr("classif.auc"))
 ```
 
-Seems like a decent result?\
+Seems like a decent result?
 Let's try to beat it with some other learner!
 
 ## Your Turn!
