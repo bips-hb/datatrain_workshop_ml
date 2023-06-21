@@ -7,3 +7,5 @@ README.html
 # Notebook previews & renders
 *.nb.html
 0*.html
+*_files
+*_cache
