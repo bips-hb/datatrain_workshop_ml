@@ -1,8 +1,11 @@
 ---
 title: "02: Resampling, Random Forest & Boosting"
 date: "`r Sys.time()`"
-output: 
-  html_notebook: 
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
     toc: yes
     theme: flatly
     number_sections: yes
@@ -21,7 +24,7 @@ lgr::get_logger("bbotk")$set_threshold("error")
 
 Goals of this part:
 
-1. A Quick look at other tasks available and the spam task specifically
+1. A Quick look at other tasks available and the "spam" task specifically
 2. Resampling for model evaluation
 3. Comparing learners with resampling
 
@@ -31,7 +34,7 @@ As we've seen last time, our penguin data is pretty easy for our learners.
 We need something a little more complex, meaning more observations (n)
 and a couple more predictors (p).  
 If you're looking for ready-made example tasks for your own experimentation,
-mlr3 comes with a couple you can try. The procedure is similar to `mlr_learners`
+`mlr3` comes with a couple you can try. The procedure is similar to `mlr_learners`
 and `mlr_measures`, but this time it's, you guessed it,  
 
 ```{r task-dictionary}
@@ -74,8 +77,8 @@ take too much time and computing power on small datasets like ours.
 
 Instead of training our model just once, we're going to train it 5 times with 
 different training- and test-datasets. In `{mlr3}`, we first pick a resampling
-strategy with `rsmp()` and that define out setup with `resample()` based on
-our task and resampling strategy. The result a `ResampleResult`:
+strategy with `rsmp()`, and then define our setup with `resample()` based on
+our task and resampling strategy. The result an object of class `ResampleResult`:
 
 ```{r knn-resample-cv}
 rr <- resample(
@@ -86,6 +89,9 @@ rr <- resample(
 )
 
 rr
+
+# Contains task/learner/resampling/prediction objects
+as.data.table(rr)
 ```
 
 We also tell our learner to predict both on train- and test sets.  
@@ -124,19 +130,23 @@ because it might be better to consider the **probability** that an e-mail is spa
 and maybe adjust the **threshold** at which we start rejecting mail.  
 For a class prediction we might say that if `prob(is_spam) > 0.5` the message is classified
 as spam, but maybe we'd rather be more conservative and only consider a message to 
-be spam at a probability over, let's say, 95%.
+be spam at a probability over, let's say, 70%. This will change the relative amounts of true and false positives and negatives:
 
 ```{r knn-binary-thresholds}
 knn_learner <- lrn("classif.kknn", predict_type = "prob", k = 13)
-knn_pred <- knn_learner$train(spam_task)$predict(spam_task)
 
-# Measures: True Positive Rate (sensitivity) and True Negative Rate (1 - Specificity)
+set.seed(123)
+spam_split <- partition(spam_task)
+knn_learner$train(spam_task, spam_split$train)
+knn_pred <- knn_learner$predict(spam_task, spam_split$test)
+
+# Measures: True Positive Rate (Sensitivity) and True Negative Rate (1 - Specificity)
 measures <- msrs(c("classif.tpr", "classif.tnr"))
 knn_pred$confusion
 knn_pred$score(measures)
 
-# Threshold of 60% probability of spam:
-knn_pred$set_threshold(0.6)
+# Threshold of 70% probability of spam:
+knn_pred$set_threshold(0.7)
 knn_pred$confusion
 knn_pred$score(measures)
 
@@ -146,25 +156,24 @@ knn_pred$confusion
 knn_pred$score(measures)
 ```
 
-For that, we can use [ROC curves](https://en.wikipedia.org/wiki/Receiver_operating_characteristic).
+For a better analysis than just manually trying out different thresholds, we can use [ROC curves](https://en.wikipedia.org/wiki/Receiver_operating_characteristic).
 
 To do so, we first have to adjust our Learner to predict the spam *probability*
 instead of already simplifying the prediction to `"spam"` or `"nonspam"`.
-We re-do our resampling set-up and use the `autoplot()` function based on the
-prediction, specifying `type = "roc"` to give us an ROC curve:
+We use the `autoplot()` function based on the prediction, specifying `type = "roc"` to give us an ROC curve:
 
 ```{r knn-roc}
 autoplot(knn_pred, type = "roc")
 ```
 
-This gives us the false positive rate (FPR, 1 - Specificity) and the
+This gives us the false positive rate (FPR, "1 - Specificity") and the
 Sensitivity (or true positive rate, TPR) for our binary classification example.
 "Positive" here means "the e-mail is spam". If our classification model was
 basically a random coin flip, we would expect the curve to be the diagonal (depicted
 in grey in the plot). Everything in the upper-left is at least better than random.
 
 To condense this to a single number, we use the AUC, the *area under the (ROC) curve*.
-If this AUC is 0.5, our model is basically a coin toss - and if it's 1, that
+If this AUC is 0.5, our model is basically a coin toss --- and if it's 1, that
 means our model is *perfect*, which is usually too good to be true and means
 we overfit in some way or the data is weird.
 
@@ -172,7 +181,8 @@ To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forw
 
 ## Your Turn!
 
-1. Repeat the same steps for the `{rpart}` decision tree learner.
+1. Repeat the same resampling steps for the `{rpart}` decision tree learner.
+  (Resample with 5-fold CV, evaluate based on test accuracy)
   - Does it fare better than kNN with default parameters?
 2. Repeat either learner resampling with different hyperparameters
 3. `{mlr3viz}` provides alternatives to the ROC curve, which are described in the help page `?autoplot.PredictionClassif`. 
@@ -183,13 +193,10 @@ more convenient (and methodologically sound) way in the next part :)
 
 ## Benchmarking
 
-The next thing we'll try is to resample across multiple learners at once.
+The next thing we'll try is to resample across multiple learners at once --- because doing resampling for each learner separately and comparing results is just too tedious.
 
 Let's set up our learners with default parameters and compare them against
-a dummy *featureless* learner, which serves as a naive baseline.
-
-For `kknn` and `rpart` you can also include the best hyperparameter settings 
-you have found so far.
+a dummy *featureless* learner, which serves as a naive baseline. This learner always predicts the average of the target or the majority class in this case, so it's the worst possible learner that should be beatable by any reasonable algorithm!
 
 ```{r bm-setup}
 learners <- list(
@@ -198,21 +205,27 @@ learners <- list(
   lrn("classif.featureless", id = "Baseline", predict_type = "prob")
 ) 
 
+# Define task, learners and resampling strategy in a benchmark design
 design <- benchmark_grid(
   tasks = spam_task,       # Still the same task
   learners = learners,     # The new list of learners
   resamplings = rsmp("cv", folds = 3)  # Same resampling strategy as before
 ) 
 
-# Run the benchmark and save the results
+# Run the benchmark and save the results ("BenchmarkResult" object)
 bmr <- benchmark(design)
+bmr
+
+# It's just a collection of ResampleResult objects from before!
+as.data.table(bmr)
 ```
 
-`bmr` contains all we'd like to know about out comparison. We extract the scores
+`bmr` contains everything we'd like to know about out comparison. We extract the scores
 and take a look:
 
 ```{r bm-results-full}
 bm_scores <- bmr$score(msr("classif.auc"))
+bm_scores
 
 # Extract per-iteration accuracy per learner (only first five rows shows)
 bm_scores[1:5, .(learner_id, iteration, classif.auc)]
@@ -236,14 +249,12 @@ autoplot(bmr, measure = msr("classif.auc"))
 autoplot(bmr, type = "roc")
 ```
 
-We see what we'd expect regarding the featureless learner - it's the same as
-a coin toss. 
+We see what we'd expect regarding the featureless learner --- it's effectively a coin toss. 
 Also, kNN does quite a bit better than the decision tree with the default 
 parameters here.
 
 Of course including the featureless learner here doesn't really add any insights,
-especially since its results shouldn't change throughout resampling iterations.
-Sometimes it can't hurt to confirm your assumptions though.
+especially since we evaluate by AUC, where the featureless learner gets a score of 0.5 by definition.
 
 ## Your Turn!
 
@@ -251,9 +262,10 @@ Since we have a binary classification problem, we might even get away with using
 plain old logistic regression.
 
 Instead of benchmarking against the featureless learner, compare kNN and decision trees
-to the logistic regression learner `"classif.log_reg"` with out any hyperparameters.
+to the logistic regression learner `"classif.log_reg"` without any hyperparameters.
 
 Do our fancy ML methods beat the good old GLM?
+Use the best hyperparameter settings for kNN and `rpart` you have found so far
 
 # Random Forests & Boosting
 
