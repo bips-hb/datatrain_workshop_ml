@@ -1,8 +1,11 @@
 ---
 title: "03: Tuning & SVMs"
 date: "`r Sys.time()`"
-output: 
-  html_notebook: 
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
     toc: yes
     theme: flatly
     number_sections: yes
@@ -40,16 +43,16 @@ So far we've seen four learners:
 
 We've gotten to know the first two a little, and now we'll also take a closer look at the second two.
 
-First we'll start doing some tuning with `{mlr3}` based on the **kNN** learner because it's nice and simple.\
-We saw that `k` is an important parameter, and it's an integer greater than 1 at least. To tune it, we also have to make a few other decisions, also using what we learned about resampling.
+First we'll start doing some tuning with `{mlr3}` based on the **kNN** learner because it's nice and simple.
+We saw that `k` is an important parameter, and it's an integer greater than 1 at least. To tune it, we also have to make a few other decisions, also using what we learned about (nested) resampling.
 
--   What's our inner resampling strategy?
+-   What's our resampling strategy?
 -   What measure to we tune on?
 -   What does the parameter search space look like?
 -   How long to we tune? What's our *budget*?
 -   What's our tuning strategy?
 
-We'll use `{mlr3}`'s [`auto_tuner`](https://mlr3book.mlr-org.com/chapters/chapter4/hyperparameter_optimization.html#sec-autotuner) for this because it's just so convenient:
+We'll use `{mlr3}`'s [`auto_tuner`](https://mlr3book.mlr-org.com/chapters/chapter4/hyperparameter_optimization.html) for this because it's just so convenient:
 
 ```{r knn-tuning-setup}
 # Defining a search space: k is an integer, we look in range 3 to 51
@@ -60,39 +63,42 @@ search_space_knn = ps(
 tuned_knn <- auto_tuner(
   # The base learner we want to tune, optionally setting other parameters
   learner = lrn("classif.kknn", predict_type = "prob"),
-  # Resampling strategy for the tuning
+  # Resampling strategy for the tuning (inner resampling)
   resampling = rsmp("cv", folds = 5),
-  # Tuning measure: Maximize the AUC
-  measure = msr("classif.auc"),
+  # Tuning measure: Maximize the classification accuracy
+  measure = msr("classif.acc"),
   # Setting the search space we defined above
   search_space = search_space_knn,
   # Budget: Try n_evals different values
-  terminator = trm("evals", n_evals = 30),
+  terminator = trm("evals", n_evals = 20),
   # Strategy: Randomly try parameter values in the space
+  # (not ideal in this case but in general a good place to start)
   tuner = tnr("random_search")
-)
+) 
 
 # Take a look at the new tuning learner
 tuned_knn
 ```
 
-Now `tuned_knn` behaves the same way as any other Learner that has not been trained on any data yet - first we have to train (and tune!) it on our spam training data. The result will be the best hyperparameter configuration of those we tried:
+Now `tuned_knn` behaves the same way as any other Learner that has not been trained on any data yet --- first we have to train (and tune!) it on our spam training data. The result will be the best hyperparameter configuration of those we tried:
 
 ```{r tune-knn}
 # If you're on your own machine with multiple cores available, you can parallelize:
 future::plan("multisession")
 
-# Setting a seed so we get the same result in the workshop
+# Setting a seed so we get the same results -- train on train set only!
 set.seed(2398)
 tuned_knn$train(spam_task, row_ids = spam_split$train)
 ```
 
-In this case, we get a `k` of 25, with an AUC of about 0.96 in the inner resampling (the holdout set during tuning).
+In this case, we get a `k` of 9, with an accuracy of about 90%.
 
-We can visualize the performance across all the `k`s we tried by accessing the tuning instance now included in the `tuned_knn` learner object:
+(Side task: Try the same but with the AUC measure --- do you get the same `k`?)
+
+We can visualize the performance across all values of `k` we tried by accessing the tuning instance now included in the `tuned_knn` learner object:
 
 ```{r plot-knn-tuning-result}
-autoplot(tuned_knn$tuning_instance, type = "performance")
+autoplot(tuned_knn$tuning_instance)
 
 tuned_knn$tuning_instance
 ```
@@ -100,13 +106,16 @@ tuned_knn$tuning_instance
 And we can get the hyperparameter results that worked best in the end:
 
 ```{r knn-tuning-param-results}
-tuned_knn$tuning_instance$result_learner_param_vals
+tuned_knn$tuning_result
 ```
 
-Now that we've tuned on the training set, it's time to evaluate on the test set, and to shorten it a little we'll do prediction and scoring in one line:
+Now that we've tuned on the training set, it's time to evaluate on the test set:
 
 ```{r knn-eval}
-tuned_knn$predict(spam_task, row_ids = spam_split$test)$score(msr("classif.auc"))
+tuned_knn_pred <- tuned_knn$predict(spam_task, row_ids = spam_split$test)
+
+# Accuracy and AUC
+tuned_knn_pred$score(msrs(c("classif.acc", "classif.auc")))
 ```
 
 That was basically the manual way of doing nested resampling with an inner resampling strategy (CV) and an outer resampling strategy of holdout (the `spam_train` and `spam_test` sets).
@@ -121,7 +130,7 @@ tuned_knn$reset()
 knn_nested_tune <- resample(
   task = spam_task, 
   learner = tuned_knn, 
-  resampling = rsmp("cv", folds = 3), 
+  resampling = rsmp("cv", folds = 3), # this is effectively the outer resampling
   store_models = TRUE
 )
 
@@ -138,12 +147,12 @@ autoplot(knn_nested_tune$learners[[1]]$tuning_instance)
 autoplot(knn_nested_tune$learners[[2]]$tuning_instance)
 autoplot(knn_nested_tune$learners[[3]]$tuning_instance)
 
-# Get AUC for outer folds
-knn_nested_tune$score(msr("classif.auc"))[, .(iteration, classif.auc)]
+# Get AUC and acc for outer folds
+knn_nested_tune$score(msrs(c("classif.acc", "classif.auc")))[, .(iteration, classif.auc, classif.acc)]
 
 # Average over outer folds - our "final result" performance for kNN
 # AUC is averaged over outer folds
-knn_nested_tune$aggregate(msr("classif.auc"))
+knn_nested_tune$aggregate(msrs(c("classif.acc", "classif.auc")))
 ```
 
 Seems like a decent result?
@@ -151,7 +160,7 @@ Let's try to beat it with some other learner!
 
 ## Your Turn!
 
-Above you have a boilerplate to tune your own learner.\
+Above you have a boilerplate to tune your own learner.
 Start with either of the other three learners we've seen, pick one ore two hyperparameters to tune with a reasonable budget (note we have limited time and resources), tune on the training set and evaluate per AUC on the test set.
 
 Some pointers:
@@ -163,31 +172,28 @@ Some pointers:
     -   You can also see the documentation online, e.g. <https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.xgboost.html>
 
 -   Parameter search spaces in `ps()` have different types, see the help at `?paradox::Domain`
-
     -   Use `p_int()` for integers, `p_dbl()` for real-valued params etc.
 
 -   If you don't know which parameter to tune, try the following:
-
     -   `classif.xgboost`:
-
         -   Important: `nrounds` (integer) (>= 1)
-        -   Important: `eta` (double) (0 \< eta \< 1)
-        -   Maybe: `max_depth` (integer) (\< 30)
+        -   Important: `eta` (double) (0 < eta < 1)
+        -   Maybe: `max_depth` (integer) (< 30)
 
     -   `classif.rpart`:
-
         -   `cp` (double)
-        -   Maybe: `maxdepth` (integer) (\< 30)
+        -   Maybe: `maxdepth` (integer) (< 30)
 
     -   `classif.ranger`:
-
         -   `num.trees` (integer) (default is 500)
-        -   `max.depth` (integer) (ranger has no limit here :)
+        -   `max.depth` (integer) (ranger has no limit here aside from the data itself :)
 
-Note: Instead of randomly picking parameters from the design space, we can also generate a grid of parameters and try those.\
+Note: Instead of randomly picking parameters from the design space, we can also generate a grid of parameters and try those.
 We'll not try that here for now, but you can read up on how to do that here: `?mlr_tuners_grid_search`.
 
 -> `generate_design_grid(search_space, resolution = 5)`
+
+Also note that the cool thing about the `auto_tuner()` is that it behaves just like any other `mlr3` learner, but it automatically tunes itself. You can plug it into `resample()` or `benchmark_grid()` just fine!
 
 # Support Vector Machines
 
@@ -254,7 +260,7 @@ penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
 
 ```{r svm-decision-boundaries}
 # Create the learner, picking a kernel and/or other hyperparams
-svm_learner <- lrn("classif.svm", kernel = "polynomial", degree = 7)
+svm_learner <- lrn("classif.svm", predict_type = "prob", kernel = "polynomial", degree = 7)
 
 # Train the learner
 svm_learner$train(penguin_task)
@@ -270,7 +276,7 @@ plot_learner_prediction(
 
 Let's try a more complex tuning experiment, based on the spam task from before.
 
-We'll create a new SVM learner object and this time explicitly tell it which classification to do - that's the default value anyway, but `{mlr3}` wants us to be explicit here for tuning:
+We'll create a new SVM learner object and this time explicitly tell it which classification to do --- that's the default value anyway, but `{mlr3}` wants us to be explicit here for tuning:
 
 ```{r svm-learner}
 svm_learner <- lrn("classif.svm", predict_type = "prob", type = "C-classification")
@@ -283,10 +289,15 @@ The interesting thing here is that some parameters are only relevant for some ke
 ```{r svm-search-space-short}
 search_space_svm = ps(
   kernel = p_fct(c("linear", "polynomial", "radial", "sigmoid")),
+  # Degree is onoly relevant if "kernel" is "polynomial"
   degree = p_int(1, 7, depends = kernel == "polynomial")
 )
+```
 
-# Create an example design grid to inspect our setup:
+
+We can create an example design grid to inspect our setup and see that `degree` is `NA` for cases where `kernel` is not `"polynomial"`, just as we expected
+
+```{r svm-search-space-inspect}
 generate_design_grid(search_space_svm, resolution = 3)
 ```
 
@@ -301,7 +312,7 @@ The above should get you started to...
 -   `degree`, as above, **only if** `kernel == "polynomial"`
 -   `gamma`, from e.g. 0.01 to 0.2, **only if** `kernel` is polynomial, radial, sigmoid (hint: you can't use `kernel != "linear"` unfortunately, but `kernel %in% c(...)`) works
 
-2.  Use the `AutoTuner$new()` function as previously seen with
+2.  Use the `auto_tuner` function as previously seen with
 
 -   `svm_learner` (see above)
 -   A resampling strategy (use `"holdout"` if runtime is an issue)
@@ -310,6 +321,6 @@ The above should get you started to...
 -   A termination criterion (e.g. 40 evaluations)
 -   Random search as your tuning strategy
 
-3.  Train the AutoTuned learner and evaluate on the test set
+3.  Train the auto-tuned learner and evaluate on the test set
 
 What parameter settings worked best?
