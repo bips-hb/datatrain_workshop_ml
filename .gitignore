@@ -1,11 +1,17 @@
+# R/RStudio/temp stuff/config
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-README.html
+*history
+.cache
+.config
+.local
+
 
 # Notebook previews & renders
 *.nb.html
 0*.html
 *_files
 *_cache
+README.html

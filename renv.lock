@@ -216,6 +216,22 @@
       ],
       "Hash": "1e035db628cefb315c571202d70202fe"
     },
+    "apcluster": {
+      "Package": "apcluster",
+      "Version": "1.4.10",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Matrix",
+        "R",
+        "Rcpp",
+        "grDevices",
+        "graphics",
+        "methods",
+        "stats"
+      ],
+      "Hash": "dd41c2f9468a2592fbc1cc2df611f640"
+    },
     "askpass": {
       "Package": "askpass",
       "Version": "1.1",
