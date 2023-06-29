@@ -2,10 +2,13 @@
 title: "04: Feature Selection & Importance"
 date: "`r Sys.time()`"
 output:
+  html_document:
+    toc: yes
+    df_print: paged
   html_notebook:
-  toc: yes
-theme: flatly
-number_sections: yes
+    toc: yes
+    theme: flatly
+    number_sections: yes
 editor_options: 
   chunk_output_type: console
 ---
@@ -20,16 +23,13 @@ spam_task <- tsk("spam")
 set.seed(26)
 spam_split <- partition(spam_task, ratio = 2/3)
 
-# Penguin Task setup
+# # Penguin Task setup
 penguins <- na.omit(palmerpenguins::penguins)
 penguin_task <- TaskClassif$new(
-  id = "penguins", 
-  backend = penguins, 
+  id = "penguins",
+  backend = penguins,
   target = "species"
 )
-# penguin_task$col_roles$feature <- c("bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm")
-set.seed(26)
-penguin_split <- partition(penguin_task, ratio = 2/3)
 ```
 
 Goals of this part:
@@ -40,10 +40,10 @@ Goals of this part:
 
 # Feature Selection
 
-See also: 
+There is a lot more to cover than we have time for here, see e.g.:
 
-- [mlr3gallery post with example](https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/)
-- [mlr3book](https://mlr3book.mlr-org.com/optimization.html#fs)
+- [mlr3gallery post with example](https://mlr-org.com/gallery/optimization/2020-09-14-mlr3fselect-basic/index.html)
+- [mlr3book](https://mlr3book.mlr-org.com/chapters/chapter6/feature_selection.html)
 
 Selecting features with `{mlr3}` is similar to parameter tuning: We need to set
 a budget (e.g. 20 evaluations like before) and a criterion (like the AUC.)
@@ -115,16 +115,16 @@ And of course it should be worth it to compare our variable-selected learner
 with a learner that uses all variables, just to make sure we're not sacrificing any predictive performance:
 
 ```{r fselect-bm}
-bmgrid <- benchmark_grid(
+design <- benchmark_grid(
   tasks = spam_task,
   learners = list(
     fselected_rpart, 
     lrn("classif.rpart", predict_type = "prob")
   ),
-  resampling = rsmp("cv", folds = 3)
+  resamplings = rsmp("cv", folds = 3)
 )
 
-bmr <- benchmark(bmgrid)
+bmr <- benchmark(design)
 bmr$aggregate(msr("classif.auc"))
 ```
 
@@ -162,7 +162,10 @@ we create using our learner and our data, separately for predictors and target:
 lrn_ranger <- lrn("classif.ranger", predict_type = "prob")
 lrn_ranger$train(penguin_task)
 
-penguin_x <- penguins[names(penguins) != "species"]
+# Get dataset of predictors only
+penguin_x <- penguins[, names(penguins) != "species"]
+
+# Assemble Predictor
 predictor_rf <- Predictor$new(lrn_ranger, data = penguin_x, y = penguins$species)
 ```
 
@@ -181,15 +184,19 @@ meaning it can be applied to any method.
 
 In some cases, different methods may disagree.  
 As an example, let's look at the Bikesharing dataset.  
-This dataset contains,--- see also `ISLR2::Bikeshare`.  
+This dataset contains data on the number of bike rentals over an extended period of time --- see also `?mlr3data::bike_sharing`.  
 Since this is a regression problem, we switch to `regr.ranger` as our learner:
 
 ```{r bike-importance-example}
 bikeshare <- tsk("bike_sharing")
-# Remove variables of unsopported types (for iml Predictor)
+
+# Since it's a relatively large task and some of these methods take some time, we downsample the dataset by 60% --- feel free to comment this out at home when you have the time.
+bikeshare$filter(partition(bikeshare, 0.6)$train)
+
+# Remove variables of unsupported types (for iml Predictor)
 bikeshare$set_col_roles(c("date", "working_day", "holiday"), remove_from = "feature")
 
-# Ranger: Gini impurity
+# Ranger: Built-in Gini impurity
 lrn_ranger <- lrn("regr.ranger", importance = "impurity_corrected")
 
 lrn_ranger$train(bikeshare)
@@ -203,6 +210,7 @@ bike_predictor <- Predictor$new(
   y = bikeshare$data(cols = "count")
 )
 
+# This takes a while (warnings can be ignored)
 bike_importance <- FeatureImp$new(bike_predictor, loss = "mse")
 
 # Merging importance results
@@ -240,7 +248,7 @@ So far we've only looked at feature importance based on a Random Forest learner,
 but it's also possible that importance scores vary when different learners are applied.
 
 Based on the `{iml}` code above, train two or more different learners on a task
-of your choice (`tsk("boston")`, `tsk("spam")`, ...) and calculate feature importances
+of your choice (`tsk("bike_sharing")`, `tsk("spam")`, ...) and calculate feature importances
 for both learners.
 
 Do they agree?
@@ -251,11 +259,11 @@ Hint: If you want to train an SVM on the bikeshare dataset, use this set of nume
 bikeshare$col_roles$feature <- c("hour", "month", "weekday", "year", "humidity", "temperature", "windspeed")
 ```
 
+Note that `bike_sharing` is a relatively large task, so feature importance calculations might be slow!
+
 ## Feature Effects
 
-Getting a number for "is this feature important" is nice, but often we want a better picture of the
-feature's effect. Think of linear models and how we can interpret $\beta_k$ as the linear relationship
-between $x_k$ and $y$ - often things aren't linear though.
+Getting a number for "is this feature important" is nice, but often we want a better picture of the feature's effect. Think of linear models and how we can interpret $\beta_j$ as the linear relationship between $X_j$ and $Y$ --- often things aren't linear though.
 
 One approach to visualize feature effects is via *Partial Dependence Plots* or preferably via
 *Accumulated Local Effect* plots (ALE), which `{iml}` thankfully offers.
@@ -267,7 +275,7 @@ lrn_ranger <- lrn("regr.ranger")
 lrn_ranger$train(bikeshare)
 
 predictor_rf <- Predictor$new(
-  model = lrn("regr.ranger")$train(bikeshare), 
+  model = lrn("regr.ranger"), 
   data = bikeshare$data(cols = bikeshare$feature_names), 
   y = bikeshare$data(cols = "count")
 )
