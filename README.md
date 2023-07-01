@@ -145,9 +145,9 @@ sudo apt-get install -y zlib1g-dev
 
 ### Using docker
 
-If the installation instructions above fail for some reason, you can try using [Docker](https://docs.docker.com/get-started/overview/) as a sort of last resort.  
+If the installation instructions above fail for some reason, you can try using [Docker](https://docs.docker.com/get-started/overview/) as a sort of last resort.
 You can find out how to install it at <https://docs.docker.com/engine/install/>.
-For some more information specifically in the context of R, you can skim <https://solutions.posit.co/envs-pkgs/environments/docker/>
+For some more information specifically in the context of R, you can skim <https://solutions.posit.co/envs-pkgs/environments/docker/>, and for the popular set of images available from the `rocker` project, see <https://rocker-project.org/images/>.
 
 The included [`Dockerfile`](Dockerfile) will create an image will the required packages and dependencies all installed, and afterwards it launches an RStudio server instance you cann access via your browser.
 
