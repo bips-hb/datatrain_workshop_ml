@@ -1,4 +1,4 @@
-if (Sys.info()[["user"]] == "rstudio") {
+if (as.logical(Sys.getenv("IN_DOCKER", unset = "FALSE"))) {
   message("Assuming you're running in a Docker container, so I'm not loading renv!")
 } else {
   source("renv/activate.R")

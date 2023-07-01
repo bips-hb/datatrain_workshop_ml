@@ -93,6 +93,15 @@ sapply(packages, function(x) {
 })
 ```
 
+
+You can also try using [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which may try to automatically install system dependencies on Linux (see next note) if possible:
+
+```r
+install.packages("pak")
+
+pak::pak(packages)
+```
+
 ### Linux Note
 
 If you're working on a Linux distribution such as Ubuntu (or something Ubuntu-based),
@@ -108,7 +117,6 @@ pkg_reqs <- sapply(packages, function(x) {
 })
 
 cat(paste("sudo", sort(unique(unlist(pkg_reqs))), collapse = "\n"))
-
 ```
 
 Which will output the required `apt-get install` lines you can run to install everything.  
@@ -135,10 +143,37 @@ sudo apt-get install -y pandoc
 sudo apt-get install -y zlib1g-dev
 ```
 
-You can also try using [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which may try to automatically install system dependencies if possible:
+### Using docker
 
-```r
-install.packages("pak")
+If the installation instructions above fail for some reason, you can try using [Docker](https://docs.docker.com/get-started/overview/) as a sort of last resort.  
+You can find out how to install it at <https://docs.docker.com/engine/install/>.
+For some more information specifically in the context of R, you can skim <https://solutions.posit.co/envs-pkgs/environments/docker/>
 
-pak::pak(packages)
+The included [`Dockerfile`](Dockerfile) will create an image will the required packages and dependencies all installed, and afterwards it launches an RStudio server instance you cann access via your browser.
+
+Build the image with this command:
+
+```sh
+docker build -t self/mlworkshop:1.0 .
 ```
+
+On an arm64 Mac (with an M1 or M2 processor), you will need to run the following instead:
+
+```sh
+docker build --platform linux/amd64 -t self/mlworkshop:1.0 .
+```
+
+Building the image will take a few minutes, but at least you won't have compilation issues.
+
+Afterwards you can run the image with this command, which will make the workshop materials in the current directory (`$(pwd)`) available at the home directory where the RStudio instance will start at (`/home/rstudio/`). It also sets the port where the server will be available to you in the browser (the `8787` on the left side of the `:`, do not change the right side!), and it disables password authentication for simplicity.
+
+```sh
+docker run \
+  -v "$(pwd):/home/rstudio/" \
+  -p 8787:8787 \
+  -e DISABLE_AUTH=true \
+  self/mlworkshop:1.0
+```
+
+Once it's running, visit <http://localhost:8787> in your browser and you should be greeted by an RStudio window.
+This repository is set up such that it tries to detect whether you're running inside a Docker container and will not load `renv` in that case, as that would only make things more complicated.
