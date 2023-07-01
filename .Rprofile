@@ -1,4 +1,8 @@
-source("renv/activate.R")
+if (Sys.info()[["user"]] == "rstudio") {
+  message("Assuming you're running in a Docker container, so I'm not loading renv!")
+} else {
+  source("renv/activate.R")
+}
 
 # Placeholder library-calls are only here such that renv will
 # pick these packages up as dependencies automatically, as they are not directly loaded

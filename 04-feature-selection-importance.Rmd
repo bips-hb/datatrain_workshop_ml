@@ -190,8 +190,8 @@ Since this is a regression problem, we switch to `regr.ranger` as our learner:
 ```{r bike-importance-example}
 bikeshare <- tsk("bike_sharing")
 
-# Since it's a relatively large task and some of these methods take some time, we downsample the dataset by 60% --- feel free to comment this out at home when you have the time.
-bikeshare$filter(partition(bikeshare, 0.6)$train)
+# Since it's a relatively large task and some of these methods take some time, we downsample the dataset by 50% --- feel free to comment this out at home when you have the time, or reduce it even further if it's still too slow.
+bikeshare$filter(partition(bikeshare, 0.5)$train)
 
 # Remove variables of unsupported types (for iml Predictor)
 bikeshare$set_col_roles(c("date", "working_day", "holiday"), remove_from = "feature")
@@ -275,7 +275,7 @@ lrn_ranger <- lrn("regr.ranger")
 lrn_ranger$train(bikeshare)
 
 predictor_rf <- Predictor$new(
-  model = lrn("regr.ranger"), 
+  model = lrn_ranger, 
   data = bikeshare$data(cols = bikeshare$feature_names), 
   y = bikeshare$data(cols = "count")
 )
