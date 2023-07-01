@@ -382,7 +382,7 @@ knn_learner$help()
 knn_learner$param_set$ids()
 
 # Setting parameters leaves the others as default
-knn_learner$param_set$values$k <- list(k = 5)
+knn_learner$param_set$values <- list(k = 5)
 
 # Identical method to set a single hyperparam:
 knn_learner$param_set$values$k <- 5
