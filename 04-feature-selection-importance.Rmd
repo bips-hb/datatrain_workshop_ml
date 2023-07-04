@@ -2,9 +2,6 @@
 title: "04: Feature Selection & Importance"
 date: "`r Sys.time()`"
 output:
-  html_document:
-    toc: yes
-    df_print: paged
   html_notebook:
     toc: yes
     theme: flatly

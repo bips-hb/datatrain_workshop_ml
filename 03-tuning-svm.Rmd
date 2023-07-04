@@ -2,9 +2,6 @@
 title: "03: Tuning & SVMs"
 date: "`r Sys.time()`"
 output:
-  html_document:
-    toc: yes
-    df_print: paged
   html_notebook:
     toc: yes
     theme: flatly

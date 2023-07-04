@@ -87,6 +87,9 @@ Should that be the case, delete the `.Rprofile` file or comment out the line `so
 
 ### Manual package installation instructions 
 
+<details>
+<summary>Click to expand instructions</summary>
+
 You should only need to install all packages manually if you were not able to use `renv` to install them automatically. 
 (Or if you're trying to get this code to run in a different environment than this repository)
 
@@ -112,7 +115,6 @@ sapply(packages, function(x) {
 })
 ```
 
-
 You can also try using [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which may try to automatically install system dependencies on Linux (see next note) if possible:
 
 ```r
@@ -121,7 +123,12 @@ install.packages("pak")
 pak::pak(packages)
 ```
 
+</details>
+
 ### Linux Note
+
+<details>
+<summary>Click to expand</summary>
 
 If you're working on a Linux distribution such as Ubuntu (or something Ubuntu-based),
 you may have to install some system packages with `sudo apt-get install ...` beforehand.
@@ -162,7 +169,12 @@ sudo apt-get install -y pandoc
 sudo apt-get install -y zlib1g-dev
 ```
 
+</details>
+
 ### Using docker
+
+<details>
+<summary>Click to expand</summary>
 
 If the installation instructions above fail for some reason, you can try using [Docker](https://docs.docker.com/get-started/overview/) as a sort of last resort.
 You can find out how to install it at <https://docs.docker.com/engine/install/>.
@@ -196,3 +208,22 @@ docker run \
 
 Once it's running, visit <http://localhost:8787> in your browser and you should be greeted by an RStudio window.
 This repository is set up such that it tries to detect whether you're running inside a Docker container and will not load `renv` in that case, as that would only make things more complicated.
+
+</details>
+
+# Further Reading
+
+- Introduction to Machine Learning (I2ML): https://slds-lmu.github.io/i2ml
+  - Free online lecture series with slides & videos, covers basic, intermediate and advanced topics
+- The "mlr3book": [Bischl, B., Sonabend, R., Kotthoff, L., & Lang, M. Applied Machine Learning Using mlr3 in R. (CRC Press, 2024)](https://mlr3book.mlr-org.com)
+
+## Textbooks
+
+- [An Introduction to Statistical Learning: with Applications in R. (Springer, 2013).](https://www.statlearning.com/)
+- [Hastie, T., Tibshirani, R. & Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. (Springer, 2009).](https://web.stanford.edu/~hastie/ElemStatLearn/)
+- [Murphy, K. P. Machine Learning: A Probabilistic Perspective. (MIT Press, 2012).](https://probml.github.io/pml-book/)
+- [Bishop, C. M. Pattern Recognition and Machine Learning. Information Science and Statistics. (Springer, 2006).](https://link.springer.com/book/9780387310732)
+
+
+
+
