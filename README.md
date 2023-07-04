@@ -200,7 +200,7 @@ This repository is set up such that it tries to detect whether you're running in
 # Further Reading
 
 - Introduction to Machine Learning (I2ML): https://slds-lmu.github.io/i2ml
-  - Free onlien lecture series with slides & videos, covers basic to advanced topics
+  - Free online lecture series with slides & videos, covers basic to advanced topics
 - mlr3book: https://mlr3book.mlr-org.com
   - For all the mlr3 stuff
 
