@@ -32,20 +32,39 @@ autoplot(rr, type = "prc")
 
 (You'll learn what that piece of code does in the workshop :)
 
-## Agenda
-
-TBD
-
-### Structure
+## Workshop Details
 
 - July 4+5, 2023, 9:00 AM - 5:00 PM
 - UNICOM 7.1020, Large Seminar Room, Mary-Somerville-Str. 7, 28359 Bremen
 
-Possibly subject to change: 
-
-- 4 * 3-hour blocks, each ~90min Theory, short break, ~90min Hands-on
+- 4 * 3-hour blocks, each ~90min theory, short break, ~90min hands-on
 - Hands-on exercises on local devices, bring a laptop!
 - Notebooks in this repository correspond to blocks in workshop
+
+### Day 1
+
+- Theory / practice: 9:00 - 12:00
+  - k-Nearest-Neighbors
+  - General concepts
+  - Decision Trees
+- Break: 12:00 - 13:00
+- Theory / practice: 13:00 - 17:00
+  - Random Forest
+  - Model evaluation
+  - Boosting
+
+### Day 2
+
+- Theory / practice: 9:00 - 12:00
+  - Support Vector Machines (SVM)
+  - Hyperparameter Tuning
+  - Artifical Neural Networks
+- Break: 12:00 - 13:00
+- Theory / practice: 13:00 - 17:00
+  - Specific endpoints
+  - Variable Importance
+  - Discussion
+
 
 ## Installation Instructions
 
