@@ -196,3 +196,11 @@ docker run \
 
 Once it's running, visit <http://localhost:8787> in your browser and you should be greeted by an RStudio window.
 This repository is set up such that it tries to detect whether you're running inside a Docker container and will not load `renv` in that case, as that would only make things more complicated.
+
+# Further Reading
+
+- Introduction to Machine Learning (I2ML): https://slds-lmu.github.io/i2ml
+  - Free onlien lecture series with slides & videos, covers basic to advanced topics
+- mlr3book: https://mlr3book.mlr-org.com
+  - For all the mlr3 stuff
+
