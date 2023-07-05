@@ -213,9 +213,12 @@ This repository is set up such that it tries to detect whether you're running in
 
 # Further Reading
 
-- Introduction to Machine Learning (I2ML): https://slds-lmu.github.io/i2ml
-  - Free online lecture series with slides & videos, covers basic, intermediate and advanced topics
 - The "mlr3book": [Bischl, B., Sonabend, R., Kotthoff, L., & Lang, M. Applied Machine Learning Using mlr3 in R. (CRC Press, 2024)](https://mlr3book.mlr-org.com)
+
+## Free Lectures (online with slides + videos)
+
+- Introduction to Machine Learning ("I2ML""): https://slds-lmu.github.io/i2ml
+- Introduction to Interpretable Machine Learning: https://slds-lmu.github.io/iml
 
 ## Textbooks
 
@@ -223,7 +226,6 @@ This repository is set up such that it tries to detect whether you're running in
 - [Hastie, T., Tibshirani, R. & Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. (Springer, 2009).](https://web.stanford.edu/~hastie/ElemStatLearn/)
 - [Murphy, K. P. Machine Learning: A Probabilistic Perspective. (MIT Press, 2012).](https://probml.github.io/pml-book/)
 - [Bishop, C. M. Pattern Recognition and Machine Learning. Information Science and Statistics. (Springer, 2006).](https://link.springer.com/book/9780387310732)
-
-
+- [Molnar, M. Interpretable Machine Learning: A Guide for Making Black Box Models Explainable (2023)](https://christophm.github.io/interpretable-ml-book/)
 
 
