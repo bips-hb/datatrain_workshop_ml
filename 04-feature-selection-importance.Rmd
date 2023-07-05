@@ -227,7 +227,7 @@ importance_iml$method <- "Permutation"
 # Binding them together & plotting
 importance_df <- rbind(importance_ranger, importance_iml)
 
-ggplot(importance_df, aes(y = feature, x = importance, fill = method)) +
+ggplot(importance_df, aes(y = reorder(feature, importance), x = importance, fill = method)) +
   geom_col(position = "dodge") +
   labs(
     title = "Feature importance comparison",
@@ -235,7 +235,7 @@ ggplot(importance_df, aes(y = feature, x = importance, fill = method)) +
     x = "Importance (Rescaled within method)",
     y = "Feature", fill = "Importance Method"
   ) +
-  theme_minimal() +
+  theme_minimal(base_size = 16) +
   theme(legend.position = "top")
 ```
 
@@ -288,7 +288,6 @@ For the average number of rooms: More rooms, higher value:
 ranger_effects$plot(feature = "hour")
 ```
 
-Or the crime rate: More crime, lower home value.
 
 ```{r feature-effects-ale-temp}
 ranger_effects$plot(feature = "temperature")
