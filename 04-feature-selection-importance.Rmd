@@ -282,18 +282,14 @@ predictor_rf <- Predictor$new(
 ranger_effects <- FeatureEffects$new(predictor_rf)
 ```
 
-For the average number of rooms: More rooms, higher value:
+Visualizing the (conditional) feature effect of `hour` or `temperature`
 
-```{r feature-effects-ale-hour}
+```{r feature-effects-ale-hour-temp}
 ranger_effects$plot(feature = "hour")
-```
-
-
-```{r feature-effects-ale-temp}
 ranger_effects$plot(feature = "temperature")
 ```
 
-To only get one effect as PDP or ALE
+To only get one effect as PDP or ALE (computationally faster that calculation effects for all features)
 
 ```{r feature-effects-pdp-vs-ale}
 ranger_effects_rm_ale <- FeatureEffect$new(predictor_rf, feature = "temperature", method = "ale")
