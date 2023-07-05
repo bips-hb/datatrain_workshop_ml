@@ -137,7 +137,9 @@ bmr <- benchmark(tuning_benchmark_design)
 bmr$aggregate(msr("classif.auc"))
 ```
 
-# Support Vector Machines
+For statistical tests etc. on benchmark results, refer to the `mlr3benchmark` package (not included with `mlr3verse` (yet).
+
+# Support Vector Machines?
 
 ## SVM-Tuning
 
