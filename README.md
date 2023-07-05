@@ -217,8 +217,8 @@ This repository is set up such that it tries to detect whether you're running in
 
 ## Free Lectures (online with slides + videos)
 
-- Introduction to Machine Learning ("I2ML""): https://slds-lmu.github.io/i2ml
-- Introduction to Interpretable Machine Learning: https://slds-lmu.github.io/iml
+- Introduction to Machine Learning ("I2ML"): https://slds-lmu.github.io/i2ml
+- Interpretable Machine Learning: https://slds-lmu.github.io/iml
 
 ## Textbooks
 
