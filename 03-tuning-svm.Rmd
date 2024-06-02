@@ -119,17 +119,31 @@ tuned_knn_pred$score(msrs(c("classif.acc", "classif.auc", "classif.bbrier")))
 
 That was basically the manual way of doing nested resampling with an inner resampling strategy (CV) and an outer resampling strategy of holdout (the `spam_train` and `spam_test` sets).
 
-To be more robust we can use CV in the outer resampling as well:
+In the next step we're going to compare the knn learner with the decision tree learner, and for that we need a proper nested resampling:
 
 ```{r knn-nested-resampling}
-# Reset the learner so we start fresh
-tuned_knn$reset()
+# Set up the knn autotuner again
+tuned_knn <- auto_tuner(
+  # The base learner we want to tune, optionally setting other parameters
+  learner = lrn("classif.kknn", predict_type = "prob"),
+  # Resampling strategy for the tuning (inner resampling)
+  resampling = rsmp("cv", folds = 3),
+  # Tuning measure: Maximize the classification accuracy
+  measure = msr("classif.bbrier"),
+  # Setting the search space we defined above
+  search_space = ps(k = p_int(lower = 3, upper = 51)),
+  # Budget: Try n_evals different values
+  terminator = trm("evals", n_evals = 20),
+  # Strategy: Randomly try parameter values in the space
+  # (not ideal in this case but in general a good place to start)
+  tuner = tnr("mbo")
+)
 
 # Set up resampling with the ready-to-be-tuned learner and outer resampling: CV
 knn_nested_tune <- resample(
   task = spam_task, 
   learner = tuned_knn, 
-  resampling = rsmp("cv", folds = 5), # this is effectively the outer resampling
+  resampling = rsmp("cv", folds = 3), # this is effectively the outer resampling
   store_models = TRUE
 )
 
@@ -177,22 +191,23 @@ Some pointers:
     -   `classif.xgboost`:
         -   Important: `nrounds` (integer) (>= 1)
         -   Important: `eta` (double) (0 < eta < 1)
-        -   Maybe: `max_depth` (integer) (< 10)
+        -   Maybe: `max_depth` (integer)
 
     -   `classif.rpart`:
         -   `cp` (double)
         -   Maybe: `maxdepth` (integer) (< 30)
 
     -   `classif.ranger`:
-        -   `num.trees` (integer) (default is 500)
-        -   `max.depth` (integer) (ranger has no limit here aside from the data itself :)
+        -   `mtry` (integer) (default is 500)
+        -   `max.depth` (integer)
 
 Note: Instead of randomly picking parameters from the design space, we can also generate a grid of parameters and try those.
 We'll not try that here for now, but you can read up on how to do that here: `?mlr_tuners_grid_search`.
 
 -> `generate_design_grid(search_space, resolution = 5)`
 
-Also note that the cool thing about the `auto_tuner()` is that it behaves just like any other `mlr3` learner, but it automatically tunes itself. You can plug it into `resample()` or `benchmark_grid()` just fine!
+Also note that the cool thing about the `auto_tuner()` is that it behaves just like any other `mlr3` learner, but it automatically tunes itself.
+You can plug it into `resample()` or `benchmark_grid()` just fine!
 
 # Support Vector Machines
 
@@ -259,11 +274,7 @@ penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
 
 ```{r svm-decision-boundaries}
 # Create the learner, picking a kernel and/or other hyperparams
-svm_learner <- lrn("classif.svm", predict_type = "prob", kernel = "polynomial", degree = 3)
-svm_learner <- lrn("classif.svm", predict_type = "prob", kernel = "linear")
-
-# Train the learner
-svm_learner$train(penguin_task)
+svm_learner <- lrn("classif.svm", kernel = "polynomial", degree = 3)
 
 # Plot decision boundaries
 plot_learner_prediction(
@@ -271,6 +282,23 @@ plot_learner_prediction(
   task = penguin_task
 )
 ```
+
+Directly comparing multiple kernels with default parameters:
+
+```{r}
+# Create a list of plots for each kernel
+plots <- lapply(c("linear", "polynomial", "radial", "sigmoid"), \(kernel) {
+    plot_learner_prediction(
+    learner = lrn("classif.svm", kernel = kernel), 
+    task = penguin_task
+  ) + 
+    labs(subtitle = paste("SVM with ", kernel, "kernel"))
+})
+
+# Arrange the plots with the patchwork package
+patchwork::wrap_plots(plots, guides = "collect")
+```
+
 
 ## SVM-Tuning
 
