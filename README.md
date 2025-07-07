@@ -4,12 +4,14 @@
 <!-- badges: end -->
 
 Workshop component to the [Machine Learning workshop in the Data Train
-2023 series](https://www.bremen-research.de/data-train/courses/course-catalogue/course-details?event_id=44).
+2025 series](https://www.bremen-research.de/data-train/courses/course-details?event_id=114).
 
 Repository contains `.Rmd` notebooks for hands-on ML demos & exercises.  
 Example code for exercises will be made available after the exercises.
 
 ## Workshop Quick Start Instructions:
+
+We will use R version 4.5.1, but recent versions >= 4.1 should still work.
 
 1. In RStudio, install the `usethis` package and enter
 
@@ -32,14 +34,15 @@ autoplot(rr, type = "prc")
 
 (You'll learn what that piece of code does in the workshop :)
 
+If `renv` gives you trouble, see below for manual R package installation instructions.
+
 ## Workshop Details
 
-- July 4+5, 2023, 9:00 AM - 5:00 PM
-- UNICOM 7.1020, Large Seminar Room, Mary-Somerville-Str. 7, 28359 Bremen
+- July 14+15, 2023, 9:00 AM - 5:00 PM
+- UNICOM 2, Small Seminar Room 2.207, Mary-Somerville-Str. 2, 28359 Bremen
 
 - 4 * 3-hour blocks, each ~90min theory, short break, ~90min hands-on
-- Hands-on exercises on local devices, bring a laptop!
-- Notebooks in this repository correspond to blocks in workshop
+- Hands-on exercises on local devices, **bring a laptop**!
 
 ### Day 1
 
@@ -93,6 +96,9 @@ Should that be the case, delete the `.Rprofile` file or comment out the line `so
 You should only need to install all packages manually if you were not able to use `renv` to install them automatically. 
 (Or if you're trying to get this code to run in a different environment than this repository)
 
+I recommend using [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which will try to automatically install system dependencies on Linux (see next note) if possible:
+
+
 ```r
 packages <- c(
   # Data
@@ -101,27 +107,20 @@ packages <- c(
   "ranger", "xgboost", "kknn", "rpart", "e1071", "randomForest",
   "mlr3verse", # installs "mlr3", "mlr3learners", "mlr3viz", "mlr3tuning" ...
   "precrec", # ROC plots via mlr3, not auto-installed with mlr3viz
-  "apcluster",
+  "apcluster", "DiceKriging",
   # Viz / interpretability
   "rpart.plot", "iml", # "vip", "pdp",
   # Plotting / infrastructure, goodies
-  "rmarkdown", "ggplot2", "patchwork", "usethis", "dplyr", "purrr", "ragg",
-  "remotes", "styler"
+  "rmarkdown", "ggplot2", "patchwork", "usethis", "dplyr", "purrr", "ragg"
 )
 
-# Install packages if not available already
-sapply(packages, function(x) {
-  if (!requireNamespace(x)) install.packages(x)
-})
-```
-
-You can also try using [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which may try to automatically install system dependencies on Linux (see next note) if possible:
-
-```r
+# Installing pak for faster package installation
 install.packages("pak")
 
+# Install packages if not available already
 pak::pak(packages)
 ```
+
 
 </details>
 
@@ -139,7 +138,7 @@ install.packages("remotes")
 
 # Get system requirements for Ubuntu 20.04 (the package names likely won't differ between releases)
 pkg_reqs <- sapply(packages, function(x) {
-  remotes::system_requirements("ubuntu-20.04", package = x)
+  remotes::system_requirements("ubuntu-22.04", package = x)
 })
 
 cat(paste("sudo", sort(unique(unlist(pkg_reqs))), collapse = "\n"))
@@ -213,9 +212,15 @@ This repository is set up such that it tries to detect whether you're running in
 
 # Further Reading
 
-- The "mlr3book": [Bischl, B., Sonabend, R., Kotthoff, L., & Lang, M. Applied Machine Learning Using mlr3 in R. (CRC Press, 2024)](https://mlr3book.mlr-org.com)
+## Code examples
+
+We rely on the mlr3 framework and its free online book for the hands-on part of the workshop:
+
+- [Bischl, B., Sonabend, R., Kotthoff, L., & Lang, M. *Applied Machine Learning Using mlr3 in R*. (CRC Press, 2024)](https://mlr3book.mlr-org.com)
 
 ## Free Lectures (online with slides + videos)
+
+Lecture materials take inspiration from these free and open-source lectures:
 
 - Introduction to Machine Learning ("I2ML"): https://slds-lmu.github.io/i2ml
 - Interpretable Machine Learning: https://slds-lmu.github.io/iml
@@ -227,5 +232,3 @@ This repository is set up such that it tries to detect whether you're running in
 - [Murphy, K. P. Machine Learning: A Probabilistic Perspective. (MIT Press, 2012).](https://probml.github.io/pml-book/)
 - [Bishop, C. M. Pattern Recognition and Machine Learning. Information Science and Statistics. (Springer, 2006).](https://link.springer.com/book/9780387310732)
 - [Molnar, M. Interpretable Machine Learning: A Guide for Making Black Box Models Explainable (2023)](https://christophm.github.io/interpretable-ml-book/)
-
-
