@@ -1,7 +1,8 @@
-# Data Train: Introduction to Machine Learning
-
-<!-- badges: start -->
-<!-- badges: end -->
+---
+title: 'Data Train: Introduction to Machine Learning'
+editor_options:
+  chunk_output_type: console
+---
 
 This is the workshop component to the [Machine Learning workshop in the Data Train
 2025 series](https://www.bremen-research.de/data-train/courses/course-details?event_id=114).

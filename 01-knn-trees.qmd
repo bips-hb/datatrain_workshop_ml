@@ -1,16 +1,11 @@
 ---
-title: '01: kNN & Trees'
-date: "`r Sys.time()`"
-output:
-  html_notebook:
-    toc: yes
-    theme: flatly
-    number_sections: yes
+title: 'kNN & Trees'
 editor_options:
   chunk_output_type: console
 ---
 
 ```{r setup}
+#| echo: false
 library(ggplot2)        # For plotting
 library(kknn)           # For kNN models
 library(rpart)          # For decision trees
@@ -391,28 +386,43 @@ Now that we've identified our learners, we can get it quickly via the `lrn()` he
 
 ```{r knn-learner}
 knn_learner <- lrn("classif.kknn")
+```
 
+```{r knn-learner-help, eval=FALSE}
 # What's this learner about?
 knn_learner$help()
+```
 
+```{r knn-learner-params}
 # What parameters does this learner have?
 knn_learner$param_set
 knn_learner$param_set$ids()
-
-# Setting parameters leaves the others as default
-knn_learner$configure(k = 5)
-
-# Identical methods to set a single hyperparam:
-knn_learner$param_set$values <- list(k = 5)
-knn_learner$param_set$values$k <- 5
-
-# We can also set the parameters directly when we construct the learner object
-knn_learner <- lrn("classif.kknn", k = 7)
-knn_learner$param_set$values$k
 ```
 
-We'll save the `{rpart}` learner for later, but all the methods are the same
-to get help, look at possible hyperparameters and setting them!
+Setting parameters leaves the others as default:
+
+```{r knn-learner-configure}
+knn_learner$configure(k = 5)
+
+knn_learner$param_set
+```
+
+Identical methods to set multiple or a single hyperparam:
+
+```{r knn-learner-set}
+knn_learner$param_set$values <- list(k = 5)
+knn_learner$param_set$values$k <- 5
+```
+
+
+In practice, we usually set the parameters directly when we construct the learner object:
+
+```{r knn-learner-initialize-params}
+knn_learner <- lrn("classif.kknn", k = 7)
+knn_learner$param_set
+```
+
+We'll save the `{rpart}` learner for later, but all the methods are the same because they are all `Learner` objects.
 
 ## Training and evaluating
 

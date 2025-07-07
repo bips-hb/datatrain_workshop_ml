@@ -1,11 +1,5 @@
 ---
-title: "03: Tuning & SVMs"
-date: "`r Sys.time()`"
-output:
-  html_notebook:
-    toc: yes
-    theme: flatly
-    number_sections: yes
+title: "Tuning & SVMs"
 editor_options: 
   chunk_output_type: console
 ---

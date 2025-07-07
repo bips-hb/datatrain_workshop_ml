@@ -1,0 +1,69 @@
+project:
+  type: website
+  preview:
+    port: 4321
+    browser: false
+    watch-inputs: true
+  render:
+    - "*qmd"
+
+website:
+  title: "DataTrain ML"
+  search: false
+  back-to-top-navigation: true
+  repo-url: https://github.com/bips-hb/datatrain_workshop_ml
+  repo-actions: [edit, issue]
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - text: "Introduction"
+        href: index.qmd
+      - section: "Day 1"
+        contents:
+          - 01-knn-trees.qmd
+          - 02-resampling-rf-boosting.qmd
+      - section: "Day 2"
+        contents:
+          - 03-tuning-svm.qmd
+          - 04-feature-selection-importance.qmd
+  # navbar:
+  #   left:
+  #     - href: README.md
+  #       text: Home
+  #     - text: Blocks
+  #       menu:
+  #       - href: 01-knn-trees.qmd
+  #       - href: 02-resampling-rf-boosting.qmd
+  #       - href: 03-tuning-svm.qmd
+  #       - href: 04-feature-selection-importance.qmd
+    tools:
+      - icon: github
+        href: https://github.com/bips-hb/datatrain_workshop_ml
+  # page-footer: >
+  #     CC BY-NC-SA 4.0 2025, the InterACT workshop organizers
+
+format:
+  html:
+    theme: 
+      light: [flatly]
+      dark: [darkly]
+    toc: true
+    number-sections: true
+    code-fold: false
+    code-copy: true
+    date: last-modified
+    published-title: "Last Updated"
+    date-format: long
+    anchor-sections: true
+    smooth-scroll: true
+    link-external-icon: true
+    # page-layout: full
+    fig-align: "center"
+    lightbox: true
+    include-in-header:
+      - text: |
+          <script defer src="https://umami.jemu.name/script.js" data-website-id="0b6267ec-b77d-40ef-946c-a07bc15bb722"></script>
+execute: 
+  freeze: auto  # re-render only when source changes
+  cache: false

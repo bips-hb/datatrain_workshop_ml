@@ -1,11 +1,5 @@
 ---
-title: "02: Resampling, Random Forest & Boosting"
-date: "`r Sys.time()`"
-output:
-  html_notebook:
-    toc: yes
-    theme: flatly
-    number_sections: yes
+title: "Resampling, Random Forest & Boosting"
 editor_options: 
   chunk_output_type: console
 ---
