@@ -136,7 +136,7 @@ tuned_knn <- auto_tuner(
   terminator = trm("evals", n_evals = 20),
   # Strategy: Randomly try parameter values in the space
   # (not ideal in this case but in general a good place to start)
-  tuner = tnr("mbo")
+  tuner = tnr("random_search")
 )
 
 # Set up resampling with the ready-to-be-tuned learner and outer resampling: CV

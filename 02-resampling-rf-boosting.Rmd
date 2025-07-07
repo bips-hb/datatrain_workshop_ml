@@ -82,7 +82,7 @@ rr <- resample(
   task = spam_task, 
   # Optional: Adjust learner parameters
   learner = lrn("classif.kknn", k = 13, predict_sets = c("train", "test")),
-  resampling = rsmp("cv", folds = 5) # 5-fold CV
+  resampling = rsmp("cv", folds = 3) # 3-fold CV
 )
 
 rr
@@ -118,6 +118,12 @@ not hopelessly overfitting on your training data!
 Also note how we got to train our learner, do cross validation and get scores
 all without having to do any extra work.
 That's why we use `{mlr3}` instead of doing everything manually --- abstraction is nice.
+
+Also note that we don't always have to choose a measure, there's a default measure for classification for example.
+
+```{r knn-binary-aggregate-default}
+rr$aggregate()
+```
 
 ## One more thing: Measures
 

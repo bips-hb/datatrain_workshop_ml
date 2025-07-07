@@ -47,7 +47,7 @@ a budget (e.g. 20 evaluations like before) and a criterion (like the AUC.)
 with a resampling strategy (here holdout for simplicity).
 
 ```{r fselect-instance}
-fselect_instance = FSelectInstanceSingleCrit$new(
+fselect_instance = fsi(
   task = spam_task,
   learner = lrn("classif.rpart", predict_type = "prob"),
   resampling = rsmp("holdout"),
@@ -298,4 +298,3 @@ ranger_effects_rm_pdp <- FeatureEffect$new(predictor_rf, feature = "temperature"
 ranger_effects_rm_ale$plot() + labs(title = "ALE of temperature on cyclist count")
 ranger_effects_rm_pdp$plot() + labs(title = "PDP of temperature on cyclist count")
 ```
-

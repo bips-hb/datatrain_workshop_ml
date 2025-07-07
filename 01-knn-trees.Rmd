@@ -45,15 +45,31 @@ We can take a look at the different species across two numeric features, startin
 
 ```{r penguins-plot}
 ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  ggforce::geom_mark_ellipse(aes(fill = species, label = species)) +
   geom_point() +
   labs(
     title = "Palmer Penguins",
+    subtitle = "Body mass and flipper length by species",
     x = "Flipper Length [mm]", y = "Body Mass [g]",
-    color = "Species"
+    color = "Species", fill = "Species"
   ) +
-  theme_minimal() +
-  theme(legend.position = "top")
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "bottom", 
+    plot.title.position = "plot"
+  )
 ```
+
+::: {.callout-note}
+There are two `penguins` datasets:
+
+- `penguins` from the `palmerpenguins` R package, which has been around for a while
+- `penguins`, as included in R's `datasets` package as of recently, with slightly different variable names!
+
+For backwards compatbility, we just assume the `palmerpenguins` version.  
+In the future, we will probably [convert these materials](https://cran.r-project.org/web/packages/basepenguins/vignettes/basepenguins.html)
+
+:::
 
 We split our penguin data in a roughly 2/3 to 1/3 training- and test dataset for our first experiments:
 
@@ -102,16 +118,19 @@ penguins_test$knn_predicted_species <- fitted(knn_penguins)
 # Rows: True species, columns: predicted species
 table(penguins_test$species, penguins_test$knn_predicted_species, 
       dnn = c("Observed", "Predicted"))
+```
 
-# Proportion of correct predictions ("accuracy")
-# (R shortcut: Logical comparison gives logical vector of TRUE/FALSE, which 
-# is used like 1/0 for math, so we can sum it up (== correct classifications)
-# and divide by N for the proportion, i.e. calculate the mean)
+Proportion of correct predictions ("accuracy") and **incorrect** predictions (classification error):
+
+```{r knn-prediction-check-errs}
+# Accuracy
 mean(penguins_test$species == penguins_test$knn_predicted_species)
 
-# Proportion of **incorrect** predictions (classification error)
+# Classification error
 mean(penguins_test$species != penguins_test$knn_predicted_species)
 ```
+
+(R shortcut: Logical comparison gives logical vector of `TRUE`/`FALSE`, which is used like 1/0 for math, so we can sum it up (== correct classifications) and divide by N for the proportion, i.e. calculate the mean)
 
 ## Your turn!
 
@@ -233,9 +252,10 @@ ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g)) +
     x = "Flipper Length [mm]", y = "Body Mass [g]",
     fill = "Species"
   ) +
-  theme_minimal() +
+  theme_minimal(base_size = 13) +
   theme(
     legend.position = "top",
+    plot.title.position = "plot",
     panel.grid = element_blank()
   )
 ```
@@ -281,7 +301,7 @@ So let's put our penguins into a task object for `{mlr3}` and inspect it:
 # Creating a classification task from our penguin data
 penguin_task <- TaskClassif$new(
   id = "penguins", 
-  backend = penguins, 
+  backend = na.omit(palmerpenguins::penguins), 
   target = "species"
 )
 
@@ -376,12 +396,14 @@ knn_learner <- lrn("classif.kknn")
 knn_learner$help()
 
 # What parameters does this learner have?
+knn_learner$param_set
 knn_learner$param_set$ids()
 
 # Setting parameters leaves the others as default
-knn_learner$param_set$values <- list(k = 5)
+knn_learner$configure(k = 5)
 
-# Identical method to set a single hyperparam:
+# Identical methods to set a single hyperparam:
+knn_learner$param_set$values <- list(k = 5)
 knn_learner$param_set$values$k <- 5
 
 # We can also set the parameters directly when we construct the learner object
