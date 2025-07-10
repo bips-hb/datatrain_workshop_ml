@@ -7,34 +7,6 @@ editor_options:
 This is the workshop component to the [Machine Learning workshop in the Data Train
 2025 series](https://www.bremen-research.de/data-train/courses/course-details?event_id=114).
 
-
-# Workshop Quick Start Instructions:
-
-We will use R version **4.5.1**, but recent versions >= 4.1 should still work.
-
-1. get the materials: In RStudio, install the `usethis` package and enter
-
-```r
-usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")
-```
-
-This will create a new RStudio project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with `fork = FALSE` but there's no harm in forking).  
-
-2. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
-
-
-3. Verify: If the following example code produces a plot, you're probably good to go:
-
-```r
-library(mlr3verse)
-rr <- resample(tsk("sonar"), lrn("classif.ranger", predict_type = "prob"), rsmp("bootstrap", repeats = 5))
-autoplot(rr, type = "prc")
-```
-
-(You'll learn what that piece of code does in the workshop :)
-
-If `renv` gives you trouble, see below for manual R package installation instructions.
-
 # Workshop Details
 
 - 4 * 3-hour blocks, each ~90min theory, short break, ~90min hands-on
@@ -63,6 +35,34 @@ If `renv` gives you trouble, see below for manual R package installation instruc
   - Specific endpoints
   - Variable Importance
   - Discussion
+
+# Quick Start Instructions:
+
+We will use R version **4.5.1**, but recent versions >= 4.1 should still work.
+
+1. get the materials: In RStudio, install the `usethis` package and enter
+
+```r
+usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")
+```
+
+This will create a new RStudio project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with `fork = FALSE` but there's no harm in forking).  
+
+2. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
+
+
+3. Verify: If the following example code produces a plot, you're probably good to go:
+
+```{r}
+library(mlr3verse)
+rr <- resample(tsk("sonar"), lrn("classif.ranger", predict_type = "prob"), rsmp("cv", folds = 3))
+autoplot(rr, type = "roc")
+```
+
+(You'll learn what that piece of code does in the workshop :)
+
+If `renv` gives you trouble, see below for manual R package installation instructions.
+
 
 # Setup Instructions
 
@@ -104,7 +104,7 @@ packages <- c(
   "precrec", # ROC plots via mlr3, not auto-installed with mlr3viz
   "apcluster", "DiceKriging",
   # Viz / interpretability
-  "rpart.plot", "iml", # "vip", "pdp",
+  "rpart.plot", "jemus42/xplainfi", "effectplots",
   # Plotting / infrastructure, goodies
   "rmarkdown", "ggplot2", "patchwork", "usethis", "dplyr", "purrr", "ragg"
 )
@@ -162,46 +162,6 @@ sudo apt-get install -y make
 sudo apt-get install -y pandoc
 sudo apt-get install -y zlib1g-dev
 ```
-
-</details>
-
-## Using docker
-
-<details>
-<summary>Click to expand</summary>
-
-If the installation instructions above fail for some reason, you can try using [Docker](https://docs.docker.com/get-started/overview/) as a sort of last resort.
-You can find out how to install it at <https://docs.docker.com/engine/install/>.
-For some more information specifically in the context of R, you can skim <https://solutions.posit.co/envs-pkgs/environments/docker/>, and for the popular set of images available from the `rocker` project, see <https://rocker-project.org/images/>.
-
-The included [`Dockerfile`](Dockerfile) will create an image will the required packages and dependencies all installed, and afterwards it launches an RStudio server instance you cann access via your browser.
-
-Build the image with this command:
-
-```sh
-docker build -t self/mlworkshop:1.0 .
-```
-
-On an arm64 Mac (with an M1 or M2 processor), you will need to run the following instead:
-
-```sh
-docker build --platform linux/amd64 -t self/mlworkshop:1.0 .
-```
-
-Building the image will take a few minutes, but at least you won't have compilation issues.
-
-Afterwards you can run the image with this command, which will make the workshop materials in the current directory (`$(pwd)`) available at the home directory where the RStudio instance will start at (`/home/rstudio/`). It also sets the port where the server will be available to you in the browser (the `8787` on the left side of the `:`, do not change the right side!), and it disables password authentication for simplicity.
-
-```sh
-docker run \
-  -v "$(pwd):/home/rstudio/" \
-  -p 8787:8787 \
-  -e DISABLE_AUTH=true \
-  self/mlworkshop:1.0
-```
-
-Once it's running, visit <http://localhost:8787> in your browser and you should be greeted by an RStudio window.
-This repository is set up such that it tries to detect whether you're running inside a Docker container and will not load `renv` in that case, as that would only make things more complicated.
 
 </details>
 
