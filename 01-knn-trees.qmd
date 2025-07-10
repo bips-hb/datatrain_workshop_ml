@@ -5,7 +5,7 @@ editor_options:
 ---
 
 ```{r setup}
-#| echo: false
+#| message: false
 library(ggplot2)        # For plotting
 library(kknn)           # For kNN models
 library(rpart)          # For decision trees
@@ -39,9 +39,9 @@ str(penguins)
 We can take a look at the different species across two numeric features, starting with flipper length and body mass (for reasons that may become clear later):
 
 ```{r penguins-plot}
-ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  ggforce::geom_mark_ellipse(aes(fill = species, label = species)) +
-  geom_point() +
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, fill = species)) +
+  # ggforce::geom_mark_ellipse(aes(fill = species, label = species)) +
+  geom_point(shape = 21, stroke = 1/4, size = 3, alpha = 2/3, key_glyph = "rect") +
   labs(
     title = "Palmer Penguins",
     subtitle = "Body mass and flipper length by species",
@@ -115,17 +115,22 @@ table(penguins_test$species, penguins_test$knn_predicted_species,
       dnn = c("Observed", "Predicted"))
 ```
 
-Proportion of correct predictions ("accuracy") and **incorrect** predictions (classification error):
+Proportion of correct predictions ("accuracy")...
+
+```{r knn-prediction-check-acc}
+mean(penguins_test$species == penguins_test$knn_predicted_species)
+```
+
+...and **incorrect** predictions (classification error):
 
 ```{r knn-prediction-check-errs}
-# Accuracy
-mean(penguins_test$species == penguins_test$knn_predicted_species)
-
-# Classification error
 mean(penguins_test$species != penguins_test$knn_predicted_species)
 ```
 
-(R shortcut: Logical comparison gives logical vector of `TRUE`/`FALSE`, which is used like 1/0 for math, so we can sum it up (== correct classifications) and divide by N for the proportion, i.e. calculate the mean)
+
+::: {.callout-note title="R shortcut"} 
+Logical comparison gives logical vector of `TRUE`/`FALSE`, which can be used like 1 / 0 for mathematical operations, so we can sum up cases where `observed == predicted` (=> correct classifications) and divide by N for the proportion, i.e. calculate the proportion of correct predictions, the accuracy.
+:::
 
 ## Your turn!
 
@@ -145,6 +150,16 @@ Some things to try:
     Is higher == better? (You can stick to odd numbers)
     - After you've tried a couple `k`'s, does it get cumbersome yet?
 
+
+
+```{r knn-your-turn-1}
+# Your code
+```
+
+
+{{< include solutions/01-knn.qmd >}}
+
+
 ## Growing a decision tree
 
 Now that we've played around with kNN a little, let's grow some trees!
@@ -154,10 +169,7 @@ We'll use the `{rpart}` (**R**ecursive **Part**itioning) package and start with 
 rpart_penguins <- rpart(
   formula = species ~ flipper_length_mm + body_mass_g,
   data = penguins_train, # Train data
-  method = "class",      # Grow a classification tree (don't change this)
-  cp = 0.01,     # Complexity parameter (default = 0.01)
-  minsplit = 20, # Default = 20
-  maxdepth = 30  # Default (and upper limit for rpart!) = 30
+  method = "class",      # Grow a classification tree (don't change this for now)
 )
 ```
 
@@ -165,12 +177,18 @@ The nice thing about a single tree is that you can just look at it and know exac
 
 ```{r tree-model}
 rpart_penguins
+```
 
-# Looking at the tree as a... tree.
+Looking at the tree as a... tree.
+
+```{r tree-model-plot-base}
 plot(rpart_penguins)
 text(rpart_penguins)
+```
 
-# Much nicer to use the rpart.plot package
+Much nicer to use the `rpart.plot` package though
+
+```{r tree-model-plot-color}
 library(rpart.plot)
 rpart.plot(rpart_penguins)
 ```
@@ -209,6 +227,14 @@ We haven't picked any hyperparameter settings for our tree yet, maybe we should 
 So, what seems to work better here?  
 kNN or trees?
 
+
+
+```{r rpart-your-turn-1}
+# Your code
+```
+
+{{< include solutions/01-rpart.qmd >}}
+
 ## Plotting decision boundaries (for 2 predictors)
 
 This is a rather cumbersome manual approach --- there's a nicer way we'll see later, but we'll do it the manual way at least once so you know how it works:
@@ -219,9 +245,10 @@ rpart_penguins <- rpart(
   formula = species ~ flipper_length_mm + body_mass_g,
   data = penguins_train, # Train data
   method = "class",      # Grow a classification tree (don't change this)
-  cp = 0.01,     # Complexity parameter (default = 0.01)
-  minsplit = 20, # Default = 20
-  maxdepth = 30  # Default (and upper limit for rpart!) = 30
+  cp = 0.005,     # Default 0.01
+  minsplit = 20, # Default 20
+  minbucket = 3, # Default is minsplit/3
+  maxdepth = 30  # Default 30 (and upper limit!)
 )
 
 # Ranges of X and Y variable on plot
@@ -240,10 +267,17 @@ pred_grid$rpart_prediction <- predict(rpart_penguins, newdata = pred_grid, type 
 # Plot all predictions, colored by species
 ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g)) +
   geom_tile(aes(color = rpart_prediction, fill = rpart_prediction), linewidth = 1, show.legend = FALSE) +
-  geom_point(data = penguins_test, aes(fill = species), shape = 21, color = "black", size = 2) +
+  geom_point(
+    data = penguins_test, aes(fill = species), 
+    shape = 21, 
+    color = "black", 
+    size = 2,
+    key_glyph = "rect"
+  ) +
   labs(
     title = "Palmer Penguins: Decision Boundaries",
-    subtitle = "Species as predicted by decision tree",
+    subtitle = paste("Species as predicted by decision tree", 
+    "Point color is the true species", sep = "\n"),
     x = "Flipper Length [mm]", y = "Body Mass [g]",
     fill = "Species"
   ) +
@@ -254,238 +288,3 @@ ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g)) +
     panel.grid = element_blank()
   )
 ```
-
-# Introducing `{mlr3}`
-
-```{r setup-mlr3}
-library(mlr3verse) # includes mlr3, mlr3learners, mlr3tuning, mlr3viz, ...
-```
-
-Now, imagine you want to try out some more hyperparameters for either `rpart()` 
-or `kknn()` or both, and then you want to compare the two --- that would probably 
-be kind of tedious unless you write some wrapper functions, right?
-Well, luckily we're not the first people to do some machine learning!
-
-Our code above works (hopefully), but for any given model or algorithm, there's 
-different R packages with slightly different interfaces, and memorizing or looking up how they work can be a tedious and error-prone task, especially when we want to repeat the same general steps with each learner.
-`{mlr3}` and add-on packages unify all the common tasks with a consistent interface.
-
-## Creating a task
-
-The task encapsulates our data, including which variables we're using to learn 
-and which we want to predict.
-Tasks can be created in [multiple ways and some standard example tasks are available in mlr3](https://mlr3book.mlr-org.com/chapters/chapter2/data_and_basic_modeling.html), but we're taking the long way around.
-
-Questions a task object answers:
-
-- What kind of prediction are we doing?
-    - Here: Classification (instead of e.g. regression)
-
-- What are we predicting on?
-    - The dataset, specified as `backend =` (could be a `data.frame`, `matrix`, or a proper data base)
-
-- What variable are we predicting?
-    - The `target` variable, here `species`
-
-- Which variables are we using for predictions?
-    - The `feature` variables, which we can adjust
-    
-So let's put our penguins into a task object for `{mlr3}` and inspect it:
-
-```{r penguins-task-creation}
-# Creating a classification task from our penguin data
-penguin_task <- TaskClassif$new(
-  id = "penguins", 
-  backend = na.omit(palmerpenguins::penguins), 
-  target = "species"
-)
-
-# Contains our penguin dataset
-penguin_task$data()
-# We can ask it about e.g. our sample size and number of features
-penguin_task$nrow
-penguin_task$ncol
-# And what the classes are
-penguin_task$class_names
-# What types of features do we have? 
-# (relevant for learner support, some don't handle factors for example!)
-penguin_task$feature_types
-```
-
-(Note: Instead of `TaskClassif$new()`, you could also use `as_task_classif()` as a wrapper function if you prefer --- R6 classes may be unfamiliar territory)
-
-We can further inspect and modify the task after the fact if we choose:
-
-```{r penguins-task-modification}
-# Display feature and target variable assignment
-penguin_task$col_roles[c("feature", "target")]
-
-# Maybe not all variables are useful for this task, let's remove some
-penguin_task$set_col_roles(cols = c("island", "sex", "year"), remove_from = "feature")
-
-# We can also explicitly assign the feature columns
-penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
-
-# Check what our current variables and roles are
-penguin_task$col_roles[c("feature", "target")]
-```
-
-Some variables may have missing values --- if we had not excluded them in the beginning, you would find them here:
-
-```{r penguins-task-missings}
-penguin_task$missings()
-```
-
-### Train and test split
-
-We're mixing things up with a new train/test split, just for completeness in the example.
-For `{mlr3}`, we only need to save the indices / row IDs.
-There's a handy `partition()` function that does the same think we did with `sample()` earlier, so let's use that!
-
-```{r penguin-split}
-set.seed(26)
-penguin_split <- partition(penguin_task, ratio = 2/3)
-
-# Contains vector of row_ids for train/test set
-str(penguin_split)
-```
-
-We can now use `penguin_split$train` and `penguin_split$test` with every `mlr3` function that has a `row_ids` argument.
-
-(Note: The `row_ids` of a task are not necessarily `1:N` --- there is no guarantee they start at 1, go up to N, or contain all integers in between. We can generally only expect them to be unique within a task!)
-
-## Picking a Learner
-
-A learner encapsulates the fitting algorithm as well as any relevant hyperparameters, 
-and `{mlr3}` supports a whole lot of learners to choose from.
-We'll keep using `{kknn}` and `{rpart}` in the background for the classification task, 
-but we'll use `{mlr3}` on top of them for a consistent interface.
-So first, we have to find the learners we're looking for.
-
-There's a lot more [about learners in the mlr3 book](https://mlr3book.mlr-org.com/chapters/chapter2/data_and_basic_modeling.html#sec-learners), 
-but for now we're happy with the basics.
-
-```{r learners, eval=FALSE}
-# Lots of learners to choose from here:
-mlr_learners
-# Or as a large table:
-as.data.table(mlr_learners)
-
-# To show all classification learners (in *currently loaded* packages!)
-mlr_learners$keys(pattern = "classif")
-
-# There's also regression learner we don't need right now:
-mlr_learners$keys(pattern = "regr")
-
-# For the kknn OR rpart learners, we can use regex
-mlr_learners$keys(pattern = "knn|rpart")
-mlr_learners$keys(pattern = "classif\\.(kknn|rpart)")
-```
-
-Now that we've identified our learners, we can get it quickly via the `lrn()` helper function:
-
-```{r knn-learner}
-knn_learner <- lrn("classif.kknn")
-```
-
-```{r knn-learner-help, eval=FALSE}
-# What's this learner about?
-knn_learner$help()
-```
-
-```{r knn-learner-params}
-# What parameters does this learner have?
-knn_learner$param_set
-knn_learner$param_set$ids()
-```
-
-Setting parameters leaves the others as default:
-
-```{r knn-learner-configure}
-knn_learner$configure(k = 5)
-
-knn_learner$param_set
-```
-
-Identical methods to set multiple or a single hyperparam:
-
-```{r knn-learner-set}
-knn_learner$param_set$values <- list(k = 5)
-knn_learner$param_set$values$k <- 5
-```
-
-
-In practice, we usually set the parameters directly when we construct the learner object:
-
-```{r knn-learner-initialize-params}
-knn_learner <- lrn("classif.kknn", k = 7)
-knn_learner$param_set
-```
-
-We'll save the `{rpart}` learner for later, but all the methods are the same because they are all `Learner` objects.
-
-## Training and evaluating
-
-We can train the learner with default parameters once to see if it works as we expect it to.
-
-```{r knn-train-once}
-# Train learner on training data
-knn_learner$train(penguin_task, row_ids = penguin_split$train)
-
-# Look at stored model, which for knn is not very interesting
-knn_learner$model
-```
-
-And we can make predictions on the test data:
-
-```{r knn-predict-once}
-knn_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_split$test)
-knn_prediction
-```
-
-Our predictions are looking quite reasonable, mostly:
-
-```{r knn-confusion-matrix}
-# Confusion matrix we got via table() previously
-knn_prediction$confusion
-```
-
-To calculate the prediction accuracy, we don't have to do any math in small steps.
-`{mlr3}` comes with lots of measures (like accuracy) we can use, they're organized 
-in the `mlr_measures` object (just like `mlr_learners`). 
-
-We're using `"classif.acc"` here with the shorthand function `msr()`, and 
-score our predictions with this measure, using the `$score()` method.
-
-```{r knn-accuracy-once}
-# Available measures for classification tasks
-mlr_measures$keys(pattern = "classif")
-
-# Scores according to the selected measure
-knn_prediction$score(msr("classif.acc"))
-
-# The inverse: Classification error (1 - accuracy)
-knn_prediction$score(msr("classif.ce"))
-```
-
-As a bonus feature, `{mlr3}` also makes it easy for us to plot the decision boundaries for a two-predictor case, so we don't have to manually predict on a grid anymore.
-
-(You can ignore any warning messages from the plot here)
-
-```{r mlr3-plot-decision-boundaries}
-plot_learner_prediction(
-  learner = knn_learner, 
-  task = penguin_task
-)
-```
-
-## Your turn!
-
-Now that we've done the kNN fitting with `{mlr3}`, you can easily do the same thing with the `rpart`-learner!
-All you have to do is switch the learner objects and give it a more fitting name.
-
-
-# Useful links
-
-- [mlr3 cheatsheet with basic syntax](https://cheatsheets.mlr-org.com/mlr3.pdf)
-- [mlr3 book](https://mlr3book.mlr-org.com/) 

@@ -22,7 +22,8 @@ website:
       - section: "Day 1"
         contents:
           - 01-knn-trees.qmd
-          - 02-resampling-rf-boosting.qmd
+          - 02-mlr3.qmd
+          - 03-resampling-rf-boosting.qmd
       - section: "Day 2"
         contents:
           - 03-tuning-svm.qmd
@@ -67,3 +68,9 @@ format:
 execute: 
   freeze: auto  # re-render only when source changes
   cache: false
+
+knitr:
+  opts_chunk: 
+    collapse: false
+    comment: "#>" 
+    fig.align: "center"
