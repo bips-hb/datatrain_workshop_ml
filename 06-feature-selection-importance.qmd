@@ -16,7 +16,7 @@ spam_split <- partition(spam_task, ratio = 2/3)
 
 # # Penguin Task setup
 penguins <- na.omit(palmerpenguins::penguins)
-penguin_task <- TaskClassif$new(
+penguin_task <- as_task_classif(
   id = "penguins",
   backend = penguins,
   target = "species"
@@ -53,11 +53,11 @@ fselect_instance
 ```
 
 There are multiple feature selection methods available:
-- Random Search (`FSelectorRandomSearch`)
-- Exhaustive Search (`FSelectorExhaustiveSearch`)
-- Sequential Search (`FSelectorSequential`)
-- Recursive Feature Elimination (`FSelectorRFE`)
-- Design Points (`FSelectorDesignPoints`)
+
+- Random Search (`"random_search`): Randomly try combinations of features until our budget is exhausted
+- Exhaustive Search (`exhaustive_search`): Try all possible subsets of features. Can take a trillion years. Or 10 minutes
+- Sequential Search (`sequential`): Forwards- (default) or backwards-selection
+- Recursive Feature Elimination (`rfe`): Recursively eliminates features with low `$importance` score (if the `Learner` supports it!)
 
 ```{r mlr-fselectors}
 mlr_fselectors

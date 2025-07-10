@@ -257,7 +257,7 @@ Run the code below once to see what linear decision boundaries look like, then p
 -   Try picking any other two variables as features (`penguin_task$col_info`)
 
 ```{r penguin-task-2-predictors}
-penguin_task <- TaskClassif$new(
+penguin_task <- as_task_classif(
   id = "penguins", 
   backend = na.omit(palmerpenguins::penguins), 
   target = "species"

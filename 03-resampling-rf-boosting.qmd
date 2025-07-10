@@ -10,7 +10,6 @@ library(ggplot2)   # For plotting
 
 # Just telling mlr3 to be quiet unless something broke
 lgr::get_logger("mlr3")$set_threshold("error")
-lgr::get_logger("bbotk")$set_threshold("error")
 ```
 
 Goals of this part:
@@ -188,7 +187,7 @@ To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forw
 This is technically peck-and-find hyperparameter tuning which we'll do in a
 more convenient (and methodologically sound) way in the next part :)
 
-## Benchmarking
+# Benchmarking
 
 The next thing we'll try is to resample across multiple learners at once --- because doing resampling for each learner separately and comparing results is just too tedious.
 

@@ -7,8 +7,6 @@ editor_options:
 This is the workshop component to the [Machine Learning workshop in the Data Train
 2025 series](https://www.bremen-research.de/data-train/courses/course-details?event_id=114).
 
-Repository contains [Quarto](https://quarto.org/) `.qmd` notebooks for hands-on ML demos & exercises.  
-Example code for exercises will be made available after the exercises.
 
 # Workshop Quick Start Instructions:
 
@@ -38,9 +36,6 @@ autoplot(rr, type = "prc")
 If `renv` gives you trouble, see below for manual R package installation instructions.
 
 # Workshop Details
-
-- July 14+15, 2023, 9:00 AM - 5:00 PM
-- UNICOM 2, Small Seminar Room 2.207, Mary-Somerville-Str. 2, 28359 Bremen
 
 - 4 * 3-hour blocks, each ~90min theory, short break, ~90min hands-on
 - Hands-on exercises on local devices, **bring a laptop**!
