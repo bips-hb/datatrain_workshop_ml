@@ -8,7 +8,7 @@ rpart_learner <- lrn("classif.rpart")
 rpart_learner$param_set$ids()
 
 # Setting parameters (omit to use the defaults)
-rpart_learner$param_set$values <- list(maxdepth = 15)
+rpart_learner$param_set$values$maxdepth <- 20
 
 # Train
 rpart_learner$train(penguin_task, row_ids = penguin_split$train)

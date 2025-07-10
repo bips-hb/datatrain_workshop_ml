@@ -1,0 +1,46 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+
+```{r example-svm-searchspace}
+search_space_svm = ps(
+  cost = p_dbl(-1, 1, trafo = function(x) 10^x),
+  kernel = p_fct(c("linear", "polynomial", "radial", "sigmoid")),
+  degree = p_int(1, 7, depends = kernel == "polynomial"),
+  gamma = p_dbl(lower = 0.01, upper = 0.2, depends = kernel %in% c("polynomial", "radial", "sigmoid"))
+)
+
+grid <- generate_design_grid(search_space_svm, resolution = 6)
+
+# Look at grid with transformed cost param (manual way, there's probably a better one)
+grid$data$cost_trafo <- 10^grid$data$cost
+grid$data
+```
+
+```{r example-svm-tuning}
+set.seed(313)
+
+tuned_svm = auto_tuner(
+  learner = svm_learner,
+  resampling = rsmp("holdout"),
+  measure = msr("classif.auc"),
+  search_space = search_space_svm,
+  terminator = trm("evals", n_evals = 40),
+  tuner = tnr("random_search")
+)
+
+# Tune!
+tuned_svm$train(spam_task, row_ids = spam_split$train)
+
+# Evaluate!
+tuned_svm$predict(spam_task, row_ids = spam_split$test)$score(msr("classif.auc"))
+
+# Hyperparam winner:
+tuned_svm$tuning_result
+
+# Remember that we transformed `cost`, here's the best value on the original scale
+tuned_svm$tuning_result$x_domain
+
+autoplot(tuned_svm$tuning_instance)
+```
+
+:::

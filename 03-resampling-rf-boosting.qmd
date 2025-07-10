@@ -55,6 +55,7 @@ Think about this as a new analysis problem, so what do we need to know here?
 
 (If you'd like a simpler overview, you can read the help with `spam_task$help()`)
 
+
 # Resampling
 
 To continue with our kNN and tree experiments, we'll now enter resampling territory.  
@@ -187,6 +188,9 @@ To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forw
 This is technically peck-and-find hyperparameter tuning which we'll do in a
 more convenient (and methodologically sound) way in the next part :)
 
+{{< include solutions/03-1-rr-rpart.qmd >}}
+
+
 # Benchmarking
 
 The next thing we'll try is to resample across multiple learners at once --- because doing resampling for each learner separately and comparing results is just too tedious.
@@ -263,6 +267,8 @@ to the logistic regression learner `"classif.log_reg"` without any hyperparamete
 Do our fancy ML methods beat the good old GLM?
 Use the best hyperparameter settings for kNN and `rpart` you have found so far
 
+{{< include solutions/03-2-bm-logreg.qmd >}}
+
 # Random Forests & Boosting
 
 Armed with our new model comparison skills, we can add Random Forests and
@@ -288,3 +294,5 @@ Maybe switch to holdout resampling to speed the process up a little and make
 sure to set `nrounds` to something greater than 1 for `xgboost`.
 
 What about now? Can we beat logistic regression?
+
+{{< include solutions/03-3-bm-rf-xgb-logreg.qmd >}}
