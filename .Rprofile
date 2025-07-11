@@ -1,8 +1,4 @@
-if (as.logical(Sys.getenv("IN_DOCKER", unset = "FALSE"))) {
-  message("Assuming you're running in a Docker container, so I'm not loading renv!")
-} else {
-  # source("renv/activate.R")
-}
+source("renv/activate.R")
 
 # Placeholder library-calls are only here such that renv will
 # pick these packages up as dependencies automatically, as they are not directly loaded
@@ -17,8 +13,6 @@ if (FALSE) {
   library(patchwork)
   library(e1071)
   library(apcluster)
-  library(DiceKriging) # needed for mbo
-  library(remotes)
   library(usethis)
   library(styler)
   library(here)
