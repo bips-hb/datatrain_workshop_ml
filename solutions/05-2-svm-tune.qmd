@@ -20,7 +20,7 @@ grid$data
 set.seed(313)
 
 tuned_svm = auto_tuner(
-  learner = svm_learner,
+  learner = lrn("classif.svm", predict_type = "prob"),
   resampling = rsmp("holdout"),
   measure = msr("classif.auc"),
   search_space = search_space_svm,
