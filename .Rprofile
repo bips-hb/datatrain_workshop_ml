@@ -1,3 +1,5 @@
+options("renv.config.pak.enabled" = TRUE)
+
 source("renv/activate.R")
 
 # Placeholder library-calls are only here such that renv will

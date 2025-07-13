@@ -72,7 +72,7 @@ If `renv` gives you trouble, see below for manual R package installation instruc
 
 1. Install R for your platform: <https://cran.r-project.org/>
   - Installation instructions depend in whether you're using Windows, Linux (whichever flavor), or macOS.
-  - We assume R version 4.3.0 but all recent versions should work fine.
+  - We assumethe most recent R version, but all recent versions should work fine.
 2. If you have neither [Positron](https://positron.posit.co/download.html) nor [RStudio](https://posit.co/download/rstudio-desktop/) installed, install wither (Positron probably preferred)
 3. Create a local copy of this workshop repository (`https://github.com/bips-hb/datatrain_workshop_ml.git`), 
     using any one of these options (use whichever you are most familiar with):
