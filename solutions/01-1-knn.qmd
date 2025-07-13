@@ -1,0 +1,54 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+Already perfect accuracy with multiple predictors, not so interesting
+
+```{r example-knn-penguins}
+knn_penguins <- kknn(
+  formula = species ~ flipper_length_mm + body_mass_g + bill_length_mm + bill_depth_mm,
+  k = 5,
+  train = penguins_train,
+  test = penguins_test
+)
+
+penguins_test$knn_predicted_species <- fitted(knn_penguins)
+mean(penguins_test$species == penguins_test$knn_predicted_species)
+```
+
+The "try a bunch of `k`"-shortcut function (using less features to be moderately interesting):
+
+```{r example-knn-penguins-looptune}
+knn_try_k <- function(k) {
+  knn_penguins <- kknn::kknn(
+    formula = species ~ flipper_length_mm + body_mass_g + bill_depth_mm,
+    k = k,
+    train = penguins_train,
+    test = penguins_test
+  )
+
+  penguins_test$knn_predicted_species <- fitted(knn_penguins)
+  acc <- mean(penguins_test$species == penguins_test$knn_predicted_species)
+  
+  data.frame(k = k, accuracy = acc)
+}
+
+# Call function ^ with k = 1 through 10, collect result as data.frame
+k_result <- do.call(rbind, lapply(1:10, knn_try_k))
+
+ggplot(k_result, aes(x = k, y = accuracy)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = 1:10) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "kNN test accuracy on penguin dataset",
+    x = "k", y = "Test accuracy"
+  ) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank())
+```
+
+This is a cumbersome way to find the "best" `k` though --- we'll learn about the better ways later!
+
+(We basically did a *grid search* across `k` here)
+
+:::

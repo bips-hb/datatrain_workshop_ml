@@ -1,0 +1,27 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+```{r example-rpart-learner}
+# Picking the learner
+rpart_learner <- lrn("classif.rpart")
+
+# What parameters does this learner have?
+rpart_learner$param_set$ids()
+
+# Setting parameters (omit to use the defaults)
+rpart_learner$param_set$values$maxdepth <- 20
+
+# Train
+rpart_learner$train(penguin_task, row_ids = penguin_split$train)
+
+# Predict
+rpart_prediction <- rpart_learner$predict(penguin_task, row_ids = penguin_split$test)
+
+rpart_prediction$confusion
+
+# Accuracy
+rpart_prediction$score(msr("classif.acc"))
+
+plot_learner_prediction(rpart_learner, penguin_task)
+```
+
+:::

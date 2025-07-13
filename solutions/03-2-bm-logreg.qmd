@@ -1,0 +1,25 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+
+```{r example-bm-setup-logreg}
+learners <- list(
+  lrn("classif.kknn", id = "knn", predict_type = "prob", k = 25),
+  lrn("classif.rpart", id = "tree", predict_type = "prob", maxdepth = 11, cp = 0.0036),
+  lrn("classif.log_reg", id = "LogReg", predict_type = "prob")
+) 
+
+design <- benchmark_grid(
+  tasks = spam_task,       # Still the same task
+  learners = learners,     # The new list of learners
+  resamplings = rsmp("cv", folds = 3)  # Same resampling strategy as before
+) 
+
+# Run the benchmark and save the results
+bmr <- benchmark(design)
+
+autoplot(bmr, type = "roc")
+bmr$aggregate(msr("classif.auc"))[, .(learner_id, classif.auc)]
+```
+
+
+:::

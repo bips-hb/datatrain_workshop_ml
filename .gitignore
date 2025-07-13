@@ -8,13 +8,18 @@
 .config
 .local
 
-
 # Notebook previews & renders
 *.nb.html
 0*.html
 *_files
 *_cache
 README.html
+/.quarto/
+_site/
+site_libs/
 
 # Temporary stuff
 attic
+scratch.R
+
+*.rmarkdown

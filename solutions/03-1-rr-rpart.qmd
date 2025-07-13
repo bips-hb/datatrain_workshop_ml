@@ -1,0 +1,38 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+The idea would be to re-run this code chunk with different hyperparameters:
+
+```{r example-rr-rpart}
+rr <- resample(
+  task = spam_task,
+  # Important: set predict_type to "prob", set other parameters as desired.
+  learner = lrn(
+    "classif.rpart",
+    predict_type = "prob",
+    maxdepth = 15,
+    cp = 0.003
+  ),
+  resampling = rsmp("cv", folds = 3)
+)
+
+rr$score(msr("classif.acc"))[, .(classif.acc)]
+```
+
+ROC curve based on resampling iterations:
+
+```{r example-rr-rpart-roc}
+autoplot(rr, type = "roc")
+rr$aggregate(msr("classif.auc"))
+```
+
+Alternatives to ROC:
+Precision-Recall curve (prc) and a threshold-error curve --- all three can be very useful depending on your specific classification problem!
+
+```{r example-knn-roc}
+autoplot(rr, type = "prc")
+
+# Threshold plot doesn't work on resampling result, but on prediction objects!
+autoplot(rr$prediction(), type = "threshold")
+```
+
+:::

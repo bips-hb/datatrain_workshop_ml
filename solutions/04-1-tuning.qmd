@@ -1,0 +1,138 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+
+The following example code uses the `holdout` resampling just to keep it fast --- when you have the time, using cross-validation (`"cv"`) will give you more reliable results.
+
+
+We also use 6 threads for parallelization here, but you are free to adjust this according to your available hardware.
+
+```{r setup-parallelization-tuning}
+future::plan("multisession", workers = 6)
+```
+
+The tuning budget used here is just 50 evaluations, which as all you likely want to bump up a little if you have the time.
+
+::: {.panel-tabset}
+
+
+#### `rpart` Tuning
+
+```{r example-tuned-rpart}
+# Tuning setup
+tuned_rpart = auto_tuner(
+  learner = lrn("classif.rpart", predict_type = "prob"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.auc"),
+  search_space = ps(
+    cp = p_dbl(lower = 0.001, upper = 0.03),
+    maxdepth = p_int(lower = 1, upper = 30)
+  ),
+  terminator = trm("evals", n_evals = 50),
+  tuner = tnr("random_search")
+)
+
+# Tune!
+tuned_rpart$train(spam_task, row_ids = spam_split$train)
+
+# Evaluate!
+tuned_rpart$predict(spam_task, row_ids = spam_split$test)$score(msr(
+  "classif.auc"
+))
+
+# Check parameter results
+autoplot(tuned_rpart$tuning_instance)
+```
+
+#### `xgboost` Tuning
+
+```{r example-tuned-xgboost}
+# Tuning setup
+tuned_xgboost = auto_tuner(
+  learner = lrn("classif.xgboost", predict_type = "prob"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.auc"),
+  search_space = ps(
+    eta = p_dbl(lower = 0.001, upper = 1),
+    nrounds = p_int(lower = 1, upper = 500)
+  ),
+  terminator = trm("evals", n_evals = 50),
+  tuner = tnr("random_search")
+)
+
+# Tune!
+tuned_xgboost$train(spam_task, row_ids = spam_split$train)
+
+autoplot(tuned_xgboost$tuning_instance, cols_x = c("nrounds", "eta"))
+
+# Evaluate!
+tuned_xgboost$predict(spam_task, row_ids = spam_split$test)$score(msr(
+  "classif.auc"
+))
+```
+
+#### `ranger` Tuning
+
+```{r example-tuned-ranger}
+# Tuning setup
+tuned_ranger = auto_tuner(
+  learner = lrn("classif.ranger", predict_type = "prob"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.auc"),
+  search_space = ps(
+    mtry.ratio = p_dbl(lower = 0, upper = 1),
+    max.depth = p_int(lower = 1, upper = 30)
+  ),
+  terminator = trm("evals", n_evals = 50),
+  tuner = tnr("random_search")
+)
+
+# Tune!
+tuned_ranger$train(spam_task, row_ids = spam_split$train)
+
+# Evaluate!
+tuned_ranger$predict(spam_task, row_ids = spam_split$test)$score(msr(
+  "classif.auc"
+))
+
+# Check parameter results
+autoplot(tuned_ranger$tuning_instance)
+```
+
+:::
+
+## Benchmarking all the things (with tuning)
+
+Above we tuned all the learners individually, but often we want to tune all of them at the same time to determine which performs best overall. For that, we use `benchmark_grid()` again (like in the second notebook), but now we just give it the `AutoTuner`-style learners instead of the "normal" learners.
+
+Since we have already set up the tuning-ready learners (`tuned_<method>` objects) above we just recycle them here, but we first reset all of them since we already tuned them and we want to start from scratch.
+
+```{r example-tuning-benchmark}
+tuned_knn$reset()
+tuned_rpart$reset()
+tuned_ranger$reset()
+tuned_xgboost$reset()
+
+tuning_learners <- list(
+  tuned_knn,
+  tuned_rpart,
+  tuned_ranger,
+  tuned_xgboost
+)
+
+tuning_benchmark_design <- benchmark_grid(
+  tasks = spam_task, # Still the same task. Optional: Use list() of multiple tasks for large benchmark study
+  learners = tuning_learners, # List of AutoTune-learners
+  resamplings = rsmp("holdout") # Outer resampling strategy, holdout to keep it simpel
+)
+
+# Run the benchmark and save the results
+future::plan("multisession", workers = 4)
+bmr <- benchmark(tuning_benchmark_design)
+
+# Who won?
+bmr$aggregate(msr("classif.auc"))
+```
+
+For statistical tests on benchmark results, refer to the `mlr3benchmark` package (not included with `mlr3verse`).
+
+:::

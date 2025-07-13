@@ -1,0 +1,27 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+This is just for demonstration --- we'd need to use tuned hyperparameters for the SVM for a proper comparison!
+
+```{r importance-pfi-example}
+penguin_task <- as_task_classif(
+  na.omit(palmerpenguins::penguins),
+  target = "species"
+)
+
+lrn_svm <- po("encode") %>>%
+  po("learner", lrn("classif.svm")) |>
+  as_learner()
+
+pfi_svm = flt("permutation", learner = lrn_svm)
+pfi_svm$calculate(penguin_task)
+pfi_svm
+
+
+pfi_ranger = flt("importance", learner = lrn("classif.ranger", importance = "permutation"))
+pfi_ranger$calculate(penguin_task)
+pfi_ranger
+```
+
+
+
+:::

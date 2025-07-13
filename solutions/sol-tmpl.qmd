@@ -1,0 +1,4 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+
+:::

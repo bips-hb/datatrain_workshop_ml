@@ -1,0 +1,145 @@
+---
+title: "Feature Importance"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+library(mlr3verse) # All the mlr3 things
+library(effectplots) # For effects plotting
+
+# Penguin Task setup
+penguins <- na.omit(palmerpenguins::penguins)
+penguin_task <- as_task_classif(
+  penguins,
+  target = "species"
+)
+
+lgr::get_logger("mlr3")$set_threshold("error")
+```
+
+Goals of this part:
+
+1. Introduce (some) variable importance measures
+2. Compare measures for different settings
+
+# Feature Importance
+
+Feature importance falls under the umbrella of interpretability, which is a huge topic, and there's a lot to explore --- we'll cover some basics and if you're interested, you can always find more at
+
+- The [IML lecture](https://slds-lmu.github.io/iml/) (free slides, videos)
+- The [Interpretable Machine Learning book](https://christophm.github.io/interpretable-ml-book)
+- The [`{mlr3}` book chapter](https://mlr3book.mlr-org.com/interpretation.html)
+
+Before we get started with the general methods, it should be noted that some learners bring their own method-specific importance measures.
+Random Forests (via `{ranger}`) for example has some built-in importance
+metrics, like the corrected Gini impurity:
+
+```{r ranger-importance}
+lrn_ranger <- lrn("classif.ranger", importance = "impurity_corrected")
+lrn_ranger$train(penguin_task)
+
+sort(lrn_ranger$importance(), decreasing = TRUE)
+```
+
+Which shows us that for our penguins, `bill_length_mm` is probably the most relevant feature, whereas `body_mass_g` does not turn out to be as important with regard to species classification.
+THe `year` doesn't seem to be useful for prediction at all --- which is perfectly plausible!
+
+
+## Feature Importance with `{mlr3filters}`
+
+The `mlr3filters` package provides some _global_, _marginal_ importance methods, meaning they consider the relationship between the target and one feature at a time. 
+
+```{r mlr-filters}
+as.data.table(mlr_filters)[1:20, .(key, label)]
+```
+
+One "trick" of the filters package is that it can be used to access the `$importance()` that some learners provide on their own, and `ranger` provides the impurtiy-importance and permutation feature importance (PFI). 
+We can access either with `mlr3filters` directly, but note it retrains the learner:
+
+```{r filter-improtance}
+lrn_ranger <- lrn("classif.ranger", importance = "impurity_corrected")
+filter_importance = flt("importance", learner = lrn_ranger)
+filter_importance$calculate(penguin_task)
+
+filter_importance
+```
+
+`mlr3filters` also provides a general implementation for PFI that retrains the learner repeatedly with one feature randomly shuffled.
+
+
+```{r filter-permutation}
+lrn_ranger <- lrn("classif.ranger")
+filter_permutation = flt("permutation", learner = lrn_ranger)
+filter_permutation$calculate(penguin_task)
+
+filter_permutation
+```
+
+But that also means we can use PFI for _any other_ learner, such the SVM or XGBoost!
+
+## Your Turn!
+
+- Compute PFI with `ranger` using it's built-in `$importance()`, using `mlr3filters`
+- Compute PFI for an SVM using the approproate `"permutation"` filter
+- Comapre the two methods. Do they agree?
+
+```{r pfi-your-turn}
+# Your code
+```
+
+
+::: {.callout-tip title="mlr3 preprocessing pipelines"}
+
+Note that we need to use the encoding `PipeOp` to train the SVM of these on the penguins task, as they can't handle categorical features automatically:
+
+```r
+lrn_svm <- po("encode") %>>%
+  po("learner", lrn("classif.svm", kernel = "radial", <any other parameter>)) |>
+  as_learner()
+```
+
+:::
+
+
+{{< include solutions/07-1-pfi.qmd >}}
+
+
+## Feature Effects with `{effectplots}`
+
+Getting a number for "is this feature important" is nice, but often we want a better picture of the feature's effect. Think of linear models and how we can interpret $\beta_j$ as the linear relationship between $X_j$ and $Y$ --- often things aren't linear though.
+
+One approach to visualize feature effects is via *Partial Dependence Plots* or preferably via
+*Accumulated Local Effect* plots (ALE), which we get from the `{effectplots}` thankfully offers.
+
+Let's recycle our `ranger` learner and plot some effects, using the partial dependence plot (PDP) as an example:
+
+```{r feature-effects-ale}
+lrn_ranger_cl <- lrn("classif.ranger", predict_type = "prob")
+lrn_ranger_cl$train(penguin_task)
+
+pd_penguins <- partial_dependence(
+  object = lrn_ranger_cl$model,
+  v = penguin_task$feature_names,
+  data = penguin_task$data(),
+  which_pred = "Adelie"
+)
+
+plot(pd_penguins)
+
+```
+
+::: {.callout-note}
+We're doing _multiclass classification_ here, so while our learner predicts a probability for one of each of the three target classes (Adelie, Gentoo, Chinstrap), we need to pick one for the visualization!
+:::
+
+## Your turn! (Possibly for another time)
+
+- Use the `bike_share` regression task to calculate the PDP
+- Stick with the `ranger` learner as `{effectplots}` supports it directly.
+
+```{r pdp-your-turn}
+# your code
+```
+
+{{< include solutions/07-2-pdp.qmd >}}

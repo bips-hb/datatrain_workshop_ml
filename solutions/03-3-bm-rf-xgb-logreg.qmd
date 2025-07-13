@@ -1,0 +1,24 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+```{r example-benchmark-rf-boosting-logreg}
+learners <- list(
+  lrn("classif.ranger", id = "forest", predict_type = "prob"),
+  lrn("classif.xgboost", id = "xgboost", predict_type = "prob", nrounds = 5),
+  lrn("classif.log_reg", id = "LogReg", predict_type = "prob")
+) 
+
+design <- benchmark_grid(
+  tasks = spam_task,       # Still the same task
+  learners = learners,     # The new list of learners
+  resamplings = rsmp("cv", folds = 3)
+) 
+
+# Run the benchmark and save the results
+bmr <- benchmark(design)
+
+autoplot(bmr, type = "roc")
+bmr$aggregate(msr("classif.auc"))[, .(learner_id, classif.auc)]
+```
+
+
+:::

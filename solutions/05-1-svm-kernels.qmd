@@ -1,0 +1,25 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+Directly comparing multiple kernels with default parameters:
+
+```{r svm-kernel-boundaries}
+penguin_task <- as_task_classif(
+  na.omit(palmerpenguins::penguins),
+  target = "species"
+)
+penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
+
+# Create a list of plots for each kernel
+plots <- lapply(c("linear", "polynomial", "radial", "sigmoid"), \(kernel) {
+  plot_learner_prediction(
+    learner = lrn("classif.svm", kernel = kernel),
+    task = penguin_task
+  ) +
+    labs(subtitle = paste("SVM with ", kernel, "kernel"))
+})
+
+# Arrange the plots with the patchwork package
+patchwork::wrap_plots(plots, guides = "collect")
+```
+
+:::

@@ -1,0 +1,314 @@
+---
+title: 'kNN & Trees'
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup}
+#| message: false
+library(ggplot2) # For plotting
+library(kknn) # For kNN models
+library(rpart) # For decision trees
+library(palmerpenguins) # For penguins
+```
+
+Goals of this part:
+
+1.  Taking a look at our example dataset
+2.  Introduce kNN via `{kknn}` and decision trees via `{rpart}`
+3.  Train some models, look at some results
+4.  Introduce `{mlr3}` and do 3. again, but nicer
+
+# The dataset: Pengiuns!
+
+See [their website](https://allisonhorst.github.io/palmerpenguins/) for some more information if you're interested.  
+For now it's enough to know that we have a bunch of data about 3 species of penguins.
+
+![](img/lter_penguins.png)
+
+```{r penguins}
+# remove missing values for simplicity in this example
+# (handling missing data is a can of worms for another time :)
+penguins <- na.omit(penguins)
+
+str(penguins)
+```
+
+![](img/culmen_depth.png)
+
+We can take a look at the different species across two numeric features, starting with flipper length and body mass (for reasons that may become clear later):
+
+```{r penguins-plot}
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, fill = species)) +
+  # ggforce::geom_mark_ellipse(aes(fill = species, label = species)) +
+  geom_point(
+    shape = 21,
+    stroke = 1 / 4,
+    size = 3,
+    alpha = 2 / 3,
+    key_glyph = "rect"
+  ) +
+  labs(
+    title = "Palmer Penguins",
+    subtitle = "Body mass and flipper length by species",
+    x = "Flipper Length [mm]",
+    y = "Body Mass [g]",
+    color = "Species",
+    fill = "Species"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "bottom",
+    plot.title.position = "plot"
+  )
+```
+
+::: {.callout-note}
+There are two `penguins` datasets:
+
+- `penguins` from the `palmerpenguins` R package, which has been around for a while
+- `penguins`, as included in R's `datasets` package as of recently, with slightly different variable names!
+
+For backwards compatbility, we just assume the `palmerpenguins` version.  
+In the future, we will probably [convert these materials](https://cran.r-project.org/web/packages/basepenguins/vignettes/basepenguins.html)
+
+:::
+
+We split our penguin data in a roughly 2/3 to 1/3 training- and test dataset for our first experiments:
+
+```{r penguin-split-manual}
+penguin_N <- nrow(penguins) # Our total sample size
+
+# We draw 2/3 of all indices randomly with a sampling proportion of 2/3 with a fixed seed
+set.seed(234)
+train_ids <- sample(penguin_N, replace = FALSE, size = penguin_N * 2 / 3)
+# Our test set are the indices not in the training set
+test_ids <- setdiff(1:penguin_N, train_ids)
+
+# Assemble our train/test set using the indices we just randomized
+penguins_train <- penguins[train_ids, ]
+penguins_test <- penguins[test_ids, ]
+```
+
+# kNN and trees, step by step
+
+Now that we have some data, we can start fitting models, just to see how it goes!
+Given the plot from earlier, we may have a rough idea that the flipper length and body mass measurements are already giving us a somewhat decent picture about the species.
+
+## kNN
+
+Let's start with the nearest-neighbor approach via the `{kknn}` package.
+It takes a `formula` argument like you may know from `lm()` and other common modeling functions in R, where the format is `predict_this ~ on_this + and_that + ...`.
+
+```{r kknn-fit}
+knn_penguins <- kknn(
+  formula = species ~ flipper_length_mm + body_mass_g,
+  k = 3, # Hyperparameter: How many neighbors to consider
+  train = penguins_train, # Training data used to make predictions
+  test = penguins_test # Data to make predictions on
+)
+
+# Peek at the predictions, one row per observation in test data
+head(knn_penguins$prob)
+```
+
+To get an idea of how well our predictions fit, we add them to our original test data and compare observed (true) and predicted species:
+
+```{r knn-prediction-check}
+# Add predictions to the test dataset
+penguins_test$knn_predicted_species <- fitted(knn_penguins)
+
+# Rows: True species, columns: predicted species
+table(
+  penguins_test$species,
+  penguins_test$knn_predicted_species,
+  dnn = c("Observed", "Predicted")
+)
+```
+
+Proportion of correct predictions ("accuracy")...
+
+```{r knn-prediction-check-acc}
+mean(penguins_test$species == penguins_test$knn_predicted_species)
+```
+
+...and **incorrect** predictions (classification error):
+
+```{r knn-prediction-check-errs}
+mean(penguins_test$species != penguins_test$knn_predicted_species)
+```
+
+
+::: {.callout-note title="R shortcut"} 
+Logical comparison gives logical vector of `TRUE`/`FALSE`, which can be used like 1 / 0 for mathematical operations, so we can sum up cases where `observed == predicted` (=> correct classifications) and divide by N for the proportion, i.e. calculate the proportion of correct predictions, the accuracy.
+:::
+
+## Your turn!
+
+Above you have working code for an acceptable but *not great* kNN model.
+Can you make it even better?
+Can you change something to make it *worse*?
+
+Some things to try:
+
+1.  Try different predictors, maybe leave some out
+    - Which seem to work best?
+
+2.  Try using all available predictors (`formula = species ~ .`)
+    - Would you recommend doing that? Does it work well?
+
+3.  Try different `k` values.
+    Is higher == better? (You can stick to odd numbers)
+    - After you've tried a couple `k`'s, does it get cumbersome yet?
+
+
+
+```{r knn-your-turn}
+# your code
+```
+
+
+{{< include solutions/01-1-knn.qmd >}}
+
+
+## Growing a decision tree
+
+Now that we've played around with kNN a little, let's grow some trees!
+We'll use the `{rpart}` (**R**ecursive **Part**itioning) package and start with the same model specification as before and use the default parameters.
+
+```{r tree-fit}
+rpart_penguins <- rpart(
+  formula = species ~ flipper_length_mm + body_mass_g,
+  data = penguins_train, # Train data
+  method = "class", # Grow a classification tree (don't change this for now)
+)
+```
+
+The nice thing about a single tree is that you can just look at it and know exactly what it did:
+
+```{r tree-model}
+rpart_penguins
+```
+
+Looking at the tree as a... tree.
+
+```{r tree-model-plot-base}
+plot(rpart_penguins)
+text(rpart_penguins)
+```
+
+Much nicer to use the `rpart.plot` package though
+
+```{r tree-model-plot-color}
+library(rpart.plot)
+rpart.plot(rpart_penguins)
+```
+
+If we want to know how accurate we are with our model we need to make predictions on our test data manually:
+
+```{r tree-predict}
+rpart_predictions <- predict(
+  rpart_penguins, # The model we just fit
+  newdata = penguins_test, # New data to predict species on
+  type = "class" # We want class predictions (the species), not probabilities
+)
+
+penguins_test$rpart_predicted_species <- rpart_predictions
+
+# Same procedure as with kNN before
+table(penguins_test$species, penguins_test$rpart_predicted_species)
+
+# And our accuracy score
+mean(penguins_test$species == penguins_test$rpart_predicted_species)
+```
+
+## Your turn!
+
+We haven't picked any hyperparameter settings for our tree yet, maybe we should try?
+
+1.  What hyperparameters does `rpart()` offer?
+    Do you recognize some from the lecture?
+    - You can check via `?rpart.control`
+    - When in doubt check `minsplit`, `maxdepth` and `cp`
+
+2.  Try out trees with different parameters
+    - Would you prefer simple or complex trees?
+    - How far can you improve the tree's accuracy?
+
+So, what seems to work better here?  
+kNN or trees?
+
+
+
+```{r rpart-your-turn}
+# your code
+```
+
+{{< include solutions/01-1-rpart.qmd >}}
+
+## Plotting decision boundaries (for 2 predictors)
+
+This is a rather cumbersome manual approach --- there's a nicer way we'll see later, but we'll do it the manual way at least once so you know how it works:
+
+```{r decision-boundary-plot}
+# Decision tree to plot the boundaries of
+rpart_penguins <- rpart(
+  formula = species ~ flipper_length_mm + body_mass_g,
+  data = penguins_train, # Train data
+  method = "class", # Grow a classification tree (don't change this)
+  cp = 0.005, # Default 0.01
+  minsplit = 20, # Default 20
+  minbucket = 3, # Default is minsplit/3
+  maxdepth = 30 # Default 30 (and upper limit!)
+)
+
+# Ranges of X and Y variable on plot
+flipper_range <- range(penguins$flipper_length_mm)
+mass_range <- range(penguins$body_mass_g)
+
+# A grid of values within these boundaries, 100 points per axis
+pred_grid <- expand.grid(
+  flipper_length_mm = seq(flipper_range[1], flipper_range[2], length.out = 100),
+  body_mass_g = seq(mass_range[1], mass_range[2], length.out = 100)
+)
+
+# Predict with tree for every single point
+pred_grid$rpart_prediction <- predict(
+  rpart_penguins,
+  newdata = pred_grid,
+  type = "class"
+)
+
+# Plot all predictions, colored by species
+ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_tile(
+    aes(color = rpart_prediction, fill = rpart_prediction),
+    linewidth = 1,
+    show.legend = FALSE
+  ) +
+  geom_point(
+    data = penguins_test,
+    aes(fill = species),
+    shape = 21,
+    color = "black",
+    size = 2,
+    key_glyph = "rect"
+  ) +
+  labs(
+    title = "Palmer Penguins: Decision Boundaries",
+    subtitle = paste(
+      "Species as predicted by decision tree",
+      "Point color is the true species",
+      sep = "\n"
+    ),
+    x = "Flipper Length [mm]",
+    y = "Body Mass [g]",
+    fill = "Species"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "top",
+    plot.title.position = "plot",
+    panel.grid = element_blank()
+  )
+```
