@@ -2116,7 +2116,7 @@
     },
     "httr2": {
       "Package": "httr2",
-      "Version": "1.1.2",
+      "Version": "1.2.0",
       "Source": "Repository",
       "Title": "Perform HTTP Requests and Process the Responses",
       "Authors@R": "c( person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = c(\"aut\", \"cre\")), person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\")), person(\"Maximilian\", \"Girlich\", role = \"ctb\") )",
@@ -2125,11 +2125,11 @@
       "URL": "https://httr2.r-lib.org, https://github.com/r-lib/httr2",
       "BugReports": "https://github.com/r-lib/httr2/issues",
       "Depends": [
-        "R (>= 4.0)"
+        "R (>= 4.1)"
       ],
       "Imports": [
         "cli (>= 3.0.0)",
-        "curl (>= 6.2.1)",
+        "curl (>= 6.4.0)",
         "glue",
         "lifecycle",
         "magrittr",
@@ -2157,14 +2157,14 @@
         "rmarkdown",
         "testthat (>= 3.1.8)",
         "tibble",
-        "webfakes",
+        "webfakes (>= 1.4.0)",
         "xml2"
       ],
       "VignetteBuilder": "knitr",
       "Config/Needs/website": "tidyverse/tidytemplate",
       "Config/testthat/edition": "3",
       "Config/testthat/parallel": "true",
-      "Config/testthat/start-first": "multi-req, resp-stream, req-perform",
+      "Config/testthat/start-first": "resp-stream, req-perform",
       "Encoding": "UTF-8",
       "RoxygenNote": "7.3.2",
       "NeedsCompilation": "no",
@@ -3084,7 +3084,7 @@
     },
     "mlr3hyperband": {
       "Package": "mlr3hyperband",
-      "Version": "0.6.0",
+      "Version": "1.0.0",
       "Source": "Repository",
       "Title": "Hyperband for 'mlr3'",
       "Authors@R": "c( person(\"Marc\", \"Becker\", , \"marcbecker@posteo.de\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-8115-0400\")), person(\"Sebastian\", \"Gruber\", , \"gruber_sebastian@t-online.de\", role = \"aut\", comment = c(ORCID = \"0000-0002-8544-3470\")), person(\"Jakob\", \"Richter\", , \"jakob1richter@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0003-4481-5554\")), person(\"Julia\", \"Moosbauer\", , \"ju.moosbauer@googlemail.com\", role = \"aut\", comment = c(ORCID = \"0000-0002-0000-9297\")), person(\"Bernd\", \"Bischl\", , \"bernd_bischl@gmx.net\", role = \"aut\", comment = c(ORCID = \"0000-0001-6002-6980\")) )",
@@ -3093,34 +3093,38 @@
       "URL": "https://mlr3hyperband.mlr-org.com, https://github.com/mlr-org/mlr3hyperband",
       "BugReports": "https://github.com/mlr-org/mlr3hyperband/issues",
       "Depends": [
-        "mlr3tuning (>= 1.0.0)",
+        "mlr3tuning (>= 1.4.0)",
         "R (>= 3.1.0)"
       ],
       "Imports": [
-        "bbotk (>= 1.0.0)",
+        "bbotk (>= 1.6.0)",
         "checkmate (>= 1.9.4)",
         "data.table",
         "lgr",
         "mlr3 (>= 0.13.1)",
         "mlr3misc (>= 0.10.0)",
         "paradox (>= 0.9.0)",
-        "R6"
+        "R6",
+        "uuid"
       ],
       "Suggests": [
         "emoa",
+        "mirai",
         "mlr3learners (>= 0.5.2)",
         "mlr3pipelines",
+        "redux",
         "rpart",
+        "rush (>= 0.2.0)",
         "testthat (>= 3.0.0)",
         "xgboost"
       ],
       "Config/testthat/edition": "3",
-      "Config/testthat/parallel": "true",
+      "Config/testthat/parallel": "no",
       "Encoding": "UTF-8",
       "NeedsCompilation": "no",
-      "RoxygenNote": "7.3.1",
-      "Collate": "'aaa.R' 'OptimizerBatchSuccessiveHalving.R' 'OptimizerBatchHyperband.R' 'TunerBatchHyperband.R' 'TunerBatchSuccessiveHalving.R' 'bibentries.R' 'helper.R' 'zzz.R'",
-      "Author": "Marc Becker [aut, cre] (<https://orcid.org/0000-0002-8115-0400>), Sebastian Gruber [aut] (<https://orcid.org/0000-0002-8544-3470>), Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>), Julia Moosbauer [aut] (<https://orcid.org/0000-0002-0000-9297>), Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>)",
+      "RoxygenNote": "7.3.2",
+      "Collate": "'OptimizerAsyncSuccessiveHalving.R' 'aaa.R' 'OptimizerBatchSuccessiveHalving.R' 'OptimizerBatchHyperband.R' 'TunerAsyncSuccessiveHalving.R' 'TunerBatchHyperband.R' 'TunerBatchSuccessiveHalving.R' 'bibentries.R' 'helper.R' 'zzz.R'",
+      "Author": "Marc Becker [aut, cre] (ORCID: <https://orcid.org/0000-0002-8115-0400>), Sebastian Gruber [aut] (ORCID: <https://orcid.org/0000-0002-8544-3470>), Jakob Richter [aut] (ORCID: <https://orcid.org/0000-0003-4481-5554>), Julia Moosbauer [aut] (ORCID: <https://orcid.org/0000-0002-0000-9297>), Bernd Bischl [aut] (ORCID: <https://orcid.org/0000-0001-6002-6980>)",
       "Maintainer": "Marc Becker <marcbecker@posteo.de>",
       "Repository": "CRAN"
     },
@@ -4590,7 +4594,7 @@
     },
     "rprojroot": {
       "Package": "rprojroot",
-      "Version": "2.0.4",
+      "Version": "2.1.0",
       "Source": "Repository",
       "Title": "Finding Files in Project Subdirectories",
       "Authors@R": "person(given = \"Kirill\", family = \"M\\u00fcller\", role = c(\"aut\", \"cre\"), email = \"kirill@cynkra.com\", comment = c(ORCID = \"0000-0002-1416-3412\"))",
@@ -4605,18 +4609,20 @@
         "covr",
         "knitr",
         "lifecycle",
-        "mockr",
         "rlang",
         "rmarkdown",
-        "testthat (>= 3.0.0)",
+        "testthat (>= 3.2.0)",
         "withr"
       ],
       "VignetteBuilder": "knitr",
       "Config/testthat/edition": "3",
       "Encoding": "UTF-8",
-      "RoxygenNote": "7.2.3",
+      "RoxygenNote": "7.3.2.9000",
+      "Config/autostyle/scope": "line_breaks",
+      "Config/autostyle/strict": "true",
+      "Config/Needs/website": "tidyverse/tidytemplate",
       "NeedsCompilation": "no",
-      "Author": "Kirill Müller [aut, cre] (<https://orcid.org/0000-0002-1416-3412>)",
+      "Author": "Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>)",
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
       "Repository": "CRAN"
     },

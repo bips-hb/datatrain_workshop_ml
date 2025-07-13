@@ -5,8 +5,8 @@ project:
     browser: false
     watch-inputs: true
   render:
-    - "./.*qmd"
-    - "!solutions/*qmd"
+    - "0*.qmd"
+    - "!solutions/"
 
 website:
   title: "DataTrain ML"
@@ -27,18 +27,10 @@ website:
           - 03-resampling-rf-boosting.qmd
       - section: "Day 2"
         contents:
-          - 03-tuning-svm.qmd
-          - 04-feature-selection-importance.qmd
-  # navbar:
-  #   left:
-  #     - href: README.md
-  #       text: Home
-  #     - text: Blocks
-  #       menu:
-  #       - href: 01-knn-trees.qmd
-  #       - href: 02-resampling-rf-boosting.qmd
-  #       - href: 03-tuning-svm.qmd
-  #       - href: 04-feature-selection-importance.qmd
+          - 04-tuning.qmd
+          - 05-svm-tuning.qmd
+          - 06-feature-selection.qmd
+          - 07-importance.qmd
     tools:
       - icon: github
         href: https://github.com/bips-hb/datatrain_workshop_ml
