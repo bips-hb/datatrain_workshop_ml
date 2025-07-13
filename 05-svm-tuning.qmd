@@ -6,14 +6,14 @@ editor_options:
 
 ```{r setup}
 library(mlr3verse) # All the mlr3 things
-library(ggplot2)   # For plotting
+library(ggplot2) # For plotting
 
 # Spam Task setup
 spam_task <- tsk("spam")
 set.seed(26)
 
 # train/test split
-spam_split <- partition(spam_task, ratio = 2/3)
+spam_split <- partition(spam_task, ratio = 2 / 3)
 ```
 
 Goals of this part:
@@ -32,7 +32,8 @@ ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
   geom_point() +
   labs(
     title = "Palmer Penguins",
-    x = "Flipper Length [mm]", y = "Body Mass [g]",
+    x = "Flipper Length [mm]",
+    y = "Body Mass [g]",
     color = "Species"
   ) +
   theme_minimal()
@@ -40,7 +41,7 @@ ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
 
 Since we don't care about prediction accuracy for now, we'll use the whole dataset for training and prediction. Please only do this with toy data 🙃.
 
-For the SVM algorithm itself, we use the `svm` learner from the `e1071` package (great name, I know) but once again use `{mlr3}`'s interface
+For the SVM algorithm itself, we use the `svm` learner from the `{e1071}` package (great name, I know) but once again use `{mlr3}`'s interface
 
 According to the docs (`?e1071::svm`) we have the choice of the following kernels:
 
@@ -73,11 +74,9 @@ Run the code below once to see what linear decision boundaries look like, then p
 
 ```{r penguin-task-2-predictors}
 penguin_task <- as_task_classif(
-  id = "penguins", 
-  backend = na.omit(palmerpenguins::penguins), 
+  na.omit(palmerpenguins::penguins),
   target = "species"
 )
-
 penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
 ```
 
@@ -87,9 +86,13 @@ svm_learner <- lrn("classif.svm", kernel = "polynomial", degree = 3)
 
 # Plot decision boundaries
 plot_learner_prediction(
-  learner = svm_learner, 
+  learner = svm_learner,
   task = penguin_task
 )
+```
+
+```{r svm-kernels-your-turn}
+# your code
 ```
 
 {{< include solutions/05-1-svm-kernels.qmd >}}
@@ -101,7 +104,11 @@ Let's try a more complex tuning experiment, based on the spam task from before.
 We'll create a new SVM learner object and this time explicitly tell it which classification to do --- that's the default value anyway, but `{mlr3}` wants us to be explicit here for tuning:
 
 ```{r svm-learner}
-svm_learner <- lrn("classif.svm", predict_type = "prob", type = "C-classification")
+svm_learner <- lrn(
+  "classif.svm",
+  predict_type = "prob",
+  type = "C-classification"
+)
 ```
 
 First up we'll define our search space, meaning the range of parameters we want to test out. Since `kernel` is a categorical parameter (i.e. no numbers, just names of kernels), we'll define the search space for that parameter by just passing the names of the kernels to the `p_fct()` helper function that defines `factor`-parameters in `{mlr3}`.
@@ -115,7 +122,6 @@ search_space_svm = ps(
   degree = p_int(lower = 1, upper = 7, depends = kernel == "polynomial")
 )
 ```
-
 
 We can create an example design grid to inspect our setup and see that `degree` is `NA` for cases where `kernel` is not `"polynomial"`, just as we expected
 
@@ -147,16 +153,16 @@ The above should get you started to...
 
 What parameter settings worked best?
 
+```{r svm-tune-your-turn}
+# your code
+```
+
 {{< include solutions/05-2-svm-tune.qmd >}}
 
-
 ::: {.callout-tip title="SVM with categorical features"}
-
 We have not covered this so far, but if you want to tran an SVM (or many other learners) on tasks with categorical ("nominal") features (usually `factor` in R), we first need to encode them in a numeric format. The simplest way is to perform dummy- or one-hot encoding, and mlr3 has a whole slew of these sorts of rpeprocessing capabilities.
 
-This works by creating a _pipeline_ using the `%>>%` oeprator (not to be confused with the magrittr-pipe `%>%` you might be familiar with!).
-We take the `encode` pipeline operation (`PipeOp`) and stack it on top of our learner we create as usual.
-At the end we convert it to a regular learner, and `lrn_svm` is now a regular mlr3 learner we can use like any other, but with built-in encoding!
+This works by creating a *pipeline* using the `%>>%` oeprator (not to be confused with the magrittr-pipe `%>%` you might be familiar with!). We take the `encode` pipeline operation (`PipeOp`) and stack it on top of our learner we create as usual. At the end we convert it to a regular learner, and `lrn_svm` is now a regular mlr3 learner we can use like any other, but with built-in encoding!
 
 ```{r svm-encode-demo}
 lrn_svm_base <- lrn("classif.svm", predict_type = "prob")
@@ -177,5 +183,4 @@ lrn_svm$predict(penguin_task)
 ```
 
 Pipelines are extremely useful and part of any reasonably complex machine learning pipeline, and to learn more you can read the [chapter in the mlr3book](https://mlr3book.mlr-org.com/chapters/chapter7/sequential_pipelines.html).
-
 :::

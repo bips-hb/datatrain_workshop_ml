@@ -6,7 +6,7 @@ editor_options:
 
 ```{r setup}
 library(mlr3verse) # Loads all the mlr3 stuff
-library(ggplot2)   # For plotting
+library(ggplot2) # For plotting
 
 # Just telling mlr3 to be quiet unless something broke
 lgr::get_logger("mlr3")$set_threshold("error")
@@ -73,7 +73,7 @@ our task and resampling strategy. The result an object of class `ResampleResult`
 
 ```{r knn-resample-cv}
 rr <- resample(
-  task = spam_task, 
+  task = spam_task,
   # Optional: Adjust learner parameters
   learner = lrn("classif.kknn", k = 13, predict_sets = c("train", "test")),
   resampling = rsmp("cv", folds = 3) # 3-fold CV
@@ -86,8 +86,7 @@ as.data.table(rr)
 ```
 
 We also tell our learner to predict both on train- and test sets.  
-Now we have a look at our predictions, but *per resampling iteration*, for both
-train- and test-set accuracy:
+Now we have a look at our predictions, but *per resampling iteration*, for both train- and test-set accuracy:
 
 ```{r knn-resample-acc}
 traintest_acc <- list(
@@ -188,8 +187,12 @@ To get the AUC we use `msr("classif.auc")` instead of `"classif.acc"` going forw
 This is technically peck-and-find hyperparameter tuning which we'll do in a
 more convenient (and methodologically sound) way in the next part :)
 
-{{< include solutions/03-1-rr-rpart.qmd >}}
 
+```{r resampling-your-turn}
+# your code
+```
+
+{{< include solutions/03-1-rr-rpart.qmd >}}
 
 # Benchmarking
 
@@ -203,14 +206,14 @@ learners <- list(
   lrn("classif.kknn", id = "knn", predict_type = "prob"),
   lrn("classif.rpart", id = "tree", predict_type = "prob"),
   lrn("classif.featureless", id = "Baseline", predict_type = "prob")
-) 
+)
 
 # Define task, learners and resampling strategy in a benchmark design
 design <- benchmark_grid(
-  tasks = spam_task,       # Still the same task
-  learners = learners,     # The new list of learners
-  resamplings = rsmp("cv", folds = 3)  # Same resampling strategy as before
-) 
+  tasks = spam_task, # Still the same task
+  learners = learners, # The new list of learners
+  resamplings = rsmp("cv", folds = 3) # Same resampling strategy as before
+)
 
 # Run the benchmark and save the results ("BenchmarkResult" object)
 bmr <- benchmark(design)
@@ -267,12 +270,16 @@ to the logistic regression learner `"classif.log_reg"` without any hyperparamete
 Do our fancy ML methods beat the good old GLM?
 Use the best hyperparameter settings for kNN and `rpart` you have found so far
 
+
+```{r benchmarking-your-turn}
+# your code
+```
+
 {{< include solutions/03-2-bm-logreg.qmd >}}
 
 # Random Forests & Boosting
 
-Armed with our new model comparison skills, we can add Random Forests and
-Gradient Boosting to the mix!
+Armed with our new model comparison skills, we can add Random Forests and Gradient Boosting to the mix!
 
 Our new learner IDs are
 
@@ -281,18 +288,19 @@ Our new learner IDs are
 
 (You know it has to be fancy if it has "extreme" in the name!)
 
-Both learners can already do fairly well without tweaking hyperparameters, except
-for the `nrounds` value in `xgboost` which sets the number of boosting iterations.
+Both learners can already do fairly well without tweaking hyperparameters, except for the `nrounds` value in `xgboost` which sets the number of boosting iterations.
 The default in the `{mlr3}` learner is 1, which kind of defeats the purpose of boosting.
 
 ## Your Turn!
 
-Use the benchmark setup from above and switch the `kknn` and `rpart` learners
-with the Random Forest and Boosting learners.
+Use the benchmark setup from above and switch the `kknn` and `rpart` learners with the Random Forest and Boosting learners.
 
-Maybe switch to holdout resampling to speed the process up a little and make 
-sure to set `nrounds` to something greater than 1 for `xgboost`.
+Maybe switch to holdout resampling to speed the process up a little and make sure to set `nrounds` to something greater than 1 for `xgboost`.
 
 What about now? Can we beat logistic regression?
+
+```{r rf-boost-your-turn}
+# your code
+```
 
 {{< include solutions/03-3-bm-rf-xgb-logreg.qmd >}}

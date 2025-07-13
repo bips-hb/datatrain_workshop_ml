@@ -6,14 +6,14 @@ editor_options:
 
 ```{r setup}
 library(mlr3verse) # All the mlr3 things
-library(ggplot2)   # For plotting
+library(ggplot2) # For plotting
 
 # Spam Task setup
 spam_task <- tsk("spam")
 set.seed(26)
 
 # train/test split
-spam_split <- partition(spam_task, ratio = 2/3)
+spam_split <- partition(spam_task, ratio = 2 / 3)
 ```
 
 Goals of this part:
@@ -73,14 +73,12 @@ Now `tuned_knn` behaves the same way as any other Learner that has not been trai
 
 ```{r tune-knn}
 # If you're on your own machine with multiple cores available, you can parallelize:
-future::plan("multisession")
+future::plan("multisession", workers = 4)
 
 # Setting a seed so we get the same results -- train on train set only!
 set.seed(2398)
 tuned_knn$train(spam_task, row_ids = spam_split$train)
 ```
-
-In this case, we get a `k` of 9, with an accuracy of about 90%.
 
 (Side task: Try the same but with the AUC measure --- do you get the same `k`?)
 
@@ -133,8 +131,8 @@ tuned_knn <- auto_tuner(
 
 # Set up resampling with the ready-to-be-tuned learner and outer resampling: CV
 knn_nested_tune <- resample(
-  task = spam_task, 
-  learner = tuned_knn, 
+  task = spam_task,
+  learner = tuned_knn,
   resampling = rsmp("cv", folds = 3), # this is effectively the outer resampling
   store_models = TRUE
 )
@@ -153,7 +151,11 @@ autoplot(knn_nested_tune$learners[[2]]$tuning_instance)
 autoplot(knn_nested_tune$learners[[3]]$tuning_instance)
 
 # Get AUC and acc for outer folds
-knn_nested_tune$score(msrs(c("classif.acc", "classif.auc")))[, .(iteration, classif.auc, classif.acc)]
+knn_nested_tune$score(msrs(c("classif.acc", "classif.auc")))[, .(
+  iteration,
+  classif.auc,
+  classif.acc
+)]
 
 # Average over outer folds - our "final result" performance for kNN
 # AUC is averaged over outer folds
@@ -181,8 +183,8 @@ Some pointers:
 
 -   If you don't know which parameter to tune, try the following:
     -   `classif.xgboost`:
-        -   Important: `nrounds` (integer) (>= 1)
-        -   Important: `eta` (double) (0 < eta < 1)
+        -   Important: `nrounds` (integer) (>= 1 (at least 50 or so))
+        -   Important: `eta` (double) (0 < eta < 1 (close to 0 probably))
         -   Maybe: `max_depth` (integer)
 
     -   `classif.rpart`:
@@ -190,7 +192,7 @@ Some pointers:
         -   Maybe: `maxdepth` (integer) (< 30)
 
     -   `classif.ranger`:
-        -   `mtry` (integer) (default is 500)
+        -   `mtry` (integer) -> tune `mtry.ratio` (0 < `mtry.ratio` < 1)
         -   `max.depth` (integer)
 
 Note: Instead of randomly picking parameters from the design space, we can also generate a grid of parameters and try those.
@@ -200,3 +202,11 @@ We'll not try that here for now, but you can read up on how to do that here: `?m
 
 Also note that the cool thing about the `auto_tuner()` is that it behaves just like any other `mlr3` learner, but it automatically tunes itself.
 You can plug it into `resample()` or `benchmark_grid()` just fine!
+
+
+```{r tuning-your-turn}
+# your code
+```
+
+
+{{< include solutions/04-1-tuning.qmd >}}

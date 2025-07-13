@@ -6,9 +6,9 @@ editor_options:
 
 ```{r setup}
 #| message: false
-library(ggplot2)        # For plotting
-library(kknn)           # For kNN models
-library(rpart)          # For decision trees
+library(ggplot2) # For plotting
+library(kknn) # For kNN models
+library(rpart) # For decision trees
 library(palmerpenguins) # For penguins
 ```
 
@@ -41,16 +41,24 @@ We can take a look at the different species across two numeric features, startin
 ```{r penguins-plot}
 ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, fill = species)) +
   # ggforce::geom_mark_ellipse(aes(fill = species, label = species)) +
-  geom_point(shape = 21, stroke = 1/4, size = 3, alpha = 2/3, key_glyph = "rect") +
+  geom_point(
+    shape = 21,
+    stroke = 1 / 4,
+    size = 3,
+    alpha = 2 / 3,
+    key_glyph = "rect"
+  ) +
   labs(
     title = "Palmer Penguins",
     subtitle = "Body mass and flipper length by species",
-    x = "Flipper Length [mm]", y = "Body Mass [g]",
-    color = "Species", fill = "Species"
+    x = "Flipper Length [mm]",
+    y = "Body Mass [g]",
+    color = "Species",
+    fill = "Species"
   ) +
   theme_minimal(base_size = 13) +
   theme(
-    legend.position = "bottom", 
+    legend.position = "bottom",
     plot.title.position = "plot"
   )
 ```
@@ -73,7 +81,7 @@ penguin_N <- nrow(penguins) # Our total sample size
 
 # We draw 2/3 of all indices randomly with a sampling proportion of 2/3 with a fixed seed
 set.seed(234)
-train_ids <- sample(penguin_N, replace = FALSE, size = penguin_N * 2/3)
+train_ids <- sample(penguin_N, replace = FALSE, size = penguin_N * 2 / 3)
 # Our test set are the indices not in the training set
 test_ids <- setdiff(1:penguin_N, train_ids)
 
@@ -95,9 +103,9 @@ It takes a `formula` argument like you may know from `lm()` and other common mod
 ```{r kknn-fit}
 knn_penguins <- kknn(
   formula = species ~ flipper_length_mm + body_mass_g,
-  k = 3,                  # Hyperparameter: How many neighbors to consider
+  k = 3, # Hyperparameter: How many neighbors to consider
   train = penguins_train, # Training data used to make predictions
-  test = penguins_test    # Data to make predictions on
+  test = penguins_test # Data to make predictions on
 )
 
 # Peek at the predictions, one row per observation in test data
@@ -111,8 +119,11 @@ To get an idea of how well our predictions fit, we add them to our original test
 penguins_test$knn_predicted_species <- fitted(knn_penguins)
 
 # Rows: True species, columns: predicted species
-table(penguins_test$species, penguins_test$knn_predicted_species, 
-      dnn = c("Observed", "Predicted"))
+table(
+  penguins_test$species,
+  penguins_test$knn_predicted_species,
+  dnn = c("Observed", "Predicted")
+)
 ```
 
 Proportion of correct predictions ("accuracy")...
@@ -152,12 +163,12 @@ Some things to try:
 
 
 
-```{r knn-your-turn-1}
-# Your code
+```{r knn-your-turn}
+# your code
 ```
 
 
-{{< include solutions/01-knn.qmd >}}
+{{< include solutions/01-1-knn.qmd >}}
 
 
 ## Growing a decision tree
@@ -169,7 +180,7 @@ We'll use the `{rpart}` (**R**ecursive **Part**itioning) package and start with 
 rpart_penguins <- rpart(
   formula = species ~ flipper_length_mm + body_mass_g,
   data = penguins_train, # Train data
-  method = "class",      # Grow a classification tree (don't change this for now)
+  method = "class", # Grow a classification tree (don't change this for now)
 )
 ```
 
@@ -197,9 +208,9 @@ If we want to know how accurate we are with our model we need to make prediction
 
 ```{r tree-predict}
 rpart_predictions <- predict(
-  rpart_penguins,          # The model we just fit
+  rpart_penguins, # The model we just fit
   newdata = penguins_test, # New data to predict species on
-  type = "class"           # We want class predictions (the species), not probabilities
+  type = "class" # We want class predictions (the species), not probabilities
 )
 
 penguins_test$rpart_predicted_species <- rpart_predictions
@@ -229,11 +240,11 @@ kNN or trees?
 
 
 
-```{r rpart-your-turn-1}
-# Your code
+```{r rpart-your-turn}
+# your code
 ```
 
-{{< include solutions/01-rpart.qmd >}}
+{{< include solutions/01-1-rpart.qmd >}}
 
 ## Plotting decision boundaries (for 2 predictors)
 
@@ -244,11 +255,11 @@ This is a rather cumbersome manual approach --- there's a nicer way we'll see la
 rpart_penguins <- rpart(
   formula = species ~ flipper_length_mm + body_mass_g,
   data = penguins_train, # Train data
-  method = "class",      # Grow a classification tree (don't change this)
-  cp = 0.005,     # Default 0.01
+  method = "class", # Grow a classification tree (don't change this)
+  cp = 0.005, # Default 0.01
   minsplit = 20, # Default 20
   minbucket = 3, # Default is minsplit/3
-  maxdepth = 30  # Default 30 (and upper limit!)
+  maxdepth = 30 # Default 30 (and upper limit!)
 )
 
 # Ranges of X and Y variable on plot
@@ -262,23 +273,36 @@ pred_grid <- expand.grid(
 )
 
 # Predict with tree for every single point
-pred_grid$rpart_prediction <- predict(rpart_penguins, newdata = pred_grid, type = "class")
+pred_grid$rpart_prediction <- predict(
+  rpart_penguins,
+  newdata = pred_grid,
+  type = "class"
+)
 
 # Plot all predictions, colored by species
 ggplot(pred_grid, aes(x = flipper_length_mm, y = body_mass_g)) +
-  geom_tile(aes(color = rpart_prediction, fill = rpart_prediction), linewidth = 1, show.legend = FALSE) +
+  geom_tile(
+    aes(color = rpart_prediction, fill = rpart_prediction),
+    linewidth = 1,
+    show.legend = FALSE
+  ) +
   geom_point(
-    data = penguins_test, aes(fill = species), 
-    shape = 21, 
-    color = "black", 
+    data = penguins_test,
+    aes(fill = species),
+    shape = 21,
+    color = "black",
     size = 2,
     key_glyph = "rect"
   ) +
   labs(
     title = "Palmer Penguins: Decision Boundaries",
-    subtitle = paste("Species as predicted by decision tree", 
-    "Point color is the true species", sep = "\n"),
-    x = "Flipper Length [mm]", y = "Body Mass [g]",
+    subtitle = paste(
+      "Species as predicted by decision tree",
+      "Point color is the true species",
+      sep = "\n"
+    ),
+    x = "Flipper Length [mm]",
+    y = "Body Mass [g]",
     fill = "Species"
   ) +
   theme_minimal(base_size = 13) +

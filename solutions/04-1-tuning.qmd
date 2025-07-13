@@ -1,5 +1,8 @@
 ::: {.callout-tip title="Example solution" collapse ="true"}
 
+::: {.panel-tabset}
+
+
 #### `rpart` Tuning
 
 ```{r tuned-rpart}
@@ -12,7 +15,7 @@ tuned_rpart = auto_tuner(
     cp = p_dbl(lower = 0.001, upper = 0.03),
     maxdepth = p_int(lower = 1, upper = 30)
   ),
-  terminator = trm("evals", n_evals = 40),
+  terminator = trm("evals", n_evals = 100),
   tuner = tnr("random_search")
 )
 
@@ -20,7 +23,9 @@ tuned_rpart = auto_tuner(
 tuned_rpart$train(spam_task, row_ids = spam_split$train)
 
 # Evaluate!
-tuned_rpart$predict(spam_task, row_ids = spam_split$test)$score(msr("classif.auc"))
+tuned_rpart$predict(spam_task, row_ids = spam_split$test)$score(msr(
+  "classif.auc"
+))
 
 # Check parameter results
 autoplot(tuned_rpart$tuning_instance)
@@ -49,7 +54,9 @@ tuned_xgboost$train(spam_task, row_ids = spam_split$train)
 autoplot(tuned_xgboost$tuning_instance, cols_x = c("nrounds", "eta"))
 
 # Evaluate!
-tuned_xgboost$predict(spam_task, row_ids = spam_split$test)$score(msr("classif.auc"))
+tuned_xgboost$predict(spam_task, row_ids = spam_split$test)$score(msr(
+  "classif.auc"
+))
 
 # Check parameter results
 autoplot(tuned_xgboost$tuning_instance, type = "surface")
@@ -64,9 +71,10 @@ tuned_ranger = auto_tuner(
   resampling = rsmp("cv", folds = 5),
   measure = msr("classif.auc"),
   search_space = ps(
-    num.trees = p_int(lower = 200, upper = 700)
+    mtr.ratio = p_dbl(lower = 0, upper = 1),
+    max.depth = p_int(lower = 1, upper = 50)
   ),
-  terminator = trm("evals", n_evals = 20),
+  terminator = trm("evals", n_evals = 100),
   tuner = tnr("random_search")
 )
 
@@ -74,11 +82,15 @@ tuned_ranger = auto_tuner(
 tuned_ranger$train(spam_task, row_ids = spam_split$train)
 
 # Evaluate!
-tuned_ranger$predict(spam_task, row_ids = spam_split$test)$score(msr("classif.auc"))
+tuned_ranger$predict(spam_task, row_ids = spam_split$test)$score(msr(
+  "classif.auc"
+))
 
 # Check parameter results
 autoplot(tuned_ranger$tuning_instance)
 ```
+
+:::
 
 ## Benchmarking all the things (with tuning)
 
@@ -93,14 +105,17 @@ tuned_ranger$reset()
 tuned_xgboost$reset()
 
 tuning_learners <- list(
-  tuned_knn, tuned_rpart, tuned_ranger, tuned_xgboost
+  tuned_knn,
+  tuned_rpart,
+  tuned_ranger,
+  tuned_xgboost
 )
 
 tuning_benchmark_design <- benchmark_grid(
-  tasks = spam_task,                   # Still the same task. Optional: Use list() of multiple tasks for large benchmark study
-  learners = tuning_learners,          # List of AutoTune-learners
-  resamplings = rsmp("cv", folds = 3)  # Outer resampling strategy
-) 
+  tasks = spam_task, # Still the same task. Optional: Use list() of multiple tasks for large benchmark study
+  learners = tuning_learners, # List of AutoTune-learners
+  resamplings = rsmp("cv", folds = 3) # Outer resampling strategy
+)
 
 # Run the benchmark and save the results
 bmr <- benchmark(tuning_benchmark_design)

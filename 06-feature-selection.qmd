@@ -5,7 +5,7 @@ editor_options:
 ---
 
 ```{r setup}
-library(mlr3verse)  # All the mlr3 things
+library(mlr3verse) # All the mlr3 things
 
 # Spam Task setup
 spam_task <- tsk("spam")
@@ -97,7 +97,7 @@ And of course it should be worth it to compare our variable-selected learner wit
 design <- benchmark_grid(
   tasks = spam_task,
   learners = list(
-    fselected_rpart, 
+    fselected_rpart,
     lrn("classif.rpart", predict_type = "prob")
   ),
   resamplings = rsmp("cv", folds = 3)
@@ -110,10 +110,10 @@ bmr$aggregate(msr("classif.auc"))
 Of course this is essentially another form of tuning, and doings feature selection with untuned learners is not going to give you the best possible performance in each iteration, but it gives you a good set of features to start your actual hyperparameter tuning with.
 
 
-## Your turn (for some other time)
+## Your turn! (For some other time)
 
 - Try out the bike sharing task (`tsk("bike_sharing")`)
-- [Read the docs](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset) to see the meaning of ech feature
+- [Read the docs](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset) to see the meaning of each feature
 - Try out different feature selection approaches!
 
 Note that this task has a few more observations, so it's going to take a bit longer.  

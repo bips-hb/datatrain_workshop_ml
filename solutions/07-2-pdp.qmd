@@ -1,0 +1,21 @@
+::: {.callout-tip title="Example solution" collapse ="true"}
+
+The `bike_sharing` task is a regression task, so make sure to switch to the regression version of the learner. 
+
+The target is `bikers`, the number of people using a specific bike sharing service. More information can be found on the [UCI website](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset).
+
+```{r pdp-bikeshare}
+task <- tsk("bike_sharing")
+lrn_ranger <- lrn("regr.ranger")
+lrn_ranger$train(task)
+
+pd_bikeshare <- partial_dependence(
+  object = lrn_ranger$model,
+  v = task$feature_names,
+  data = task$data()
+)
+
+plot(pd_bikeshare)
+```
+
+:::

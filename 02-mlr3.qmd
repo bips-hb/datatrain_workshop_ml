@@ -6,7 +6,7 @@ editor_options:
 
 ```{r setup}
 #| message: false
-library(ggplot2)        # For plotting
+library(ggplot2) # For plotting
 library(palmerpenguins) # For penguins
 library(mlr3verse) # includes mlr3, mlr3learners, mlr3tuning, mlr3viz, ...
 ```
@@ -48,8 +48,8 @@ So let's put our penguins into a task object for `{mlr3}` and inspect it:
 ```{r penguins-task-creation}
 # Creating a classification task from our penguin data
 penguin_task <- as_task_classif(
-  na.omit(palmerpenguins::penguins), 
-  id = "penguins", 
+  na.omit(palmerpenguins::penguins),
+  id = "penguins",
   target = "species"
 )
 
@@ -66,7 +66,7 @@ penguin_task$nrow
 penguin_task$ncol
 # And what the classes are
 penguin_task$class_names
-# What types of features do we have? 
+# What types of features do we have?
 # (relevant for learner support, some don't handle factors for example!)
 penguin_task$feature_types
 ```
@@ -78,7 +78,10 @@ We can further inspect and modify the task after the fact if we choose:
 penguin_task$col_roles[c("feature", "target")]
 
 # Maybe not all variables are useful for this task, let's remove some
-penguin_task$set_col_roles(cols = c("island", "sex", "year"), remove_from = "feature")
+penguin_task$set_col_roles(
+  cols = c("island", "sex", "year"),
+  remove_from = "feature"
+)
 
 # We can also explicitly assign the feature columns
 penguin_task$col_roles$feature <- c("body_mass_g", "flipper_length_mm")
@@ -102,7 +105,7 @@ We create another 2/3 train-test split. 2/3 is actually the default in `partitio
 
 ```{r penguin-split}
 set.seed(26)
-penguin_split <- partition(penguin_task, ratio = 2/3)
+penguin_split <- partition(penguin_task, ratio = 2 / 3)
 
 # Contains vector of row_ids for train/test set
 str(penguin_split)
@@ -206,7 +209,10 @@ knn_learner$model
 And we can make predictions on the test data:
 
 ```{r knn-predict-once}
-knn_prediction <- knn_learner$predict(penguin_task, row_ids = penguin_split$test)
+knn_prediction <- knn_learner$predict(
+  penguin_task,
+  row_ids = penguin_split$test
+)
 knn_prediction
 ```
 
@@ -241,7 +247,7 @@ As a bonus feature, `{mlr3}` also makes it easy for us to plot the decision boun
 
 ```{r mlr3-plot-decision-boundaries}
 plot_learner_prediction(
-  learner = knn_learner, 
+  learner = knn_learner,
   task = penguin_task
 )
 ```
@@ -251,14 +257,12 @@ plot_learner_prediction(
 Now that we've done the kNN fitting with `{mlr3}`, you can easily do the same thing with the `rpart`-learner!
 All you have to do is switch the learner objects and give it a more fitting name.
 
-
-```{mlr3-your-turn-1}
-# Your code
+```{r mlr3-your-turn}
+# your code
 ```
 
 
-{{< include solutions/02-mlr3-rpart.qmd >}}
-
+{{< include solutions/02-1-mlr3-rpart.qmd >}}
 
 # Useful links
 
