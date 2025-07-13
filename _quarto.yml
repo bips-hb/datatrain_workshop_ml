@@ -5,6 +5,7 @@ project:
     browser: false
     watch-inputs: true
   render:
+    - "index.qmd"
     - "0*.qmd"
     - "!solutions/"
 
