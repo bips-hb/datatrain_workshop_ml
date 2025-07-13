@@ -102,7 +102,7 @@ lrn_svm <- po("encode") %>>%
 :::
 
 
-{{< include solutions/07-01-pfi.qmd >}}
+{{< include solutions/07-1-pfi.qmd >}}
 
 
 ## Feature Effects with `{effectplots}`
@@ -142,4 +142,4 @@ We're doing _multiclass classification_ here, so while our learner predicts a pr
 # your code
 ```
 
-{{< include solutions/07-02-pdp.qmd >}}
+{{< include solutions/07-2-pdp.qmd >}}

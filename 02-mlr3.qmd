@@ -58,7 +58,7 @@ penguin_task
 
 We can poke at it a little. Try typing `penguin_task$` and hit the Tab key to trigger completions.
 
-```{r penguins-task-creation}
+```{r penguins-task-features}
 # Contains our penguin dataset
 penguin_task$data()
 # We can ask it about e.g. our sample size and number of features
