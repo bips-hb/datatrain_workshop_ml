@@ -22,3 +22,4 @@ site_libs/
 attic
 scratch.R
 
+*.rmarkdown
