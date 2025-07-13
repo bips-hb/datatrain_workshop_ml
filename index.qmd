@@ -40,22 +40,26 @@ This is the workshop component to the [Machine Learning workshop in the Data Tra
 
 We will use R version **4.5.1**, but recent versions >= 4.1 should still work.
 
-1. get the materials: In RStudio, install the `usethis` package and enter
+1. Get the materials: In an R session, install the `{usethis}` package and enter
 
 ```r
 usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")
 ```
 
-This will create a new RStudio project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with `fork = FALSE` but there's no harm in forking).  
+This will create a new project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with `fork = FALSE` but there's no harm in forking).  
 
-2. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
+1. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
 
 
 3. Verify: If the following example code produces a plot, you're probably good to go:
 
 ```{r}
 library(mlr3verse)
-rr <- resample(tsk("sonar"), lrn("classif.ranger", predict_type = "prob"), rsmp("cv", folds = 3))
+rr <- resample(
+  tsk("sonar"),
+  lrn("classif.ranger", predict_type = "prob"),
+  rsmp("cv", folds = 3)
+)
 autoplot(rr, type = "roc")
 ```
 
@@ -69,19 +73,17 @@ If `renv` gives you trouble, see below for manual R package installation instruc
 1. Install R for your platform: <https://cran.r-project.org/>
   - Installation instructions depend in whether you're using Windows, Linux (whichever flavor), or macOS.
   - We assume R version 4.3.0 but all recent versions should work fine.
-2. Install RStudio Desktop: <https://posit.co/download/rstudio-desktop/>
+2. If you have neither [Positron](https://positron.posit.co/download.html) nor [RStudio](https://posit.co/download/rstudio-desktop/) installed, install wither (Positron probably preferred)
 3. Create a local copy of this workshop repository (`https://github.com/bips-hb/datatrain_workshop_ml.git`), 
     using any one of these options (use whichever you are most familiar with):
   a) Using R and the `usethis` package: `usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")`
   b) Running this in the terminal: `git clone https://github.com/bips-hb/datatrain_workshop_ml.git`
   c) Using RStudio's `New Project -> Version Control` dialog to clone the repository (analogously for whichever editor you're using). 
 
-1. Install R packages required for the workshop by opening the workshop repository in RStudio (e.g. double-clicking the `datatrain_workshop_ml.Rproj` file)  
-and run `renv::restore(prompt = FALSE)`.  
+1. Install R packages required for the workshop by opening the workshop repository in Positron or RStudio and run `renv::restore(prompt = FALSE)`.  
 [`{renv}`](https://rstudio.github.io/renv/) will automatically install all R packages with the correct versions listed in `renv.lock`.
 
-In some cases, installation with `renv` might fail.
-Should that be the case, delete the `.Rprofile` file or comment out the line `source("renv/activate.R")` in that file, and then refer to the manual package installation instructions below.
+In some cases, installation with `{renv}` might fail, and if that happens move on to the next section to install packages manually.
 
 ## Manual package installation instructions 
 
@@ -91,8 +93,13 @@ Should that be the case, delete the `.Rprofile` file or comment out the line `so
 You should only need to install all packages manually if you were not able to use `renv` to install them automatically. 
 (Or if you're trying to get this code to run in a different environment than this repository)
 
-I recommend using [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which will try to automatically install system dependencies on Linux (see next note) if possible:
+If you want to "disable" `renv` so you can manually install packages, open `.Rprofile` and comment out the following line:
 
+```
+source("renv/activate.R")
+```
+
+The you can directly use [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which will try to automatically install system dependencies on Linux (see next note) if possible:
 
 ```r
 packages <- c(
@@ -100,11 +107,10 @@ packages <- c(
   "palmerpenguins", "mlr3data",
   # Learner backends
   "ranger", "xgboost", "kknn", "rpart", "e1071", "randomForest",
-  "mlr3verse", # installs "mlr3", "mlr3learners", "mlr3viz", "mlr3tuning" ...
+  "mlr3verse", "mlr3filters", # installs "mlr3", "mlr3learners", "mlr3viz", "mlr3tuning" ...
   "precrec", # ROC plots via mlr3, not auto-installed with mlr3viz
-  "apcluster", "DiceKriging",
   # Viz / interpretability
-  "rpart.plot", "jemus42/xplainfi", "effectplots",
+  "rpart.plot", "effectplots",
   # Plotting / infrastructure, goodies
   "rmarkdown", "ggplot2", "patchwork", "usethis", "dplyr", "purrr", "ragg"
 )
@@ -116,7 +122,6 @@ install.packages("pak")
 pak::pak(packages)
 ```
 
-
 </details>
 
 ### Linux Note
@@ -126,21 +131,8 @@ pak::pak(packages)
 
 If you're working on a Linux distribution such as Ubuntu (or something Ubuntu-based),
 you may have to install some system packages with `sudo apt-get install ...` beforehand.
-To get the system requirements needed, you can use the `{remotes}` package like so:
 
-```r
-install.packages("remotes")
-
-# Get system requirements for Ubuntu 20.04 (the package names likely won't differ between releases)
-pkg_reqs <- sapply(packages, function(x) {
-  remotes::system_requirements("ubuntu-22.04", package = x)
-})
-
-cat(paste("sudo", sort(unique(unlist(pkg_reqs))), collapse = "\n"))
-```
-
-Which will output the required `apt-get install` lines you can run to install everything.  
-For Ubunt 22.04, it would look like this, which you can run in the terminal of your choice:
+For Ubuntu it would look like this, which you can run in the terminal of your choice:
 
 ```sh
 sudo apt-get install -y git
@@ -169,7 +161,7 @@ sudo apt-get install -y zlib1g-dev
 
 ## Code examples
 
-We rely on the mlr3 framework and its free online book for the hands-on part of the workshop:
+We rely on the `mlr3` framework and its free online book for the hands-on part of the workshop:
 
 - [Bischl, B., Sonabend, R., Kotthoff, L., & Lang, M. *Applied Machine Learning Using mlr3 in R*. (CRC Press, 2024)](https://mlr3book.mlr-org.com)
 

@@ -9,64 +9,6 @@ This is the workshop component to the [Machine Learning workshop in the Data Tra
 Repository contains [Quarto](https://quarto.org/) `.qmd` notebooks for hands-on ML demos & exercises.  
 Example code for exercises will be made available after the exercises.
 
-## Workshop Quick Start Instructions:
-
-We will use R version **4.5.1**, but recent versions >= 4.1 should still work.
-
-1. get the materials: In RStudio, install the `usethis` package and enter
-
-```r
-usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")
-```
-
-This will create a new RStudio project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with `fork = FALSE` but there's no harm in forking).  
-
-2. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
-
-
-3. Verify: If the following example code produces a plot, you're probably good to go:
-
-```r
-library(mlr3verse)
-rr <- resample(tsk("sonar"), lrn("classif.ranger", predict_type = "prob"), rsmp("bootstrap", repeats = 5))
-autoplot(rr, type = "prc")
-```
-
-(You'll learn what that piece of code does in the workshop :)
-
-For more detailed (and alternative) setup instructions, please [refer to the course website](https://bips-hb.github.io/datatrain_workshop_ml).
-
-# Workshop Details
-
-- July 14+15, 2025, 9:00 AM - 5:00 PM
-- UNICOM 2, Small Seminar Room 2.207, Mary-Somerville-Str. 2, 28359 Bremen
-
-- 4 * 3-hour blocks, each ~90min theory, short break, ~90min hands-on
-- Hands-on exercises on local devices, **bring a laptop**!
-
-## Day 1
-
-- Theory / practice: 9:00 - 12:00
-  - k-Nearest-Neighbors
-  - General concepts
-  - Decision Trees
-- Break: 12:00 - 13:00
-- Theory / practice: 13:00 - 17:00
-  - Random Forest
-  - Model evaluation
-  - Boosting
-
-## Day 2
-
-- Theory / practice: 9:00 - 12:00
-  - Support Vector Machines (SVM)
-  - Hyperparameter Tuning
-  - Artifical Neural Networks
-- Break: 12:00 - 13:00
-- Theory / practice: 13:00 - 17:00
-  - Specific endpoints
-  - Variable Importance
-  - Discussion
 
 # Further Reading
 
