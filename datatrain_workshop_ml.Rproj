@@ -16,4 +16,6 @@ AutoAppendNewline: Yes
 StripTrailingWhitespace: Yes
 LineEndingConversion: Posix
 
+BuildType: Makefile
+
 UseNativePipeOperator: Yes
