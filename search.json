@@ -231,6 +231,76 @@
     ]
   },
   {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Train: Introduction to Machine Learning",
+    "section": "",
+    "text": "This is the workshop component to the Machine Learning workshop in the Data Train 2025 series.",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "index.html#day-1",
+    "href": "index.html#day-1",
+    "title": "Data Train: Introduction to Machine Learning",
+    "section": "1.1 Day 1",
+    "text": "1.1 Day 1\n\nTheory / practice: 9:00 - 12:00\n\nk-Nearest-Neighbors\nGeneral concepts\nDecision Trees\n\nBreak: 12:00 - 13:00\nTheory / practice: 13:00 - 17:00\n\nRandom Forest\nModel evaluation\nBoosting",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "index.html#day-2",
+    "href": "index.html#day-2",
+    "title": "Data Train: Introduction to Machine Learning",
+    "section": "1.2 Day 2",
+    "text": "1.2 Day 2\n\nTheory / practice: 9:00 - 12:00\n\nSupport Vector Machines (SVM)\nHyperparameter Tuning\nArtifical Neural Networks\n\nBreak: 12:00 - 13:00\nTheory / practice: 13:00 - 17:00\n\nSpecific endpoints\nVariable Importance\nDiscussion",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "index.html#manual-package-installation-instructions",
+    "href": "index.html#manual-package-installation-instructions",
+    "title": "Data Train: Introduction to Machine Learning",
+    "section": "3.1 Manual package installation instructions",
+    "text": "3.1 Manual package installation instructions\n\n\nClick to expand instructions\n\nYou should only need to install all packages manually if you were not able to use renv to install them automatically. (Or if you’re trying to get this code to run in a different environment than this repository)\nIf you want to “disable” renv so you can manually install packages, open .Rprofile and comment out the following line:\nsource(\"renv/activate.R\")\nThe you can directly use {pak} for installation, which will try to automatically install system dependencies on Linux (see next note) if possible:\npackages &lt;- c(\n  # Data\n  \"palmerpenguins\", \"mlr3data\",\n  # Learner backends\n  \"ranger\", \"xgboost\", \"kknn\", \"rpart\", \"e1071\", \"randomForest\",\n  \"mlr3verse\", \"mlr3filters\", # installs \"mlr3\", \"mlr3learners\", \"mlr3viz\", \"mlr3tuning\" ...\n  \"precrec\", # ROC plots via mlr3, not auto-installed with mlr3viz\n  # Viz / interpretability\n  \"rpart.plot\", \"effectplots\",\n  # Plotting / infrastructure, goodies\n  \"rmarkdown\", \"ggplot2\", \"patchwork\", \"usethis\", \"dplyr\", \"purrr\", \"ragg\"\n)\n\n# Installing pak for faster package installation\ninstall.packages(\"pak\")\n\n# Install packages if not available already\npak::pak(packages)\n\n\n3.1.1 Linux Note\n\n\nClick to expand\n\nIf you’re working on a Linux distribution such as Ubuntu (or something Ubuntu-based), you may have to install some system packages with sudo apt-get install ... beforehand.\nFor Ubuntu it would look like this, which you can run in the terminal of your choice:\nsudo apt-get install -y git\nsudo apt-get install -y libcurl4-openssl-dev\nsudo apt-get install -y libfontconfig1-dev\nsudo apt-get install -y libfreetype6-dev\nsudo apt-get install -y libfribidi-dev\nsudo apt-get install -y libgit2-dev\nsudo apt-get install -y libglpk-dev\nsudo apt-get install -y libgmp3-dev\nsudo apt-get install -y libharfbuzz-dev\nsudo apt-get install -y libicu-dev\nsudo apt-get install -y libjpeg-dev\nsudo apt-get install -y libpng-dev\nsudo apt-get install -y libssl-dev\nsudo apt-get install -y libtiff-dev\nsudo apt-get install -y libxml2-dev\nsudo apt-get install -y make\nsudo apt-get install -y pandoc\nsudo apt-get install -y zlib1g-dev",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "index.html#code-examples",
+    "href": "index.html#code-examples",
+    "title": "Data Train: Introduction to Machine Learning",
+    "section": "4.1 Code examples",
+    "text": "4.1 Code examples\nWe rely on the mlr3 framework and its free online book for the hands-on part of the workshop:\n\nBischl, B., Sonabend, R., Kotthoff, L., & Lang, M. Applied Machine Learning Using mlr3 in R. (CRC Press, 2024)",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "index.html#free-lectures-online-with-slides-videos",
+    "href": "index.html#free-lectures-online-with-slides-videos",
+    "title": "Data Train: Introduction to Machine Learning",
+    "section": "4.2 Free Lectures (online with slides + videos)",
+    "text": "4.2 Free Lectures (online with slides + videos)\nLecture materials take inspiration from these free and open-source lectures:\n\nIntroduction to Machine Learning (“I2ML”): https://slds-lmu.github.io/i2ml\nInterpretable Machine Learning: https://slds-lmu.github.io/iml",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "index.html#textbooks",
+    "href": "index.html#textbooks",
+    "title": "Data Train: Introduction to Machine Learning",
+    "section": "4.3 Textbooks",
+    "text": "4.3 Textbooks\n\nAn Introduction to Statistical Learning: with Applications in R. (Springer, 2013).\nHastie, T., Tibshirani, R. & Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. (Springer, 2009).\nMurphy, K. P. Machine Learning: A Probabilistic Perspective. (MIT Press, 2012).\nBishop, C. M. Pattern Recognition and Machine Learning. Information Science and Statistics. (Springer, 2006).\nMolnar, M. Interpretable Machine Learning: A Guide for Making Black Box Models Explainable (2023)",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
     "objectID": "02-mlr3.html",
     "href": "02-mlr3.html",
     "title": "Introducing {mlr3}",
