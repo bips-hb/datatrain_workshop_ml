@@ -6,26 +6,27 @@
 This is the workshop component to the [Machine Learning workshop in the Data Train
 2025 series](https://www.bremen-research.de/data-train/courses/course-details?event_id=114).
 
-Repository contains [Quarto](https://quarto.org/) `.qmd` notebooks for hands-on ML demos & exercises.  
-Example code for exercises will be made available after the exercises.
+The repository contains [Quarto](https://quarto.org/) `.qmd` notebooks for hands-on ML demos & exercises.  
+Example code for exercises is included but "hidden", and only visible on the website after you unhide it.
 
+See the [workshop website](https://bips-hb.github.io/datatrain_workshop_ml/index.html) for materials and setup instructions.
 
-# Further Reading
+## Further Reading
 
-## Code examples
+### Code examples
 
 We rely on the mlr3 framework and its free online book for the hands-on part of the workshop:
 
 - [Bischl, B., Sonabend, R., Kotthoff, L., & Lang, M. *Applied Machine Learning Using mlr3 in R*. (CRC Press, 2024)](https://mlr3book.mlr-org.com)
 
-## Free Lectures (online with slides + videos)
+### Free Lectures (online with slides + videos)
 
 Lecture materials take inspiration from these free and open-source lectures:
 
 - Introduction to Machine Learning ("I2ML"): https://slds-lmu.github.io/i2ml
 - Interpretable Machine Learning: https://slds-lmu.github.io/iml
 
-## Textbooks
+### Textbooks
 
 - [An Introduction to Statistical Learning: with Applications in R. (Springer, 2013).](https://www.statlearning.com/)
 - [Hastie, T., Tibshirani, R. & Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. (Springer, 2009).](https://web.stanford.edu/~hastie/ElemStatLearn/)
