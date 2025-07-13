@@ -5,7 +5,8 @@ project:
     browser: false
     watch-inputs: true
   render:
-    - "*qmd"
+    - "./.*qmd"
+    - "!solutions/*qmd"
 
 website:
   title: "DataTrain ML"

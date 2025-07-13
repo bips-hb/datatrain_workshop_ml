@@ -6,7 +6,11 @@ search_space_svm = ps(
   cost = p_dbl(-1, 1, trafo = function(x) 10^x),
   kernel = p_fct(c("linear", "polynomial", "radial", "sigmoid")),
   degree = p_int(1, 7, depends = kernel == "polynomial"),
-  gamma = p_dbl(lower = 0.01, upper = 0.2, depends = kernel %in% c("polynomial", "radial", "sigmoid"))
+  gamma = p_dbl(
+    lower = 0.01,
+    upper = 0.2,
+    depends = kernel %in% c("polynomial", "radial", "sigmoid")
+  )
 )
 
 grid <- generate_design_grid(search_space_svm, resolution = 6)
@@ -20,7 +24,11 @@ grid$data
 set.seed(313)
 
 tuned_svm = auto_tuner(
-  learner = lrn("classif.svm", predict_type = "prob"),
+  learner = lrn(
+    "classif.svm",
+    predict_type = "prob",
+    type = "C-classification"
+  ),
   resampling = rsmp("holdout"),
   measure = msr("classif.auc"),
   search_space = search_space_svm,
@@ -32,7 +40,9 @@ tuned_svm = auto_tuner(
 tuned_svm$train(spam_task, row_ids = spam_split$train)
 
 # Evaluate!
-tuned_svm$predict(spam_task, row_ids = spam_split$test)$score(msr("classif.auc"))
+tuned_svm$predict(spam_task, row_ids = spam_split$test)$score(msr(
+  "classif.auc"
+))
 
 # Hyperparam winner:
 tuned_svm$tuning_result
