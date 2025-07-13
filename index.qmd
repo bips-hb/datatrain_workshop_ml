@@ -1,0 +1,181 @@
+---
+title: 'Data Train: Introduction to Machine Learning'
+editor_options:
+  chunk_output_type: console
+---
+
+This is the workshop component to the [Machine Learning workshop in the Data Train
+2025 series](https://www.bremen-research.de/data-train/courses/course-details?event_id=114).
+
+# Workshop Details
+
+- 4 * 3-hour blocks, each ~90min theory, short break, ~90min hands-on
+- Hands-on exercises on local devices, **bring a laptop**!
+
+## Day 1
+
+- Theory / practice: 9:00 - 12:00
+  - k-Nearest-Neighbors
+  - General concepts
+  - Decision Trees
+- Break: 12:00 - 13:00
+- Theory / practice: 13:00 - 17:00
+  - Random Forest
+  - Model evaluation
+  - Boosting
+
+## Day 2
+
+- Theory / practice: 9:00 - 12:00
+  - Support Vector Machines (SVM)
+  - Hyperparameter Tuning
+  - Artifical Neural Networks
+- Break: 12:00 - 13:00
+- Theory / practice: 13:00 - 17:00
+  - Specific endpoints
+  - Variable Importance
+  - Discussion
+
+# Quick Start Instructions:
+
+We will use R version **4.5.1**, but recent versions >= 4.1 should still work.
+
+1. Get the materials: In an R session, install the `{usethis}` package and enter
+
+```r
+usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")
+```
+
+This will create a new project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with `fork = FALSE` but there's no harm in forking).  
+
+1. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
+
+
+3. Verify: If the following example code produces a plot, you're probably good to go:
+
+```{r}
+library(mlr3verse)
+rr <- resample(
+  tsk("sonar"),
+  lrn("classif.ranger", predict_type = "prob"),
+  rsmp("cv", folds = 3)
+)
+autoplot(rr, type = "roc")
+```
+
+(You'll learn what that piece of code does in the workshop :)
+
+If `renv` gives you trouble, see below for manual R package installation instructions.
+
+
+# Setup Instructions
+
+1. Install R for your platform: <https://cran.r-project.org/>
+  - Installation instructions depend in whether you're using Windows, Linux (whichever flavor), or macOS.
+  - We assumethe most recent R version, but all recent versions should work fine.
+2. If you have neither [Positron](https://positron.posit.co/download.html) nor [RStudio](https://posit.co/download/rstudio-desktop/) installed, install wither (Positron probably preferred)
+3. Create a local copy of this workshop repository (`https://github.com/bips-hb/datatrain_workshop_ml.git`), 
+    using any one of these options (use whichever you are most familiar with):
+  a) Using R and the `usethis` package: `usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")`
+  b) Running this in the terminal: `git clone https://github.com/bips-hb/datatrain_workshop_ml.git`
+  c) Using RStudio's `New Project -> Version Control` dialog to clone the repository (analogously for whichever editor you're using). 
+
+1. Install R packages required for the workshop by opening the workshop repository in Positron or RStudio and run `renv::restore(prompt = FALSE)`.  
+[`{renv}`](https://rstudio.github.io/renv/) will automatically install all R packages with the correct versions listed in `renv.lock`.
+
+In some cases, installation with `{renv}` might fail, and if that happens move on to the next section to install packages manually.
+
+## Manual package installation instructions 
+
+<details>
+<summary>Click to expand instructions</summary>
+
+You should only need to install all packages manually if you were not able to use `renv` to install them automatically. 
+(Or if you're trying to get this code to run in a different environment than this repository)
+
+If you want to "disable" `renv` so you can manually install packages, open `.Rprofile` and comment out the following line:
+
+```
+source("renv/activate.R")
+```
+
+The you can directly use [`{pak}`](https://pak.r-lib.org/dev/index.html) for installation, which will try to automatically install system dependencies on Linux (see next note) if possible:
+
+```r
+packages <- c(
+  # Data
+  "palmerpenguins", "mlr3data",
+  # Learner backends
+  "ranger", "xgboost", "kknn", "rpart", "e1071", "randomForest",
+  "mlr3verse", "mlr3filters", # installs "mlr3", "mlr3learners", "mlr3viz", "mlr3tuning" ...
+  "precrec", # ROC plots via mlr3, not auto-installed with mlr3viz
+  # Viz / interpretability
+  "rpart.plot", "effectplots",
+  # Plotting / infrastructure, goodies
+  "rmarkdown", "ggplot2", "patchwork", "usethis", "dplyr", "purrr", "ragg"
+)
+
+# Installing pak for faster package installation
+install.packages("pak")
+
+# Install packages if not available already
+pak::pak(packages)
+```
+
+</details>
+
+### Linux Note
+
+<details>
+<summary>Click to expand</summary>
+
+If you're working on a Linux distribution such as Ubuntu (or something Ubuntu-based),
+you may have to install some system packages with `sudo apt-get install ...` beforehand.
+
+For Ubuntu it would look like this, which you can run in the terminal of your choice:
+
+```sh
+sudo apt-get install -y git
+sudo apt-get install -y libcurl4-openssl-dev
+sudo apt-get install -y libfontconfig1-dev
+sudo apt-get install -y libfreetype6-dev
+sudo apt-get install -y libfribidi-dev
+sudo apt-get install -y libgit2-dev
+sudo apt-get install -y libglpk-dev
+sudo apt-get install -y libgmp3-dev
+sudo apt-get install -y libharfbuzz-dev
+sudo apt-get install -y libicu-dev
+sudo apt-get install -y libjpeg-dev
+sudo apt-get install -y libpng-dev
+sudo apt-get install -y libssl-dev
+sudo apt-get install -y libtiff-dev
+sudo apt-get install -y libxml2-dev
+sudo apt-get install -y make
+sudo apt-get install -y pandoc
+sudo apt-get install -y zlib1g-dev
+```
+
+</details>
+
+# Further Reading
+
+## Code examples
+
+We rely on the `mlr3` framework and its free online book for the hands-on part of the workshop:
+
+- [Bischl, B., Sonabend, R., Kotthoff, L., & Lang, M. *Applied Machine Learning Using mlr3 in R*. (CRC Press, 2024)](https://mlr3book.mlr-org.com)
+
+## Free Lectures (online with slides + videos)
+
+Lecture materials take inspiration from these free and open-source lectures:
+
+- Introduction to Machine Learning ("I2ML"): https://slds-lmu.github.io/i2ml
+- Interpretable Machine Learning: https://slds-lmu.github.io/iml
+
+## Textbooks
+
+- [An Introduction to Statistical Learning: with Applications in R. (Springer, 2013).](https://www.statlearning.com/)
+- [Hastie, T., Tibshirani, R. & Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. (Springer, 2009).](https://web.stanford.edu/~hastie/ElemStatLearn/)
+- [Murphy, K. P. Machine Learning: A Probabilistic Perspective. (MIT Press, 2012).](https://probml.github.io/pml-book/)
+- [Bishop, C. M. Pattern Recognition and Machine Learning. Information Science and Statistics. (Springer, 2006).](https://link.springer.com/book/9780387310732)
+- [Molnar, M. Interpretable Machine Learning: A Guide for Making Black Box Models Explainable (2023)](https://christophm.github.io/interpretable-ml-book/)

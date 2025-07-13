@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2025-07-13">
+
+<title>SVMs and more tuning – DataTrain ML</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-562bb67f20d1e9ce3bd617891377d39b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-a2137688b5fe3c1f9ff29cff531386d3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-562bb67f20d1e9ce3bd617891377d39b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script defer="" src="https://umami.jemu.name/script.js" data-website-id="0b6267ec-b77d-40ef-946c-a07bc15bb722"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-tuning.html">Day 2</a></li><li class="breadcrumb-item"><a href="./05-svm-tuning.html">SVMs and more tuning</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">DataTrain ML</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/bips-hb/datatrain_workshop_ml" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 1</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-knn-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">kNN &amp; Trees</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-mlr3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducing <code>{mlr3}</code></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-resampling-rf-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Resampling, Random Forest &amp; Boosting</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 2</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-svm-tuning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">SVMs and more tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-feature-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Feature Selection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-importance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Feature Importance</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#support-vector-machines" id="toc-support-vector-machines" class="nav-link active" data-scroll-target="#support-vector-machines"><span class="header-section-number">1</span> Support Vector Machines</a>
+  <ul class="collapse">
+  <li><a href="#your-turn" id="toc-your-turn" class="nav-link" data-scroll-target="#your-turn"><span class="header-section-number">1.1</span> Your Turn!</a></li>
+  <li><a href="#svm-tuning" id="toc-svm-tuning" class="nav-link" data-scroll-target="#svm-tuning"><span class="header-section-number">1.2</span> SVM-Tuning</a></li>
+  <li><a href="#your-turn-1" id="toc-your-turn-1" class="nav-link" data-scroll-target="#your-turn-1"><span class="header-section-number">1.3</span> Your Turn!</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/bips-hb/datatrain_workshop_ml/edit/main/05-svm-tuning.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bips-hb/datatrain_workshop_ml/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-tuning.html">Day 2</a></li><li class="breadcrumb-item"><a href="./05-svm-tuning.html">SVMs and more tuning</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">SVMs and more tuning</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Last Updated</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 13, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlr3verse) <span class="co"># All the mlr3 things</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; Loading required package: mlr3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2) <span class="co"># For plotting</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Spam Task setup</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>spam_task <span class="ot">&lt;-</span> <span class="fu">tsk</span>(<span class="st">"spam"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">26</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># train/test split</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>spam_split <span class="ot">&lt;-</span> <span class="fu">partition</span>(spam_task, <span class="at">ratio =</span> <span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Goals of this part:</p>
+<ol type="1">
+<li>Introduce SVMs</li>
+<li>Tune an SVM with a more complex setup</li>
+</ol>
+<section id="support-vector-machines" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Support Vector Machines</h1>
+<p>Let’s circle back to new learners and explore SVMs a little by trying out different kernels at the example of our penguin dataset we used in the beginning:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(penguins, <span class="fu">aes</span>(<span class="at">x =</span> flipper_length_mm, <span class="at">y =</span> body_mass_g, <span class="at">color =</span> species)) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Palmer Penguins"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Flipper Length [mm]"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Body Mass [g]"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Species"</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="05-svm-tuning_files/figure-html/penguins-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="05-svm-tuning_files/figure-html/penguins-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Since we don’t care about prediction accuracy for now, we’ll use the whole dataset for training and prediction. Please only do this with toy data 🙃.</p>
+<p>For the SVM algorithm itself, we use the <code>svm</code> learner from the <code>{e1071}</code> package (great name, I know) but once again use <code>{mlr3}</code>’s interface</p>
+<p>According to the docs (<code>?e1071::svm</code>) we have the choice of the following kernels:</p>
+<ul>
+<li><code>"linear"</code>: <span class="math inline">\(u'v\)</span></li>
+<li><code>"polynomial"</code>: <span class="math inline">\((\mathtt{gamma} \cdot u' \cdot v + \mathtt{coef0})^\mathtt{degree}\)</span></li>
+<li><code>"radial"</code>: <span class="math inline">\(\exp(-\mathtt{gamma} \cdot |u-v|^2)\)</span></li>
+<li><code>"sigmoid"</code>: <span class="math inline">\(\tanh(\mathtt{gamma} \cdot u'v + \mathtt{coef0})\)</span></li>
+</ul>
+<p>Where <code>gamma</code>, <code>degree</code>, and <code>coef0</code> are further hyperparameters.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># What parameters do we have and what's the default kernel?</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>svm_learner<span class="sc">$</span>param_set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; &lt;ParamSet(16)&gt;
+#&gt; Key: &lt;id&gt;
+#&gt;                  id    class lower upper nlevels          default parents
+#&gt;              &lt;char&gt;   &lt;char&gt; &lt;num&gt; &lt;num&gt;   &lt;num&gt;           &lt;list&gt;  &lt;list&gt;
+#&gt;  1:       cachesize ParamDbl  -Inf   Inf     Inf               40  [NULL]
+#&gt;  2:   class.weights ParamUty    NA    NA     Inf           [NULL]  [NULL]
+#&gt;  3:           coef0 ParamDbl  -Inf   Inf     Inf                0  kernel
+#&gt;  4:            cost ParamDbl     0   Inf     Inf                1    type
+#&gt;  5:           cross ParamInt     0   Inf     Inf                0  [NULL]
+#&gt;  6: decision.values ParamLgl    NA    NA       2            FALSE  [NULL]
+#&gt;  7:          degree ParamInt     1   Inf     Inf                3  kernel
+#&gt;  8:         epsilon ParamDbl     0   Inf     Inf              0.1  [NULL]
+#&gt;  9:          fitted ParamLgl    NA    NA       2             TRUE  [NULL]
+#&gt; 10:           gamma ParamDbl     0   Inf     Inf   &lt;NoDefault[0]&gt;  kernel
+#&gt; 11:          kernel ParamFct    NA    NA       4           radial  [NULL]
+#&gt; 12:              nu ParamDbl  -Inf   Inf     Inf              0.5    type
+#&gt; 13:           scale ParamUty    NA    NA     Inf             TRUE  [NULL]
+#&gt; 14:       shrinking ParamLgl    NA    NA       2             TRUE  [NULL]
+#&gt; 15:       tolerance ParamDbl     0   Inf     Inf            0.001  [NULL]
+#&gt; 16:            type ParamFct    NA    NA       2 C-classification  [NULL]
+#&gt;      value
+#&gt;     &lt;list&gt;
+#&gt;  1: [NULL]
+#&gt;  2: [NULL]
+#&gt;  3: [NULL]
+#&gt;  4: [NULL]
+#&gt;  5: [NULL]
+#&gt;  6: [NULL]
+#&gt;  7: [NULL]
+#&gt;  8: [NULL]
+#&gt;  9: [NULL]
+#&gt; 10: [NULL]
+#&gt; 11: [NULL]
+#&gt; 12: [NULL]
+#&gt; 13: [NULL]
+#&gt; 14: [NULL]
+#&gt; 15: [NULL]
+#&gt; 16: [NULL]</code></pre>
+</div>
+</div>
+<section id="your-turn" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="your-turn"><span class="header-section-number">1.1</span> Your Turn!</h2>
+<p>Below you have a boilerplate for</p>
+<ol type="a">
+<li>Creating an SVM learner and train it on the penguin dataset with 2 predictors</li>
+<li>Plotting decision boundaries with it (using the <code>{mlr3}</code> helper function)</li>
+</ol>
+<p>Run the code below once to see what linear decision boundaries look like, then pick different kernels from the list above and run it again.</p>
+<ul>
+<li>What kernel would you pick just by the looks of the boundaries?</li>
+<li>How do the boundaries change if you also adjust the other hyperparameters?</li>
+<li>Try picking any other two variables as features (<code>penguin_task$col_info</code>)</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>penguin_task<span class="sc">$</span>col_roles<span class="sc">$</span>feature <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"body_mass_g"</span>, <span class="st">"flipper_length_mm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the learner, picking a kernel and/or other hyperparams</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> <span class="st">"polynomial"</span>, <span class="at">degree =</span> <span class="dv">3</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot decision boundaries</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_learner_prediction</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">learner =</span> svm_learner,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">task =</span> penguin_task</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; INFO  [23:20:46.416] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted
+#&gt; ℹ Consider using `geom_tile()` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="05-svm-tuning_files/figure-html/svm-decision-boundaries-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="05-svm-tuning_files/figure-html/svm-decision-boundaries-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Example solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Example solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Directly comparing multiple kernels with default parameters:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>penguin_task<span class="sc">$</span>col_roles<span class="sc">$</span>feature <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"body_mass_g"</span>, <span class="st">"flipper_length_mm"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list of plots for each kernel</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>), \(kernel) {</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_learner_prediction</span>(</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> kernel),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">task =</span> penguin_task</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"SVM with "</span>, kernel, <span class="st">"kernel"</span>))</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; INFO  [23:20:46.786] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
+#&gt; INFO  [23:20:46.865] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
+#&gt; INFO  [23:20:46.953] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
+#&gt; INFO  [23:20:47.040] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrange the plots with the patchwork package</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>patchwork<span class="sc">::</span><span class="fu">wrap_plots</span>(plots, <span class="at">guides =</span> <span class="st">"collect"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted
+#&gt; ℹ Consider using `geom_tile()` instead.
+#&gt; Raster pixels are placed at uneven horizontal intervals and will be shifted
+#&gt; ℹ Consider using `geom_tile()` instead.
+#&gt; Raster pixels are placed at uneven horizontal intervals and will be shifted
+#&gt; ℹ Consider using `geom_tile()` instead.
+#&gt; Raster pixels are placed at uneven horizontal intervals and will be shifted
+#&gt; ℹ Consider using `geom_tile()` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="05-svm-tuning_files/figure-html/svm-kernel-boundaries-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="05-svm-tuning_files/figure-html/svm-kernel-boundaries-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="svm-tuning" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="svm-tuning"><span class="header-section-number">1.2</span> SVM-Tuning</h2>
+<p>Let’s try a more complex tuning experiment, based on the spam task from before.</p>
+<p>We’ll create a new SVM learner object and this time explicitly tell it which classification to do — that’s the default value anyway, but <code>{mlr3}</code> wants us to be explicit here for tuning:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"classif.svm"</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">predict_type =</span> <span class="st">"prob"</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"C-classification"</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>First up we’ll define our search space, meaning the range of parameters we want to test out. Since <code>kernel</code> is a categorical parameter (i.e.&nbsp;no numbers, just names of kernels), we’ll define the search space for that parameter by just passing the names of the kernels to the <code>p_fct()</code> helper function that defines <code>factor</code>-parameters in <code>{mlr3}</code>.</p>
+<p>The interesting thing here is that some parameters are only relevant for some kernels, which we can declare via a <code>depends</code> argument:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>search_space_svm <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)),</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Degree is onoly relevant if "kernel" is "polynomial"</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">degree =</span> <span class="fu">p_int</span>(<span class="at">lower =</span> <span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">7</span>, <span class="at">depends =</span> kernel <span class="sc">==</span> <span class="st">"polynomial"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can create an example design grid to inspect our setup and see that <code>degree</code> is <code>NA</code> for cases where <code>kernel</code> is not <code>"polynomial"</code>, just as we expected</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">generate_design_grid</span>(search_space_svm, <span class="at">resolution =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; &lt;Design&gt; with 6 rows:
+#&gt;        kernel degree
+#&gt;        &lt;char&gt;  &lt;int&gt;
+#&gt; 1:     linear     NA
+#&gt; 2: polynomial      1
+#&gt; 3: polynomial      4
+#&gt; 4: polynomial      7
+#&gt; 5:     radial     NA
+#&gt; 6:    sigmoid     NA</code></pre>
+</div>
+</div>
+</section>
+<section id="your-turn-1" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="your-turn-1"><span class="header-section-number">1.3</span> Your Turn!</h2>
+<p>The above should get you started to…</p>
+<ol type="1">
+<li>Create a <code>search_space_svm</code> like above, tuning…</li>
+</ol>
+<ul>
+<li><code>cost</code> from 0.1 to 1 (hint: <code>trafo = function(x) 10^x</code>)</li>
+<li><code>kernel</code>, (like above example)</li>
+<li><code>degree</code>, as above, <strong>only if</strong> <code>kernel == "polynomial"</code></li>
+<li><code>gamma</code>, from e.g.&nbsp;0.01 to 0.2, <strong>only if</strong> <code>kernel</code> is polynomial, radial, sigmoid (hint: you can’t use <code>kernel != "linear"</code> unfortunately, but <code>kernel %in% c(...)</code>) works</li>
+</ul>
+<ol start="2" type="1">
+<li>Use the <code>auto_tuner</code> function as previously seen with</li>
+</ol>
+<ul>
+<li><code>svm_learner</code> (see above)</li>
+<li>A resampling strategy (use <code>"holdout"</code> if runtime is an issue)</li>
+<li>A measure (e.g.&nbsp;<code>classif.acc</code> or <code>classif.auc</code>)</li>
+<li>The search space you created in 1.</li>
+<li>A termination criterion (e.g.&nbsp;40 evaluations)</li>
+<li>Random search as your tuning strategy</li>
+</ul>
+<ol start="3" type="1">
+<li>Train the auto-tuned learner and evaluate on the test set</li>
+</ol>
+<p>What parameter settings worked best?</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Example solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Example solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>search_space_svm <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">trafo =</span> <span class="cf">function</span>(x) <span class="dv">10</span><span class="sc">^</span>x),</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)),</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">degree =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">7</span>, <span class="at">depends =</span> kernel <span class="sc">==</span> <span class="st">"polynomial"</span>),</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gamma =</span> <span class="fu">p_dbl</span>(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> <span class="fl">0.01</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">upper =</span> <span class="fl">0.2</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">depends =</span> kernel <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">generate_design_grid</span>(search_space_svm, <span class="at">resolution =</span> <span class="dv">6</span>)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at grid with transformed cost param (manual way, there's probably a better one)</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>data<span class="sc">$</span>cost_trafo <span class="ot">&lt;-</span> <span class="dv">10</span><span class="sc">^</span>grid<span class="sc">$</span>data<span class="sc">$</span>cost</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;       cost     kernel degree gamma cost_trafo
+#&gt;      &lt;num&gt;     &lt;char&gt;  &lt;int&gt; &lt;num&gt;      &lt;num&gt;
+#&gt;   1:    -1     linear     NA    NA        0.1
+#&gt;   2:    -1 polynomial      1 0.010        0.1
+#&gt;   3:    -1 polynomial      1 0.048        0.1
+#&gt;   4:    -1 polynomial      1 0.086        0.1
+#&gt;   5:    -1 polynomial      1 0.124        0.1
+#&gt;  ---                                         
+#&gt; 290:     1    sigmoid     NA 0.048       10.0
+#&gt; 291:     1    sigmoid     NA 0.086       10.0
+#&gt; 292:     1    sigmoid     NA 0.124       10.0
+#&gt; 293:     1    sigmoid     NA 0.162       10.0
+#&gt; 294:     1    sigmoid     NA 0.200       10.0</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">313</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>tuned_svm <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">learner =</span> <span class="fu">lrn</span>(</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"classif.svm"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">predict_type =</span> <span class="st">"prob"</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"C-classification"</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">"holdout"</span>),</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">"classif.auc"</span>),</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">search_space =</span> search_space_svm,</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">"evals"</span>, <span class="at">n_evals =</span> <span class="dv">40</span>),</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(<span class="st">"random_search"</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Tune!</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span><span class="fu">train</span>(spam_task, <span class="at">row_ids =</span> spam_split<span class="sc">$</span>train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; INFO  [23:20:47.716] [bbotk] Starting to optimize 4 parameter(s) with '&lt;OptimizerBatchRandomSearch&gt;' and '&lt;TerminatorEvals&gt; [n_evals=40, k=0]'
+#&gt; INFO  [23:20:47.737] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:47.744] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:47.749] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:48.306] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:48.321] [bbotk] Result of batch 1:
+#&gt; INFO  [23:20:48.323] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:20:48.323] [bbotk]  -0.6822099 sigmoid     NA 0.1616588   0.8734847        0      0
+#&gt; INFO  [23:20:48.323] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:48.323] [bbotk]             0.552 863c14a8-7124-4f5a-9aa8-e503d3cd9d16
+#&gt; INFO  [23:20:48.445] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:48.451] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:48.456] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:48.941] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:48.959] [bbotk] Result of batch 2:
+#&gt; INFO  [23:20:48.960] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:20:48.960] [bbotk]  -0.6450028 linear     NA    NA   0.9686214        0      0             0.48
+#&gt; INFO  [23:20:48.960] [bbotk]                                 uhash
+#&gt; INFO  [23:20:48.960] [bbotk]  f0232d6b-a626-4bd9-97d2-a9562eec1373
+#&gt; INFO  [23:20:48.968] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:48.975] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:48.980] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:49.398] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:49.412] [bbotk] Result of batch 3:
+#&gt; INFO  [23:20:49.413] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:20:49.413] [bbotk]  0.8984124 sigmoid     NA 0.01141063   0.9285249        0      0
+#&gt; INFO  [23:20:49.413] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:49.413] [bbotk]             0.409 a2039a04-120d-46c3-bc61-4c47b7c22f3a
+#&gt; INFO  [23:20:49.421] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:49.427] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:49.432] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:49.944] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:49.961] [bbotk] Result of batch 4:
+#&gt; INFO  [23:20:49.962] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:20:49.962] [bbotk]  0.1509409 sigmoid     NA 0.05019996    0.891037        0      0
+#&gt; INFO  [23:20:49.962] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:49.962] [bbotk]             0.507 f17bed50-5dcf-430a-b1e6-274c14e3b98c
+#&gt; INFO  [23:20:49.970] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:49.976] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:49.981] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:50.465] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:50.480] [bbotk] Result of batch 5:
+#&gt; INFO  [23:20:50.482] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:20:50.482] [bbotk]  0.9455257 sigmoid     NA 0.1810499   0.8449879        0      0
+#&gt; INFO  [23:20:50.482] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:50.482] [bbotk]             0.479 304ff020-d794-4044-b36f-e67007409969
+#&gt; INFO  [23:20:50.491] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:50.497] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:50.502] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:51.054] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:51.069] [bbotk] Result of batch 6:
+#&gt; INFO  [23:20:51.071] [bbotk]       cost     kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:20:51.071] [bbotk]  0.6023674 polynomial      3 0.09276489   0.9476628        0      0
+#&gt; INFO  [23:20:51.071] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:51.071] [bbotk]             0.548 aa437611-667b-491e-a7de-028056fcb8ac
+#&gt; INFO  [23:20:51.080] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:51.085] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:51.090] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:52.384] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:52.400] [bbotk] Result of batch 7:
+#&gt; INFO  [23:20:52.402] [bbotk]       cost kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:20:52.402] [bbotk]  0.5193901 radial     NA 0.09999874   0.9607295        0      0
+#&gt; INFO  [23:20:52.402] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:52.402] [bbotk]              1.29 f90e72b6-92b3-4efa-8122-c14640ca8430
+#&gt; INFO  [23:20:52.415] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:52.420] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:52.425] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:53.951] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:53.966] [bbotk] Result of batch 8:
+#&gt; INFO  [23:20:53.967] [bbotk]      cost kernel degree   gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:20:53.967] [bbotk]  0.390257 radial     NA 0.13199   0.9583802        0      0             1.52
+#&gt; INFO  [23:20:53.967] [bbotk]                                 uhash
+#&gt; INFO  [23:20:53.967] [bbotk]  4f49ec3e-00b7-4769-887a-e34de9dbba86
+#&gt; INFO  [23:20:53.976] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:53.982] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:53.987] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:54.475] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:54.491] [bbotk] Result of batch 9:
+#&gt; INFO  [23:20:54.493] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:20:54.493] [bbotk]  -0.7548642 linear     NA    NA   0.9683802        0      0            0.483
+#&gt; INFO  [23:20:54.493] [bbotk]                                 uhash
+#&gt; INFO  [23:20:54.493] [bbotk]  8e228fa8-b075-481a-b586-827d5e9d7624
+#&gt; INFO  [23:20:54.502] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:54.508] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:54.513] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:55.627] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:55.643] [bbotk] Result of batch 10:
+#&gt; INFO  [23:20:55.644] [bbotk]        cost kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:20:55.644] [bbotk]  -0.8124776 radial     NA 0.05523449   0.9514108        0      0
+#&gt; INFO  [23:20:55.644] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:55.644] [bbotk]             1.109 56a59abf-4ac1-420f-999e-b1012155ad71
+#&gt; INFO  [23:20:55.653] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:55.658] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:55.663] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:57.061] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:57.076] [bbotk] Result of batch 11:
+#&gt; INFO  [23:20:57.077] [bbotk]       cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:20:57.077] [bbotk]  0.6799399 linear     NA    NA   0.9684968        0      0            1.393
+#&gt; INFO  [23:20:57.077] [bbotk]                                 uhash
+#&gt; INFO  [23:20:57.077] [bbotk]  8773b6ba-c78d-4b84-b4ae-21f0af143bdc
+#&gt; INFO  [23:20:57.089] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:57.095] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:57.100] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:57.704] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:57.720] [bbotk] Result of batch 12:
+#&gt; INFO  [23:20:57.721] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:20:57.721] [bbotk]  0.7868932 sigmoid     NA 0.1636982   0.8478577        0      0
+#&gt; INFO  [23:20:57.721] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:57.721] [bbotk]               0.6 3dc8f9b7-8f34-469b-9f7e-65dd3648fae3
+#&gt; INFO  [23:20:57.731] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:57.738] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:57.743] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:58.496] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:58.511] [bbotk] Result of batch 13:
+#&gt; INFO  [23:20:58.512] [bbotk]        cost  kernel degree    gamma classif.auc warnings errors
+#&gt; INFO  [23:20:58.512] [bbotk]  -0.9922801 sigmoid     NA 0.104775   0.9275121        0      0
+#&gt; INFO  [23:20:58.512] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:58.512] [bbotk]             0.748 068dc33d-572e-4c5f-8e9c-c33532dc303a
+#&gt; INFO  [23:20:58.521] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:58.527] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:58.532] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:20:58.989] [mlr3] Finished benchmark
+#&gt; INFO  [23:20:59.004] [bbotk] Result of batch 14:
+#&gt; INFO  [23:20:59.006] [bbotk]      cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:20:59.006] [bbotk]  0.790148 sigmoid     NA 0.06053824   0.8899437        0      0
+#&gt; INFO  [23:20:59.006] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:20:59.006] [bbotk]             0.451 b8042c66-0849-419a-ae0b-7bb59cbfab45
+#&gt; INFO  [23:20:59.018] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:20:59.024] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:20:59.029] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:00.187] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:00.202] [bbotk] Result of batch 15:
+#&gt; INFO  [23:21:00.204] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:00.204] [bbotk]  -0.1012446 radial     NA 0.1207929   0.9579502        0      0
+#&gt; INFO  [23:21:00.204] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:00.204] [bbotk]             1.153 8a2ec5df-a4c3-4e72-8666-74d47dd99fcb
+#&gt; INFO  [23:21:00.213] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:00.219] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:00.223] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:00.783] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:00.802] [bbotk] Result of batch 16:
+#&gt; INFO  [23:21:00.804] [bbotk]        cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:00.804] [bbotk]  -0.2715305 polynomial      3 0.1355686   0.9532898        0      0
+#&gt; INFO  [23:21:00.804] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:00.804] [bbotk]             0.555 bf8dcaae-0466-4daf-a988-9891c070f89a
+#&gt; INFO  [23:21:00.813] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:00.819] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:00.825] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:02.206] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:02.220] [bbotk] Result of batch 17:
+#&gt; INFO  [23:21:02.222] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:02.222] [bbotk]  -0.2421622 radial     NA 0.1686133    0.953742        0      0
+#&gt; INFO  [23:21:02.222] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:02.222] [bbotk]             1.376 52b343cf-5290-4d5f-b07b-7d1dbb28601d
+#&gt; INFO  [23:21:02.231] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:02.237] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:02.242] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:03.559] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:03.573] [bbotk] Result of batch 18:
+#&gt; INFO  [23:21:03.575] [bbotk]        cost kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:21:03.575] [bbotk]  -0.9009985 radial     NA 0.09712621   0.9430044        0      0
+#&gt; INFO  [23:21:03.575] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:03.575] [bbotk]             1.313 0c230f99-b9ae-4da6-8dad-c7e5a7796217
+#&gt; INFO  [23:21:03.583] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:03.589] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:03.594] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:04.266] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:04.281] [bbotk] Result of batch 19:
+#&gt; INFO  [23:21:04.282] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:04.282] [bbotk]  0.3821866 polynomial      5 0.1204278   0.9233159        0      0
+#&gt; INFO  [23:21:04.282] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:04.282] [bbotk]             0.668 08f5799f-7f35-4837-bcdd-143807077b6f
+#&gt; INFO  [23:21:04.290] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:04.296] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:04.300] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:05.024] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:05.038] [bbotk] Result of batch 20:
+#&gt; INFO  [23:21:05.040] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:05.040] [bbotk]  0.7460784 polynomial      7 0.1637225   0.9048633        0      0
+#&gt; INFO  [23:21:05.040] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:05.040] [bbotk]             0.718 e2b5ea9c-d2b5-46aa-af5a-a1abd5d5648b
+#&gt; INFO  [23:21:05.048] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:05.053] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:05.058] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:06.473] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:06.488] [bbotk] Result of batch 21:
+#&gt; INFO  [23:21:06.489] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:06.489] [bbotk]  -0.8161055 radial     NA 0.1789979   0.9397508        0      0
+#&gt; INFO  [23:21:06.489] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:06.489] [bbotk]              1.41 2b37a046-3efa-4ce0-9c73-7a896c79c8ff
+#&gt; INFO  [23:21:06.498] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:06.504] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:06.509] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:07.145] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:07.160] [bbotk] Result of batch 22:
+#&gt; INFO  [23:21:07.161] [bbotk]         cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:21:07.161] [bbotk]  -0.07166682 linear     NA    NA   0.9690756        0      0            0.632
+#&gt; INFO  [23:21:07.161] [bbotk]                                 uhash
+#&gt; INFO  [23:21:07.161] [bbotk]  82f3f10c-3bfa-49ba-97a4-5e5562c5398c
+#&gt; INFO  [23:21:07.173] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:07.178] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:07.183] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:08.551] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:08.566] [bbotk] Result of batch 23:
+#&gt; INFO  [23:21:08.568] [bbotk]       cost kernel degree     gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:21:08.568] [bbotk]  0.2154819 radial     NA 0.1292934    0.958332        0      0            1.362
+#&gt; INFO  [23:21:08.568] [bbotk]                                 uhash
+#&gt; INFO  [23:21:08.568] [bbotk]  3a7a51bb-3ab4-45eb-8e4c-c33541484a3f
+#&gt; INFO  [23:21:08.577] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:08.586] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:08.593] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:09.077] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:09.093] [bbotk] Result of batch 24:
+#&gt; INFO  [23:21:09.094] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:09.094] [bbotk]  0.9292742 sigmoid     NA 0.1826756   0.8441801        0      0
+#&gt; INFO  [23:21:09.094] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:09.094] [bbotk]             0.479 68fd98d8-79c9-4be2-9e4b-bc9e94090b39
+#&gt; INFO  [23:21:09.102] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:09.108] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:09.113] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:09.602] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:09.617] [bbotk] Result of batch 25:
+#&gt; INFO  [23:21:09.618] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:21:09.618] [bbotk]  -0.7159391 linear     NA    NA   0.9685209        0      0            0.486
+#&gt; INFO  [23:21:09.618] [bbotk]                                 uhash
+#&gt; INFO  [23:21:09.618] [bbotk]  da808016-df30-4db3-ad0f-5888c68c67a6
+#&gt; INFO  [23:21:09.626] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:09.632] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:09.637] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:10.807] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:10.822] [bbotk] Result of batch 26:
+#&gt; INFO  [23:21:10.823] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:10.823] [bbotk]  -0.2707529 radial     NA 0.1142384   0.9565072        0      0
+#&gt; INFO  [23:21:10.823] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:10.823] [bbotk]             1.166 3b166e76-ee22-4e3f-9494-fa018cf23ff4
+#&gt; INFO  [23:21:10.832] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:10.838] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:10.842] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:11.370] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:11.385] [bbotk] Result of batch 27:
+#&gt; INFO  [23:21:11.386] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:11.386] [bbotk]  0.6745258 polynomial      3 0.1412825   0.9470498        0      0
+#&gt; INFO  [23:21:11.386] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:11.386] [bbotk]             0.523 cb4b7a46-ac8e-4ed6-b7f2-fb1caeb9c2b2
+#&gt; INFO  [23:21:11.395] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:11.401] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:11.406] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:12.098] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:12.113] [bbotk] Result of batch 28:
+#&gt; INFO  [23:21:12.114] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:12.114] [bbotk]  -0.7508148 sigmoid     NA 0.1498661   0.8808159        0      0
+#&gt; INFO  [23:21:12.114] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:12.114] [bbotk]             0.687 da841a95-fee8-43c0-96b3-e5794617c238
+#&gt; INFO  [23:21:12.123] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:12.129] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:12.134] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:12.845] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:12.861] [bbotk] Result of batch 29:
+#&gt; INFO  [23:21:12.863] [bbotk]        cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:21:12.863] [bbotk]  -0.8497675 sigmoid     NA 0.09646477   0.9186535        0      0
+#&gt; INFO  [23:21:12.863] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:12.863] [bbotk]             0.707 8e222806-bdc3-4bd1-8105-4de5e5bf7efe
+#&gt; INFO  [23:21:12.872] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:12.878] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:12.883] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:14.116] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:14.130] [bbotk] Result of batch 30:
+#&gt; INFO  [23:21:14.132] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:14.132] [bbotk]  -0.1740692 radial     NA 0.1386397   0.9565213        0      0
+#&gt; INFO  [23:21:14.132] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:14.132] [bbotk]             1.228 1cd379d1-50e3-48c2-b66e-3a877225f385
+#&gt; INFO  [23:21:14.140] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:14.145] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:14.150] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:14.662] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:14.676] [bbotk] Result of batch 31:
+#&gt; INFO  [23:21:14.677] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:21:14.677] [bbotk]  -0.3421337 linear     NA    NA   0.9692404        0      0            0.507
+#&gt; INFO  [23:21:14.677] [bbotk]                                 uhash
+#&gt; INFO  [23:21:14.677] [bbotk]  e8d32db2-d0a3-4d4c-a0cd-07dfc27ff4ca
+#&gt; INFO  [23:21:14.685] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:14.691] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:14.696] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:15.317] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:15.331] [bbotk] Result of batch 32:
+#&gt; INFO  [23:21:15.333] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:15.333] [bbotk]  -0.8117912 sigmoid     NA 0.1346607   0.8903859        0      0
+#&gt; INFO  [23:21:15.333] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:15.333] [bbotk]             0.617 7e56f3a6-2713-47cd-b0ba-33953acbb0df
+#&gt; INFO  [23:21:15.341] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:15.347] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:15.352] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:15.839] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:15.854] [bbotk] Result of batch 33:
+#&gt; INFO  [23:21:15.855] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:21:15.855] [bbotk]  0.5639651 sigmoid     NA 0.02464691    0.904365        0      0
+#&gt; INFO  [23:21:15.855] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:15.855] [bbotk]             0.483 ec93df48-8d1f-4a30-a410-91f23c727d57
+#&gt; INFO  [23:21:15.863] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:15.873] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:15.878] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:16.623] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:16.638] [bbotk] Result of batch 34:
+#&gt; INFO  [23:21:16.640] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:16.640] [bbotk]  0.5970128 polynomial      6 0.1064664   0.9081793        0      0
+#&gt; INFO  [23:21:16.640] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:16.640] [bbotk]              0.74 f254351e-4518-4737-847d-c45063aa1ecf
+#&gt; INFO  [23:21:16.650] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:16.659] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:16.664] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:17.342] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:17.358] [bbotk] Result of batch 35:
+#&gt; INFO  [23:21:17.359] [bbotk]        cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [23:21:17.359] [bbotk]  0.04841973 polynomial      4 0.1337475   0.9176608        0      0
+#&gt; INFO  [23:21:17.359] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:17.359] [bbotk]             0.674 52884322-d709-4389-a4b9-60f1b9fa31ff
+#&gt; INFO  [23:21:17.368] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:17.374] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:17.380] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:17.860] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:17.874] [bbotk] Result of batch 36:
+#&gt; INFO  [23:21:17.876] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:21:17.876] [bbotk]  -0.7770614 linear     NA    NA   0.9683079        0      0            0.475
+#&gt; INFO  [23:21:17.876] [bbotk]                                 uhash
+#&gt; INFO  [23:21:17.876] [bbotk]  3c0667bd-5c20-453d-9ca9-4ceb1f574ed0
+#&gt; INFO  [23:21:17.884] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:17.890] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:17.895] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:18.631] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:18.646] [bbotk] Result of batch 37:
+#&gt; INFO  [23:21:18.647] [bbotk]       cost     kernel degree   gamma classif.auc warnings errors
+#&gt; INFO  [23:21:18.647] [bbotk]  0.4114269 polynomial      6 0.13385   0.8988746        0      0
+#&gt; INFO  [23:21:18.647] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:18.647] [bbotk]             0.732 e1db435e-e0d4-404d-b47f-0567f6b30d6d
+#&gt; INFO  [23:21:18.655] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:18.661] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:18.666] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:19.131] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:19.146] [bbotk] Result of batch 38:
+#&gt; INFO  [23:21:19.147] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:21:19.147] [bbotk]  0.7752214 sigmoid     NA 0.05379679   0.8730145        0      0
+#&gt; INFO  [23:21:19.147] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:19.147] [bbotk]             0.461 1c6b2c4f-fb61-4f3e-8820-65d6fc245bb7
+#&gt; INFO  [23:21:19.156] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:19.162] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:19.167] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:19.653] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:19.668] [bbotk] Result of batch 39:
+#&gt; INFO  [23:21:19.669] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [23:21:19.669] [bbotk]  -0.5680516 linear     NA    NA   0.9692524        0      0            0.482
+#&gt; INFO  [23:21:19.669] [bbotk]                                 uhash
+#&gt; INFO  [23:21:19.669] [bbotk]  aec2ecc7-37b1-46e9-b23d-1ff7d6d027b3
+#&gt; INFO  [23:21:19.677] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [23:21:19.683] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [23:21:19.688] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [23:21:20.254] [mlr3] Finished benchmark
+#&gt; INFO  [23:21:20.269] [bbotk] Result of batch 40:
+#&gt; INFO  [23:21:20.270] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [23:21:20.270] [bbotk]  0.1828651 sigmoid     NA 0.01471691   0.9411093        0      0
+#&gt; INFO  [23:21:20.270] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [23:21:20.270] [bbotk]             0.562 8688a014-b239-4bb2-88f0-3ccea006d013
+#&gt; INFO  [23:21:20.289] [bbotk] Finished optimizing after 40 evaluation(s)
+#&gt; INFO  [23:21:20.290] [bbotk] Result:
+#&gt; INFO  [23:21:20.291] [bbotk]        cost kernel degree gamma learner_param_vals  x_domain classif.auc
+#&gt; INFO  [23:21:20.291] [bbotk]       &lt;num&gt; &lt;char&gt;  &lt;int&gt; &lt;num&gt;             &lt;list&gt;    &lt;list&gt;       &lt;num&gt;
+#&gt; INFO  [23:21:20.291] [bbotk]  -0.5680516 linear     NA    NA          &lt;list[3]&gt; &lt;list[2]&gt;   0.9692524</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate!</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span><span class="fu">predict</span>(spam_task, <span class="at">row_ids =</span> spam_split<span class="sc">$</span>test)<span class="sc">$</span><span class="fu">score</span>(<span class="fu">msr</span>(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"classif.auc"</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; classif.auc 
+#&gt;   0.9702688</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparam winner:</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;          cost kernel degree gamma learner_param_vals  x_domain classif.auc
+#&gt;         &lt;num&gt; &lt;char&gt;  &lt;int&gt; &lt;num&gt;             &lt;list&gt;    &lt;list&gt;       &lt;num&gt;
+#&gt; 1: -0.5680516 linear     NA    NA          &lt;list[3]&gt; &lt;list[2]&gt;   0.9692524</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remember that we transformed `cost`, here's the best value on the original scale</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result<span class="sc">$</span>x_domain</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [[1]]
+#&gt; [[1]]$cost
+#&gt; [1] 0.2703637
+#&gt; 
+#&gt; [[1]]$kernel
+#&gt; [1] "linear"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_svm<span class="sc">$</span>tuning_instance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="05-svm-tuning_files/figure-html/example-svm-tuning-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="05-svm-tuning_files/figure-html/example-svm-tuning-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="SVM with categorical features">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+SVM with categorical features
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We have not covered this so far, but if you want to tran an SVM (or many other learners) on tasks with categorical (“nominal”) features (usually <code>factor</code> in R), we first need to encode them in a numeric format. The simplest way is to perform dummy- or one-hot encoding, and mlr3 has a whole slew of these sorts of rpeprocessing capabilities.</p>
+<p>This works by creating a <em>pipeline</em> using the <code>%&gt;&gt;%</code> oeprator (not to be confused with the magrittr-pipe <code>%&gt;%</code> you might be familiar with!). We take the <code>encode</code> pipeline operation (<code>PipeOp</code>) and stack it on top of our learner we create as usual. At the end we convert it to a regular learner, and <code>lrn_svm</code> is now a regular mlr3 learner we can use like any other, but with built-in encoding!</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>lrn_svm_base <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">predict_type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, lrn_svm_base) <span class="sc">|&gt;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin task (including categoricals!)</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick demo</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">predict</span>(penguin_task)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; ── &lt;PredictionClassif&gt; for 333 observations: ───────────────────────────────────
+#&gt;  row_ids     truth  response  prob.Adelie prob.Chinstrap prob.Gentoo
+#&gt;        1    Adelie    Adelie 0.9897186263    0.004709601 0.005571773
+#&gt;        2    Adelie    Adelie 0.9794937270    0.010353218 0.010153055
+#&gt;        3    Adelie    Adelie 0.9754507758    0.014019113 0.010530111
+#&gt;      ---       ---       ---          ---            ---         ---
+#&gt;      331 Chinstrap Chinstrap 0.0131531135    0.979987515 0.006859371
+#&gt;      332 Chinstrap Chinstrap 0.0049911109    0.986551962 0.008456927
+#&gt;      333 Chinstrap Chinstrap 0.0005266358    0.993014315 0.006459049</code></pre>
+</div>
+</div>
+<p>Pipelines are extremely useful and part of any reasonably complex machine learning pipeline, and to learn more you can read the <a href="https://mlr3book.mlr-org.com/chapters/chapter7/sequential_pipelines.html">chapter in the mlr3book</a>.</p>
+</div>
+</div>
+
+
+</section>
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/bips-hb/datatrain_workshop_ml/edit/main/05-svm-tuning.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bips-hb/datatrain_workshop_ml/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
