@@ -14,6 +14,5 @@ if (FALSE) {
   library(e1071)
   library(apcluster)
   library(usethis)
-  library(styler)
   library(here)
 }
