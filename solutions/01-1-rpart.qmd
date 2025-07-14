@@ -6,12 +6,19 @@ A "full" call to rpart with (most) relevant hyperparameters
 rpart_penguins <- rpart(
   formula = species ~ flipper_length_mm + body_mass_g,
   data = penguins_train, # Train data
-  method = "class",      # Grow a classification tree (don't change this)
-  cp       = 0.03, # Complexity parameter for regularization (default = 0.01)
-  minsplit = 15,   # Number of obs to keep in node to continue splitting, default = 20
-  minbucket = 2,   # Number of obs to keep in terminal/leaf nodes, default is minsplit/3
-  maxdepth = 15    # Maximum tree depth, default (and upper limit for rpart!) = 30
+  method = "class", # Grow a classification tree (don't change this)
+  cp = 0.03, # Complexity parameter for regularization (default = 0.01)
+  minsplit = 15, # Number of obs to keep in node to continue splitting, default = 20
+  minbucket = 2, # Number of obs to keep in terminal/leaf nodes, default is minsplit/3
+  maxdepth = 15 # Maximum tree depth, default (and upper limit for rpart!) = 30
 )
+
+# Evaluate
+penguins_test$rpart_predicted_species <- rpart_predictions
+# Confusion matrix
+table(penguins_test$species, penguins_test$rpart_predicted_species)
+# Accuracy
+mean(penguins_test$species == penguins_test$rpart_predicted_species)
 ```
 
 Not much else to show here, just play around with the parameters!
