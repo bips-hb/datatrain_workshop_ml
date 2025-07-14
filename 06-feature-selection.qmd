@@ -5,6 +5,7 @@ editor_options:
 ---
 
 ```{r setup}
+#| message: false
 library(mlr3verse) # All the mlr3 things
 
 # Spam Task setup

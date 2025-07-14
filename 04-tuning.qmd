@@ -5,6 +5,7 @@ editor_options:
 ---
 
 ```{r setup}
+#| message: false
 library(mlr3verse) # All the mlr3 things
 library(ggplot2) # For plotting
 
@@ -210,3 +211,13 @@ You can plug it into `resample()` or `benchmark_grid()` just fine!
 
 
 {{< include solutions/04-1-tuning.qmd >}}
+
+
+::: {.callout-tip title="Not sure what to tune?"}
+
+Which parameter to tune in which interval is usually an area of research, unless you have specific theory- or domain-driven constraints.  
+
+The [mlr3tuningspaces](https://mlr3tuningspaces.mlr-org.com/) packages aims to collect comprehensive tuning spaces for many learners, and when in doubt, they are usually a good place to start.
+Note that it's most likely not necessary to extensively tune all parameters as much as possible --- diminishing returns and such!
+
+:::
