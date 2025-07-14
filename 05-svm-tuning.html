@@ -448,18 +448,15 @@ window.Quarto = {
 
 
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlr3verse) <span class="co"># All the mlr3 things</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>#&gt; Loading required package: mlr3</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2) <span class="co"># For plotting</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Spam Task setup</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>spam_task <span class="ot">&lt;-</span> <span class="fu">tsk</span>(<span class="st">"spam"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">26</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># train/test split</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>spam_split <span class="ot">&lt;-</span> <span class="fu">partition</span>(spam_task, <span class="at">ratio =</span> <span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlr3verse) <span class="co"># All the mlr3 things</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2) <span class="co"># For plotting</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Spam Task setup</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>spam_task <span class="ot">&lt;-</span> <span class="fu">tsk</span>(<span class="st">"spam"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">26</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># train/test split</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>spam_split <span class="ot">&lt;-</span> <span class="fu">partition</span>(spam_task, <span class="at">ratio =</span> <span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Goals of this part:</p>
 <ol type="1">
@@ -470,17 +467,17 @@ window.Quarto = {
 <h1 data-number="1"><span class="header-section-number">1</span> Support Vector Machines</h1>
 <p>Let’s circle back to new learners and explore SVMs a little by trying out different kernels at the example of our penguin dataset we used in the beginning:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(penguins, <span class="fu">aes</span>(<span class="at">x =</span> flipper_length_mm, <span class="at">y =</span> body_mass_g, <span class="at">color =</span> species)) <span class="sc">+</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Palmer Penguins"</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Flipper Length [mm]"</span>,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Body Mass [g]"</span>,</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Species"</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(penguins, <span class="fu">aes</span>(<span class="at">x =</span> flipper_length_mm, <span class="at">y =</span> body_mass_g, <span class="at">color =</span> species)) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Palmer Penguins"</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Flipper Length [mm]"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Body Mass [g]"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Species"</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -500,10 +497,10 @@ window.Quarto = {
 </ul>
 <p>Where <code>gamma</code>, <code>degree</code>, and <code>coef0</code> are further hyperparameters.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># What parameters do we have and what's the default kernel?</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>svm_learner<span class="sc">$</span>param_set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># What parameters do we have and what's the default kernel?</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>svm_learner<span class="sc">$</span>param_set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; &lt;ParamSet(16)&gt;
 #&gt; Key: &lt;id&gt;
@@ -559,23 +556,23 @@ window.Quarto = {
 <li>Try picking any other two variables as features (<code>penguin_task$col_info</code>)</li>
 </ul>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>penguin_task<span class="sc">$</span>col_roles<span class="sc">$</span>feature <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"body_mass_g"</span>, <span class="st">"flipper_length_mm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>penguin_task<span class="sc">$</span>col_roles<span class="sc">$</span>feature <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"body_mass_g"</span>, <span class="st">"flipper_length_mm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the learner, picking a kernel and/or other hyperparams</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> <span class="st">"polynomial"</span>, <span class="at">degree =</span> <span class="dv">3</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot decision boundaries</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_learner_prediction</span>(</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">learner =</span> svm_learner,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">task =</span> penguin_task</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the learner, picking a kernel and/or other hyperparams</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> <span class="st">"polynomial"</span>, <span class="at">degree =</span> <span class="dv">3</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot decision boundaries</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_learner_prediction</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">learner =</span> svm_learner,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">task =</span> penguin_task</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>#&gt; INFO  [23:20:46.416] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)</code></pre>
+<pre><code>#&gt; INFO  [02:33:48.710] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>#&gt; Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted
@@ -590,7 +587,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Example solution">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -606,28 +603,28 @@ Example solution
 <div class="callout-body-container callout-body">
 <p>Directly comparing multiple kernels with default parameters:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>penguin_task<span class="sc">$</span>col_roles<span class="sc">$</span>feature <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"body_mass_g"</span>, <span class="st">"flipper_length_mm"</span>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list of plots for each kernel</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>), \(kernel) {</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_learner_prediction</span>(</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> kernel),</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">task =</span> penguin_task</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"SVM with "</span>, kernel, <span class="st">"kernel"</span>))</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>penguin_task<span class="sc">$</span>col_roles<span class="sc">$</span>feature <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"body_mass_g"</span>, <span class="st">"flipper_length_mm"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list of plots for each kernel</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>), \(kernel) {</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_learner_prediction</span>(</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> kernel),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">task =</span> penguin_task</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"SVM with "</span>, kernel, <span class="st">"kernel"</span>))</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>#&gt; INFO  [23:20:46.786] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
-#&gt; INFO  [23:20:46.865] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
-#&gt; INFO  [23:20:46.953] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
-#&gt; INFO  [23:20:47.040] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)</code></pre>
+<pre><code>#&gt; INFO  [02:33:49.116] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
+#&gt; INFO  [02:33:49.196] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
+#&gt; INFO  [02:33:49.281] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)
+#&gt; INFO  [02:33:49.368] [mlr3] Applying learner 'classif.svm' on task 'na.omit(palmerpenguins::penguins)' (iter 1/1)</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrange the plots with the patchwork package</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>patchwork<span class="sc">::</span><span class="fu">wrap_plots</span>(plots, <span class="at">guides =</span> <span class="st">"collect"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrange the plots with the patchwork package</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>patchwork<span class="sc">::</span><span class="fu">wrap_plots</span>(plots, <span class="at">guides =</span> <span class="st">"collect"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>#&gt; Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted
 #&gt; ℹ Consider using `geom_tile()` instead.
@@ -655,24 +652,24 @@ Example solution
 <p>Let’s try a more complex tuning experiment, based on the spam task from before.</p>
 <p>We’ll create a new SVM learner object and this time explicitly tell it which classification to do — that’s the default value anyway, but <code>{mlr3}</code> wants us to be explicit here for tuning:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"classif.svm"</span>,</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">predict_type =</span> <span class="st">"prob"</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"C-classification"</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>svm_learner <span class="ot">&lt;-</span> <span class="fu">lrn</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"classif.svm"</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">predict_type =</span> <span class="st">"prob"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"C-classification"</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First up we’ll define our search space, meaning the range of parameters we want to test out. Since <code>kernel</code> is a categorical parameter (i.e.&nbsp;no numbers, just names of kernels), we’ll define the search space for that parameter by just passing the names of the kernels to the <code>p_fct()</code> helper function that defines <code>factor</code>-parameters in <code>{mlr3}</code>.</p>
 <p>The interesting thing here is that some parameters are only relevant for some kernels, which we can declare via a <code>depends</code> argument:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>search_space_svm <span class="ot">=</span> <span class="fu">ps</span>(</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)),</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Degree is onoly relevant if "kernel" is "polynomial"</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">degree =</span> <span class="fu">p_int</span>(<span class="at">lower =</span> <span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">7</span>, <span class="at">depends =</span> kernel <span class="sc">==</span> <span class="st">"polynomial"</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>search_space_svm <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Degree is onoly relevant if "kernel" is "polynomial"</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">degree =</span> <span class="fu">p_int</span>(<span class="at">lower =</span> <span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">7</span>, <span class="at">depends =</span> kernel <span class="sc">==</span> <span class="st">"polynomial"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can create an example design grid to inspect our setup and see that <code>degree</code> is <code>NA</code> for cases where <code>kernel</code> is not <code>"polynomial"</code>, just as we expected</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">generate_design_grid</span>(search_space_svm, <span class="at">resolution =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">generate_design_grid</span>(search_space_svm, <span class="at">resolution =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; &lt;Design&gt; with 6 rows:
 #&gt;        kernel degree
@@ -714,7 +711,7 @@ Example solution
 </ol>
 <p>What parameter settings worked best?</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Example solution">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -729,22 +726,22 @@ Example solution
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>search_space_svm <span class="ot">=</span> <span class="fu">ps</span>(</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">trafo =</span> <span class="cf">function</span>(x) <span class="dv">10</span><span class="sc">^</span>x),</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)),</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">degree =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">7</span>, <span class="at">depends =</span> kernel <span class="sc">==</span> <span class="st">"polynomial"</span>),</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gamma =</span> <span class="fu">p_dbl</span>(</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> <span class="fl">0.01</span>,</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">upper =</span> <span class="fl">0.2</span>,</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">depends =</span> kernel <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">generate_design_grid</span>(search_space_svm, <span class="at">resolution =</span> <span class="dv">6</span>)</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at grid with transformed cost param (manual way, there's probably a better one)</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>data<span class="sc">$</span>cost_trafo <span class="ot">&lt;-</span> <span class="dv">10</span><span class="sc">^</span>grid<span class="sc">$</span>data<span class="sc">$</span>cost</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>search_space_svm <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">trafo =</span> <span class="cf">function</span>(x) <span class="dv">10</span><span class="sc">^</span>x),</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">degree =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">7</span>, <span class="at">depends =</span> kernel <span class="sc">==</span> <span class="st">"polynomial"</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gamma =</span> <span class="fu">p_dbl</span>(</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> <span class="fl">0.01</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">upper =</span> <span class="fl">0.2</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">depends =</span> kernel <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">generate_design_grid</span>(search_space_svm, <span class="at">resolution =</span> <span class="dv">6</span>)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at grid with transformed cost param (manual way, there's probably a better one)</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>data<span class="sc">$</span>cost_trafo <span class="ot">&lt;-</span> <span class="dv">10</span><span class="sc">^</span>grid<span class="sc">$</span>data<span class="sc">$</span>cost</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;       cost     kernel degree gamma cost_trafo
 #&gt;      &lt;num&gt;     &lt;char&gt;  &lt;int&gt; &lt;num&gt;      &lt;num&gt;
@@ -762,408 +759,408 @@ Example solution
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">313</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>tuned_svm <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">learner =</span> <span class="fu">lrn</span>(</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"classif.svm"</span>,</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">predict_type =</span> <span class="st">"prob"</span>,</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"C-classification"</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">"holdout"</span>),</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">"classif.auc"</span>),</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">search_space =</span> search_space_svm,</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">"evals"</span>, <span class="at">n_evals =</span> <span class="dv">40</span>),</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(<span class="st">"random_search"</span>)</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Tune!</span></span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span><span class="fu">train</span>(spam_task, <span class="at">row_ids =</span> spam_split<span class="sc">$</span>train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">313</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>tuned_svm <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">learner =</span> <span class="fu">lrn</span>(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"classif.svm"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">predict_type =</span> <span class="st">"prob"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"C-classification"</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">"holdout"</span>),</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">"classif.auc"</span>),</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">search_space =</span> search_space_svm,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">"evals"</span>, <span class="at">n_evals =</span> <span class="dv">40</span>),</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(<span class="st">"random_search"</span>)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Tune!</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span><span class="fu">train</span>(spam_task, <span class="at">row_ids =</span> spam_split<span class="sc">$</span>train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>#&gt; INFO  [23:20:47.716] [bbotk] Starting to optimize 4 parameter(s) with '&lt;OptimizerBatchRandomSearch&gt;' and '&lt;TerminatorEvals&gt; [n_evals=40, k=0]'
-#&gt; INFO  [23:20:47.737] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:47.744] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:47.749] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:48.306] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:48.321] [bbotk] Result of batch 1:
-#&gt; INFO  [23:20:48.323] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:20:48.323] [bbotk]  -0.6822099 sigmoid     NA 0.1616588   0.8734847        0      0
-#&gt; INFO  [23:20:48.323] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:48.323] [bbotk]             0.552 863c14a8-7124-4f5a-9aa8-e503d3cd9d16
-#&gt; INFO  [23:20:48.445] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:48.451] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:48.456] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:48.941] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:48.959] [bbotk] Result of batch 2:
-#&gt; INFO  [23:20:48.960] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:20:48.960] [bbotk]  -0.6450028 linear     NA    NA   0.9686214        0      0             0.48
-#&gt; INFO  [23:20:48.960] [bbotk]                                 uhash
-#&gt; INFO  [23:20:48.960] [bbotk]  f0232d6b-a626-4bd9-97d2-a9562eec1373
-#&gt; INFO  [23:20:48.968] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:48.975] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:48.980] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:49.398] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:49.412] [bbotk] Result of batch 3:
-#&gt; INFO  [23:20:49.413] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:20:49.413] [bbotk]  0.8984124 sigmoid     NA 0.01141063   0.9285249        0      0
-#&gt; INFO  [23:20:49.413] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:49.413] [bbotk]             0.409 a2039a04-120d-46c3-bc61-4c47b7c22f3a
-#&gt; INFO  [23:20:49.421] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:49.427] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:49.432] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:49.944] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:49.961] [bbotk] Result of batch 4:
-#&gt; INFO  [23:20:49.962] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:20:49.962] [bbotk]  0.1509409 sigmoid     NA 0.05019996    0.891037        0      0
-#&gt; INFO  [23:20:49.962] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:49.962] [bbotk]             0.507 f17bed50-5dcf-430a-b1e6-274c14e3b98c
-#&gt; INFO  [23:20:49.970] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:49.976] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:49.981] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:50.465] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:50.480] [bbotk] Result of batch 5:
-#&gt; INFO  [23:20:50.482] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:20:50.482] [bbotk]  0.9455257 sigmoid     NA 0.1810499   0.8449879        0      0
-#&gt; INFO  [23:20:50.482] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:50.482] [bbotk]             0.479 304ff020-d794-4044-b36f-e67007409969
-#&gt; INFO  [23:20:50.491] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:50.497] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:50.502] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:51.054] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:51.069] [bbotk] Result of batch 6:
-#&gt; INFO  [23:20:51.071] [bbotk]       cost     kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:20:51.071] [bbotk]  0.6023674 polynomial      3 0.09276489   0.9476628        0      0
-#&gt; INFO  [23:20:51.071] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:51.071] [bbotk]             0.548 aa437611-667b-491e-a7de-028056fcb8ac
-#&gt; INFO  [23:20:51.080] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:51.085] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:51.090] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:52.384] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:52.400] [bbotk] Result of batch 7:
-#&gt; INFO  [23:20:52.402] [bbotk]       cost kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:20:52.402] [bbotk]  0.5193901 radial     NA 0.09999874   0.9607295        0      0
-#&gt; INFO  [23:20:52.402] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:52.402] [bbotk]              1.29 f90e72b6-92b3-4efa-8122-c14640ca8430
-#&gt; INFO  [23:20:52.415] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:52.420] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:52.425] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:53.951] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:53.966] [bbotk] Result of batch 8:
-#&gt; INFO  [23:20:53.967] [bbotk]      cost kernel degree   gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:20:53.967] [bbotk]  0.390257 radial     NA 0.13199   0.9583802        0      0             1.52
-#&gt; INFO  [23:20:53.967] [bbotk]                                 uhash
-#&gt; INFO  [23:20:53.967] [bbotk]  4f49ec3e-00b7-4769-887a-e34de9dbba86
-#&gt; INFO  [23:20:53.976] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:53.982] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:53.987] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:54.475] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:54.491] [bbotk] Result of batch 9:
-#&gt; INFO  [23:20:54.493] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:20:54.493] [bbotk]  -0.7548642 linear     NA    NA   0.9683802        0      0            0.483
-#&gt; INFO  [23:20:54.493] [bbotk]                                 uhash
-#&gt; INFO  [23:20:54.493] [bbotk]  8e228fa8-b075-481a-b586-827d5e9d7624
-#&gt; INFO  [23:20:54.502] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:54.508] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:54.513] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:55.627] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:55.643] [bbotk] Result of batch 10:
-#&gt; INFO  [23:20:55.644] [bbotk]        cost kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:20:55.644] [bbotk]  -0.8124776 radial     NA 0.05523449   0.9514108        0      0
-#&gt; INFO  [23:20:55.644] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:55.644] [bbotk]             1.109 56a59abf-4ac1-420f-999e-b1012155ad71
-#&gt; INFO  [23:20:55.653] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:55.658] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:55.663] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:57.061] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:57.076] [bbotk] Result of batch 11:
-#&gt; INFO  [23:20:57.077] [bbotk]       cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:20:57.077] [bbotk]  0.6799399 linear     NA    NA   0.9684968        0      0            1.393
-#&gt; INFO  [23:20:57.077] [bbotk]                                 uhash
-#&gt; INFO  [23:20:57.077] [bbotk]  8773b6ba-c78d-4b84-b4ae-21f0af143bdc
-#&gt; INFO  [23:20:57.089] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:57.095] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:57.100] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:57.704] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:57.720] [bbotk] Result of batch 12:
-#&gt; INFO  [23:20:57.721] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:20:57.721] [bbotk]  0.7868932 sigmoid     NA 0.1636982   0.8478577        0      0
-#&gt; INFO  [23:20:57.721] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:57.721] [bbotk]               0.6 3dc8f9b7-8f34-469b-9f7e-65dd3648fae3
-#&gt; INFO  [23:20:57.731] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:57.738] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:57.743] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:58.496] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:58.511] [bbotk] Result of batch 13:
-#&gt; INFO  [23:20:58.512] [bbotk]        cost  kernel degree    gamma classif.auc warnings errors
-#&gt; INFO  [23:20:58.512] [bbotk]  -0.9922801 sigmoid     NA 0.104775   0.9275121        0      0
-#&gt; INFO  [23:20:58.512] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:58.512] [bbotk]             0.748 068dc33d-572e-4c5f-8e9c-c33532dc303a
-#&gt; INFO  [23:20:58.521] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:58.527] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:58.532] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:20:58.989] [mlr3] Finished benchmark
-#&gt; INFO  [23:20:59.004] [bbotk] Result of batch 14:
-#&gt; INFO  [23:20:59.006] [bbotk]      cost  kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:20:59.006] [bbotk]  0.790148 sigmoid     NA 0.06053824   0.8899437        0      0
-#&gt; INFO  [23:20:59.006] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:20:59.006] [bbotk]             0.451 b8042c66-0849-419a-ae0b-7bb59cbfab45
-#&gt; INFO  [23:20:59.018] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:20:59.024] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:20:59.029] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:00.187] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:00.202] [bbotk] Result of batch 15:
-#&gt; INFO  [23:21:00.204] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:00.204] [bbotk]  -0.1012446 radial     NA 0.1207929   0.9579502        0      0
-#&gt; INFO  [23:21:00.204] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:00.204] [bbotk]             1.153 8a2ec5df-a4c3-4e72-8666-74d47dd99fcb
-#&gt; INFO  [23:21:00.213] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:00.219] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:00.223] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:00.783] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:00.802] [bbotk] Result of batch 16:
-#&gt; INFO  [23:21:00.804] [bbotk]        cost     kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:00.804] [bbotk]  -0.2715305 polynomial      3 0.1355686   0.9532898        0      0
-#&gt; INFO  [23:21:00.804] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:00.804] [bbotk]             0.555 bf8dcaae-0466-4daf-a988-9891c070f89a
-#&gt; INFO  [23:21:00.813] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:00.819] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:00.825] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:02.206] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:02.220] [bbotk] Result of batch 17:
-#&gt; INFO  [23:21:02.222] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:02.222] [bbotk]  -0.2421622 radial     NA 0.1686133    0.953742        0      0
-#&gt; INFO  [23:21:02.222] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:02.222] [bbotk]             1.376 52b343cf-5290-4d5f-b07b-7d1dbb28601d
-#&gt; INFO  [23:21:02.231] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:02.237] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:02.242] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:03.559] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:03.573] [bbotk] Result of batch 18:
-#&gt; INFO  [23:21:03.575] [bbotk]        cost kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:21:03.575] [bbotk]  -0.9009985 radial     NA 0.09712621   0.9430044        0      0
-#&gt; INFO  [23:21:03.575] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:03.575] [bbotk]             1.313 0c230f99-b9ae-4da6-8dad-c7e5a7796217
-#&gt; INFO  [23:21:03.583] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:03.589] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:03.594] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:04.266] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:04.281] [bbotk] Result of batch 19:
-#&gt; INFO  [23:21:04.282] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:04.282] [bbotk]  0.3821866 polynomial      5 0.1204278   0.9233159        0      0
-#&gt; INFO  [23:21:04.282] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:04.282] [bbotk]             0.668 08f5799f-7f35-4837-bcdd-143807077b6f
-#&gt; INFO  [23:21:04.290] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:04.296] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:04.300] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:05.024] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:05.038] [bbotk] Result of batch 20:
-#&gt; INFO  [23:21:05.040] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:05.040] [bbotk]  0.7460784 polynomial      7 0.1637225   0.9048633        0      0
-#&gt; INFO  [23:21:05.040] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:05.040] [bbotk]             0.718 e2b5ea9c-d2b5-46aa-af5a-a1abd5d5648b
-#&gt; INFO  [23:21:05.048] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:05.053] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:05.058] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:06.473] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:06.488] [bbotk] Result of batch 21:
-#&gt; INFO  [23:21:06.489] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:06.489] [bbotk]  -0.8161055 radial     NA 0.1789979   0.9397508        0      0
-#&gt; INFO  [23:21:06.489] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:06.489] [bbotk]              1.41 2b37a046-3efa-4ce0-9c73-7a896c79c8ff
-#&gt; INFO  [23:21:06.498] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:06.504] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:06.509] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:07.145] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:07.160] [bbotk] Result of batch 22:
-#&gt; INFO  [23:21:07.161] [bbotk]         cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:21:07.161] [bbotk]  -0.07166682 linear     NA    NA   0.9690756        0      0            0.632
-#&gt; INFO  [23:21:07.161] [bbotk]                                 uhash
-#&gt; INFO  [23:21:07.161] [bbotk]  82f3f10c-3bfa-49ba-97a4-5e5562c5398c
-#&gt; INFO  [23:21:07.173] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:07.178] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:07.183] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:08.551] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:08.566] [bbotk] Result of batch 23:
-#&gt; INFO  [23:21:08.568] [bbotk]       cost kernel degree     gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:21:08.568] [bbotk]  0.2154819 radial     NA 0.1292934    0.958332        0      0            1.362
-#&gt; INFO  [23:21:08.568] [bbotk]                                 uhash
-#&gt; INFO  [23:21:08.568] [bbotk]  3a7a51bb-3ab4-45eb-8e4c-c33541484a3f
-#&gt; INFO  [23:21:08.577] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:08.586] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:08.593] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:09.077] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:09.093] [bbotk] Result of batch 24:
-#&gt; INFO  [23:21:09.094] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:09.094] [bbotk]  0.9292742 sigmoid     NA 0.1826756   0.8441801        0      0
-#&gt; INFO  [23:21:09.094] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:09.094] [bbotk]             0.479 68fd98d8-79c9-4be2-9e4b-bc9e94090b39
-#&gt; INFO  [23:21:09.102] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:09.108] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:09.113] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:09.602] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:09.617] [bbotk] Result of batch 25:
-#&gt; INFO  [23:21:09.618] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:21:09.618] [bbotk]  -0.7159391 linear     NA    NA   0.9685209        0      0            0.486
-#&gt; INFO  [23:21:09.618] [bbotk]                                 uhash
-#&gt; INFO  [23:21:09.618] [bbotk]  da808016-df30-4db3-ad0f-5888c68c67a6
-#&gt; INFO  [23:21:09.626] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:09.632] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:09.637] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:10.807] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:10.822] [bbotk] Result of batch 26:
-#&gt; INFO  [23:21:10.823] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:10.823] [bbotk]  -0.2707529 radial     NA 0.1142384   0.9565072        0      0
-#&gt; INFO  [23:21:10.823] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:10.823] [bbotk]             1.166 3b166e76-ee22-4e3f-9494-fa018cf23ff4
-#&gt; INFO  [23:21:10.832] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:10.838] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:10.842] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:11.370] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:11.385] [bbotk] Result of batch 27:
-#&gt; INFO  [23:21:11.386] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:11.386] [bbotk]  0.6745258 polynomial      3 0.1412825   0.9470498        0      0
-#&gt; INFO  [23:21:11.386] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:11.386] [bbotk]             0.523 cb4b7a46-ac8e-4ed6-b7f2-fb1caeb9c2b2
-#&gt; INFO  [23:21:11.395] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:11.401] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:11.406] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:12.098] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:12.113] [bbotk] Result of batch 28:
-#&gt; INFO  [23:21:12.114] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:12.114] [bbotk]  -0.7508148 sigmoid     NA 0.1498661   0.8808159        0      0
-#&gt; INFO  [23:21:12.114] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:12.114] [bbotk]             0.687 da841a95-fee8-43c0-96b3-e5794617c238
-#&gt; INFO  [23:21:12.123] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:12.129] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:12.134] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:12.845] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:12.861] [bbotk] Result of batch 29:
-#&gt; INFO  [23:21:12.863] [bbotk]        cost  kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:21:12.863] [bbotk]  -0.8497675 sigmoid     NA 0.09646477   0.9186535        0      0
-#&gt; INFO  [23:21:12.863] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:12.863] [bbotk]             0.707 8e222806-bdc3-4bd1-8105-4de5e5bf7efe
-#&gt; INFO  [23:21:12.872] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:12.878] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:12.883] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:14.116] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:14.130] [bbotk] Result of batch 30:
-#&gt; INFO  [23:21:14.132] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:14.132] [bbotk]  -0.1740692 radial     NA 0.1386397   0.9565213        0      0
-#&gt; INFO  [23:21:14.132] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:14.132] [bbotk]             1.228 1cd379d1-50e3-48c2-b66e-3a877225f385
-#&gt; INFO  [23:21:14.140] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:14.145] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:14.150] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:14.662] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:14.676] [bbotk] Result of batch 31:
-#&gt; INFO  [23:21:14.677] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:21:14.677] [bbotk]  -0.3421337 linear     NA    NA   0.9692404        0      0            0.507
-#&gt; INFO  [23:21:14.677] [bbotk]                                 uhash
-#&gt; INFO  [23:21:14.677] [bbotk]  e8d32db2-d0a3-4d4c-a0cd-07dfc27ff4ca
-#&gt; INFO  [23:21:14.685] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:14.691] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:14.696] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:15.317] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:15.331] [bbotk] Result of batch 32:
-#&gt; INFO  [23:21:15.333] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:15.333] [bbotk]  -0.8117912 sigmoid     NA 0.1346607   0.8903859        0      0
-#&gt; INFO  [23:21:15.333] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:15.333] [bbotk]             0.617 7e56f3a6-2713-47cd-b0ba-33953acbb0df
-#&gt; INFO  [23:21:15.341] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:15.347] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:15.352] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:15.839] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:15.854] [bbotk] Result of batch 33:
-#&gt; INFO  [23:21:15.855] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:21:15.855] [bbotk]  0.5639651 sigmoid     NA 0.02464691    0.904365        0      0
-#&gt; INFO  [23:21:15.855] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:15.855] [bbotk]             0.483 ec93df48-8d1f-4a30-a410-91f23c727d57
-#&gt; INFO  [23:21:15.863] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:15.873] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:15.878] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:16.623] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:16.638] [bbotk] Result of batch 34:
-#&gt; INFO  [23:21:16.640] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:16.640] [bbotk]  0.5970128 polynomial      6 0.1064664   0.9081793        0      0
-#&gt; INFO  [23:21:16.640] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:16.640] [bbotk]              0.74 f254351e-4518-4737-847d-c45063aa1ecf
-#&gt; INFO  [23:21:16.650] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:16.659] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:16.664] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:17.342] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:17.358] [bbotk] Result of batch 35:
-#&gt; INFO  [23:21:17.359] [bbotk]        cost     kernel degree     gamma classif.auc warnings errors
-#&gt; INFO  [23:21:17.359] [bbotk]  0.04841973 polynomial      4 0.1337475   0.9176608        0      0
-#&gt; INFO  [23:21:17.359] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:17.359] [bbotk]             0.674 52884322-d709-4389-a4b9-60f1b9fa31ff
-#&gt; INFO  [23:21:17.368] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:17.374] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:17.380] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:17.860] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:17.874] [bbotk] Result of batch 36:
-#&gt; INFO  [23:21:17.876] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:21:17.876] [bbotk]  -0.7770614 linear     NA    NA   0.9683079        0      0            0.475
-#&gt; INFO  [23:21:17.876] [bbotk]                                 uhash
-#&gt; INFO  [23:21:17.876] [bbotk]  3c0667bd-5c20-453d-9ca9-4ceb1f574ed0
-#&gt; INFO  [23:21:17.884] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:17.890] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:17.895] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:18.631] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:18.646] [bbotk] Result of batch 37:
-#&gt; INFO  [23:21:18.647] [bbotk]       cost     kernel degree   gamma classif.auc warnings errors
-#&gt; INFO  [23:21:18.647] [bbotk]  0.4114269 polynomial      6 0.13385   0.8988746        0      0
-#&gt; INFO  [23:21:18.647] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:18.647] [bbotk]             0.732 e1db435e-e0d4-404d-b47f-0567f6b30d6d
-#&gt; INFO  [23:21:18.655] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:18.661] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:18.666] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:19.131] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:19.146] [bbotk] Result of batch 38:
-#&gt; INFO  [23:21:19.147] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:21:19.147] [bbotk]  0.7752214 sigmoid     NA 0.05379679   0.8730145        0      0
-#&gt; INFO  [23:21:19.147] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:19.147] [bbotk]             0.461 1c6b2c4f-fb61-4f3e-8820-65d6fc245bb7
-#&gt; INFO  [23:21:19.156] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:19.162] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:19.167] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:19.653] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:19.668] [bbotk] Result of batch 39:
-#&gt; INFO  [23:21:19.669] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
-#&gt; INFO  [23:21:19.669] [bbotk]  -0.5680516 linear     NA    NA   0.9692524        0      0            0.482
-#&gt; INFO  [23:21:19.669] [bbotk]                                 uhash
-#&gt; INFO  [23:21:19.669] [bbotk]  aec2ecc7-37b1-46e9-b23d-1ff7d6d027b3
-#&gt; INFO  [23:21:19.677] [bbotk] Evaluating 1 configuration(s)
-#&gt; INFO  [23:21:19.683] [mlr3] Running benchmark with 1 resampling iterations
-#&gt; INFO  [23:21:19.688] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
-#&gt; INFO  [23:21:20.254] [mlr3] Finished benchmark
-#&gt; INFO  [23:21:20.269] [bbotk] Result of batch 40:
-#&gt; INFO  [23:21:20.270] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
-#&gt; INFO  [23:21:20.270] [bbotk]  0.1828651 sigmoid     NA 0.01471691   0.9411093        0      0
-#&gt; INFO  [23:21:20.270] [bbotk]  runtime_learners                                uhash
-#&gt; INFO  [23:21:20.270] [bbotk]             0.562 8688a014-b239-4bb2-88f0-3ccea006d013
-#&gt; INFO  [23:21:20.289] [bbotk] Finished optimizing after 40 evaluation(s)
-#&gt; INFO  [23:21:20.290] [bbotk] Result:
-#&gt; INFO  [23:21:20.291] [bbotk]        cost kernel degree gamma learner_param_vals  x_domain classif.auc
-#&gt; INFO  [23:21:20.291] [bbotk]       &lt;num&gt; &lt;char&gt;  &lt;int&gt; &lt;num&gt;             &lt;list&gt;    &lt;list&gt;       &lt;num&gt;
-#&gt; INFO  [23:21:20.291] [bbotk]  -0.5680516 linear     NA    NA          &lt;list[3]&gt; &lt;list[2]&gt;   0.9692524</code></pre>
+<pre><code>#&gt; INFO  [02:33:50.078] [bbotk] Starting to optimize 4 parameter(s) with '&lt;OptimizerBatchRandomSearch&gt;' and '&lt;TerminatorEvals&gt; [n_evals=40, k=0]'
+#&gt; INFO  [02:33:50.108] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:50.115] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:50.120] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:50.676] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:50.814] [bbotk] Result of batch 1:
+#&gt; INFO  [02:33:50.816] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:33:50.816] [bbotk]  -0.6822099 sigmoid     NA 0.1616588   0.8734847        0      0
+#&gt; INFO  [02:33:50.816] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:33:50.816] [bbotk]             0.551 2a706faa-52a7-4aa1-9f44-96d20b1c441e
+#&gt; INFO  [02:33:50.824] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:50.831] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:50.836] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:51.326] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:51.341] [bbotk] Result of batch 2:
+#&gt; INFO  [02:33:51.342] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:33:51.342] [bbotk]  -0.6450028 linear     NA    NA   0.9686214        0      0            0.486
+#&gt; INFO  [02:33:51.342] [bbotk]                                 uhash
+#&gt; INFO  [02:33:51.342] [bbotk]  ce65c812-7a5c-4e05-905a-db5c1e4675ad
+#&gt; INFO  [02:33:51.351] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:51.357] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:51.361] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:51.784] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:51.799] [bbotk] Result of batch 3:
+#&gt; INFO  [02:33:51.800] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:33:51.800] [bbotk]  0.8984124 sigmoid     NA 0.01141063   0.9285249        0      0
+#&gt; INFO  [02:33:51.800] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:33:51.800] [bbotk]             0.418 55188f7b-d82c-4cf0-85ae-c40669ee55e8
+#&gt; INFO  [02:33:51.809] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:51.815] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:51.819] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:52.342] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:52.357] [bbotk] Result of batch 4:
+#&gt; INFO  [02:33:52.358] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:33:52.358] [bbotk]  0.1509409 sigmoid     NA 0.05019996    0.891037        0      0
+#&gt; INFO  [02:33:52.358] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:33:52.358] [bbotk]             0.518 62f59832-fc88-4ab6-9975-16ee5d480567
+#&gt; INFO  [02:33:52.367] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:52.373] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:52.378] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:52.869] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:52.890] [bbotk] Result of batch 5:
+#&gt; INFO  [02:33:52.892] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:33:52.892] [bbotk]  0.9455257 sigmoid     NA 0.1810499   0.8449879        0      0
+#&gt; INFO  [02:33:52.892] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:33:52.892] [bbotk]             0.485 1c5cf5e0-bc2f-4d3b-9f8c-e385dc881ac5
+#&gt; INFO  [02:33:52.902] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:52.908] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:52.914] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:53.477] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:53.492] [bbotk] Result of batch 6:
+#&gt; INFO  [02:33:53.494] [bbotk]       cost     kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:33:53.494] [bbotk]  0.6023674 polynomial      3 0.09276489   0.9476628        0      0
+#&gt; INFO  [02:33:53.494] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:33:53.494] [bbotk]             0.558 70e40131-e712-4e8e-a52e-ada2ffb97e5b
+#&gt; INFO  [02:33:53.502] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:53.508] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:53.513] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:54.865] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:54.882] [bbotk] Result of batch 7:
+#&gt; INFO  [02:33:54.884] [bbotk]       cost kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:33:54.884] [bbotk]  0.5193901 radial     NA 0.09999874   0.9607295        0      0
+#&gt; INFO  [02:33:54.884] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:33:54.884] [bbotk]             1.348 05020e38-bbbb-4cc1-9d04-e5b5f2141878
+#&gt; INFO  [02:33:54.893] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:54.899] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:54.904] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:56.359] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:56.374] [bbotk] Result of batch 8:
+#&gt; INFO  [02:33:56.375] [bbotk]      cost kernel degree   gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:33:56.375] [bbotk]  0.390257 radial     NA 0.13199   0.9583802        0      0            1.446
+#&gt; INFO  [02:33:56.375] [bbotk]                                 uhash
+#&gt; INFO  [02:33:56.375] [bbotk]  267941ef-fb97-4887-a1ab-c1f048aefe36
+#&gt; INFO  [02:33:56.385] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:56.391] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:56.397] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:56.908] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:56.925] [bbotk] Result of batch 9:
+#&gt; INFO  [02:33:56.927] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:33:56.927] [bbotk]  -0.7548642 linear     NA    NA   0.9683802        0      0            0.507
+#&gt; INFO  [02:33:56.927] [bbotk]                                 uhash
+#&gt; INFO  [02:33:56.927] [bbotk]  782401c1-cd16-468a-a875-121b0d5e555f
+#&gt; INFO  [02:33:56.936] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:56.942] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:56.950] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:58.244] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:58.261] [bbotk] Result of batch 10:
+#&gt; INFO  [02:33:58.262] [bbotk]        cost kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:33:58.262] [bbotk]  -0.8124776 radial     NA 0.05523449   0.9514108        0      0
+#&gt; INFO  [02:33:58.262] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:33:58.262] [bbotk]             1.289 acd9f349-2f0c-453c-910e-d77259cf942d
+#&gt; INFO  [02:33:58.271] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:58.277] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:58.282] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:33:59.751] [mlr3] Finished benchmark
+#&gt; INFO  [02:33:59.772] [bbotk] Result of batch 11:
+#&gt; INFO  [02:33:59.773] [bbotk]       cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:33:59.773] [bbotk]  0.6799399 linear     NA    NA   0.9684968        0      0            1.464
+#&gt; INFO  [02:33:59.773] [bbotk]                                 uhash
+#&gt; INFO  [02:33:59.773] [bbotk]  f75f5805-e8af-4002-afe4-07a01a990f00
+#&gt; INFO  [02:33:59.781] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:33:59.787] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:33:59.793] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:00.317] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:00.335] [bbotk] Result of batch 12:
+#&gt; INFO  [02:34:00.337] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:00.337] [bbotk]  0.7868932 sigmoid     NA 0.1636982   0.8478577        0      0
+#&gt; INFO  [02:34:00.337] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:00.337] [bbotk]              0.52 f21fe9f3-6dbb-446d-a549-edd7d2146dc2
+#&gt; INFO  [02:34:00.348] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:00.356] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:00.361] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:01.152] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:01.167] [bbotk] Result of batch 13:
+#&gt; INFO  [02:34:01.169] [bbotk]        cost  kernel degree    gamma classif.auc warnings errors
+#&gt; INFO  [02:34:01.169] [bbotk]  -0.9922801 sigmoid     NA 0.104775   0.9275121        0      0
+#&gt; INFO  [02:34:01.169] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:01.169] [bbotk]             0.786 1db9f9f4-8b18-4d23-87c1-fc967273a7dc
+#&gt; INFO  [02:34:01.178] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:01.185] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:01.190] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:01.669] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:01.685] [bbotk] Result of batch 14:
+#&gt; INFO  [02:34:01.687] [bbotk]      cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:34:01.687] [bbotk]  0.790148 sigmoid     NA 0.06053824   0.8899437        0      0
+#&gt; INFO  [02:34:01.687] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:01.687] [bbotk]             0.474 75beb619-feb5-4bae-b193-05d69f0304c3
+#&gt; INFO  [02:34:01.696] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:01.702] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:01.707] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:02.893] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:02.909] [bbotk] Result of batch 15:
+#&gt; INFO  [02:34:02.911] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:02.911] [bbotk]  -0.1012446 radial     NA 0.1207929   0.9579502        0      0
+#&gt; INFO  [02:34:02.911] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:02.911] [bbotk]             1.181 ddf8b41b-aeed-43c8-b60d-13c978dcd1ff
+#&gt; INFO  [02:34:02.921] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:02.927] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:02.932] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:03.522] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:03.538] [bbotk] Result of batch 16:
+#&gt; INFO  [02:34:03.539] [bbotk]        cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:03.539] [bbotk]  -0.2715305 polynomial      3 0.1355686   0.9532898        0      0
+#&gt; INFO  [02:34:03.539] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:03.539] [bbotk]             0.583 8a6b26a4-35d8-437f-974e-cc3283f8a16b
+#&gt; INFO  [02:34:03.550] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:03.556] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:03.562] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:04.920] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:04.935] [bbotk] Result of batch 17:
+#&gt; INFO  [02:34:04.936] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:04.936] [bbotk]  -0.2421622 radial     NA 0.1686133    0.953742        0      0
+#&gt; INFO  [02:34:04.936] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:04.936] [bbotk]             1.353 8a67a004-2f26-4a87-964c-3435097d6cf0
+#&gt; INFO  [02:34:04.945] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:04.952] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:04.957] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:06.323] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:06.340] [bbotk] Result of batch 18:
+#&gt; INFO  [02:34:06.341] [bbotk]        cost kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:34:06.341] [bbotk]  -0.9009985 radial     NA 0.09712621   0.9430044        0      0
+#&gt; INFO  [02:34:06.341] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:06.341] [bbotk]              1.36 05293022-d283-4a47-86ae-0f5a9007288a
+#&gt; INFO  [02:34:06.350] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:06.357] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:06.362] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:07.170] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:07.185] [bbotk] Result of batch 19:
+#&gt; INFO  [02:34:07.186] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:07.186] [bbotk]  0.3821866 polynomial      5 0.1204278   0.9233159        0      0
+#&gt; INFO  [02:34:07.186] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:07.186] [bbotk]             0.804 46436fde-5969-4547-b1f1-05f597f9274e
+#&gt; INFO  [02:34:07.195] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:07.201] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:07.206] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:07.931] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:07.947] [bbotk] Result of batch 20:
+#&gt; INFO  [02:34:07.948] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:07.948] [bbotk]  0.7460784 polynomial      7 0.1637225   0.9048633        0      0
+#&gt; INFO  [02:34:07.948] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:07.948] [bbotk]              0.72 f1eb3ee0-5d46-4077-821e-948a25c5ed5e
+#&gt; INFO  [02:34:07.961] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:07.967] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:07.973] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:09.406] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:09.425] [bbotk] Result of batch 21:
+#&gt; INFO  [02:34:09.426] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:09.426] [bbotk]  -0.8161055 radial     NA 0.1789979   0.9397508        0      0
+#&gt; INFO  [02:34:09.426] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:09.426] [bbotk]             1.429 3aa95dd5-9a22-4f26-82f6-826d332433bf
+#&gt; INFO  [02:34:09.434] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:09.440] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:09.445] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:10.075] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:10.092] [bbotk] Result of batch 22:
+#&gt; INFO  [02:34:10.093] [bbotk]         cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:34:10.093] [bbotk]  -0.07166682 linear     NA    NA   0.9690756        0      0            0.624
+#&gt; INFO  [02:34:10.093] [bbotk]                                 uhash
+#&gt; INFO  [02:34:10.093] [bbotk]  bbb78fa0-d1ba-419e-9378-12632314fa91
+#&gt; INFO  [02:34:10.102] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:10.108] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:10.112] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:11.491] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:11.505] [bbotk] Result of batch 23:
+#&gt; INFO  [02:34:11.507] [bbotk]       cost kernel degree     gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:34:11.507] [bbotk]  0.2154819 radial     NA 0.1292934    0.958332        0      0            1.374
+#&gt; INFO  [02:34:11.507] [bbotk]                                 uhash
+#&gt; INFO  [02:34:11.507] [bbotk]  5560f21c-656a-4c49-9e7c-3afac64555be
+#&gt; INFO  [02:34:11.515] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:11.525] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:11.530] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:12.010] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:12.025] [bbotk] Result of batch 24:
+#&gt; INFO  [02:34:12.026] [bbotk]       cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:12.026] [bbotk]  0.9292742 sigmoid     NA 0.1826756   0.8441801        0      0
+#&gt; INFO  [02:34:12.026] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:12.026] [bbotk]             0.475 2fcab667-7bc5-4a1d-89dd-73fcc0dcbfd7
+#&gt; INFO  [02:34:12.034] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:12.040] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:12.045] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:12.541] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:12.556] [bbotk] Result of batch 25:
+#&gt; INFO  [02:34:12.557] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:34:12.557] [bbotk]  -0.7159391 linear     NA    NA   0.9685209        0      0            0.491
+#&gt; INFO  [02:34:12.557] [bbotk]                                 uhash
+#&gt; INFO  [02:34:12.557] [bbotk]  3f85b22a-418c-45c2-8470-29e54f53da1c
+#&gt; INFO  [02:34:12.566] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:12.571] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:12.576] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:13.738] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:13.753] [bbotk] Result of batch 26:
+#&gt; INFO  [02:34:13.754] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:13.754] [bbotk]  -0.2707529 radial     NA 0.1142384   0.9565072        0      0
+#&gt; INFO  [02:34:13.754] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:13.754] [bbotk]             1.158 11e3a99c-938f-420b-81b2-3b018f3a9cd0
+#&gt; INFO  [02:34:13.762] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:13.768] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:13.773] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:14.303] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:14.318] [bbotk] Result of batch 27:
+#&gt; INFO  [02:34:14.319] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:14.319] [bbotk]  0.6745258 polynomial      3 0.1412825   0.9470498        0      0
+#&gt; INFO  [02:34:14.319] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:14.319] [bbotk]             0.525 758a9dd5-5069-4f3f-b29a-e0845bc813fc
+#&gt; INFO  [02:34:14.328] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:14.333] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:14.338] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:14.922] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:14.942] [bbotk] Result of batch 28:
+#&gt; INFO  [02:34:14.944] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:14.944] [bbotk]  -0.7508148 sigmoid     NA 0.1498661   0.8808159        0      0
+#&gt; INFO  [02:34:14.944] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:14.944] [bbotk]             0.579 0bfd4b94-c640-482d-a23a-183fdf4f0d35
+#&gt; INFO  [02:34:14.952] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:14.958] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:14.963] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:15.782] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:15.797] [bbotk] Result of batch 29:
+#&gt; INFO  [02:34:15.798] [bbotk]        cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:34:15.798] [bbotk]  -0.8497675 sigmoid     NA 0.09646477   0.9186535        0      0
+#&gt; INFO  [02:34:15.798] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:15.798] [bbotk]             0.815 b73a2abe-29d0-4d19-9f13-e35d3d129244
+#&gt; INFO  [02:34:15.807] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:15.813] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:15.819] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:17.045] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:17.060] [bbotk] Result of batch 30:
+#&gt; INFO  [02:34:17.061] [bbotk]        cost kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:17.061] [bbotk]  -0.1740692 radial     NA 0.1386397   0.9565213        0      0
+#&gt; INFO  [02:34:17.061] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:17.061] [bbotk]             1.221 34da7d15-dc24-4dde-9356-fecae2116adf
+#&gt; INFO  [02:34:17.073] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:17.079] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:17.084] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:17.601] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:17.616] [bbotk] Result of batch 31:
+#&gt; INFO  [02:34:17.617] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:34:17.617] [bbotk]  -0.3421337 linear     NA    NA   0.9692404        0      0            0.513
+#&gt; INFO  [02:34:17.617] [bbotk]                                 uhash
+#&gt; INFO  [02:34:17.617] [bbotk]  60644bea-e524-4abc-8ca8-fd4f53f2f674
+#&gt; INFO  [02:34:17.625] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:17.631] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:17.636] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:18.264] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:18.279] [bbotk] Result of batch 32:
+#&gt; INFO  [02:34:18.280] [bbotk]        cost  kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:18.280] [bbotk]  -0.8117912 sigmoid     NA 0.1346607   0.8903859        0      0
+#&gt; INFO  [02:34:18.280] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:18.280] [bbotk]             0.624 c55eb678-0f42-41e8-a0d7-a2d3750e3577
+#&gt; INFO  [02:34:18.289] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:18.295] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:18.299] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:18.790] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:18.805] [bbotk] Result of batch 33:
+#&gt; INFO  [02:34:18.806] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:34:18.806] [bbotk]  0.5639651 sigmoid     NA 0.02464691    0.904365        0      0
+#&gt; INFO  [02:34:18.806] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:18.806] [bbotk]             0.485 af28278a-666c-4f28-b853-3efbca01f7cf
+#&gt; INFO  [02:34:18.814] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:18.820] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:18.824] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:19.598] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:19.619] [bbotk] Result of batch 34:
+#&gt; INFO  [02:34:19.620] [bbotk]       cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:19.620] [bbotk]  0.5970128 polynomial      6 0.1064664   0.9081793        0      0
+#&gt; INFO  [02:34:19.620] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:19.620] [bbotk]             0.768 96618ec0-2705-4308-a859-2b2943193a96
+#&gt; INFO  [02:34:19.630] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:19.636] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:19.641] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:20.340] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:20.359] [bbotk] Result of batch 35:
+#&gt; INFO  [02:34:20.360] [bbotk]        cost     kernel degree     gamma classif.auc warnings errors
+#&gt; INFO  [02:34:20.360] [bbotk]  0.04841973 polynomial      4 0.1337475   0.9176608        0      0
+#&gt; INFO  [02:34:20.360] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:20.360] [bbotk]             0.694 95677b2d-34d4-4ac7-946f-f6d30bdfff40
+#&gt; INFO  [02:34:20.371] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:20.379] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:20.384] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:21.021] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:21.039] [bbotk] Result of batch 36:
+#&gt; INFO  [02:34:21.041] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:34:21.041] [bbotk]  -0.7770614 linear     NA    NA   0.9683079        0      0             0.63
+#&gt; INFO  [02:34:21.041] [bbotk]                                 uhash
+#&gt; INFO  [02:34:21.041] [bbotk]  c00c8988-4c5e-424f-9d8a-628a2ce1d873
+#&gt; INFO  [02:34:21.051] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:21.059] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:21.064] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:22.220] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:22.238] [bbotk] Result of batch 37:
+#&gt; INFO  [02:34:22.240] [bbotk]       cost     kernel degree   gamma classif.auc warnings errors
+#&gt; INFO  [02:34:22.240] [bbotk]  0.4114269 polynomial      6 0.13385   0.8988746        0      0
+#&gt; INFO  [02:34:22.240] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:22.240] [bbotk]             1.151 523c421a-0ab9-43f1-89fa-5215c19d223f
+#&gt; INFO  [02:34:22.251] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:22.257] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:22.262] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:22.744] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:22.762] [bbotk] Result of batch 38:
+#&gt; INFO  [02:34:22.764] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:34:22.764] [bbotk]  0.7752214 sigmoid     NA 0.05379679   0.8730145        0      0
+#&gt; INFO  [02:34:22.764] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:22.764] [bbotk]             0.477 62d13723-1784-471e-8c72-12519f49abdf
+#&gt; INFO  [02:34:22.774] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:22.781] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:22.788] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:23.303] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:23.323] [bbotk] Result of batch 39:
+#&gt; INFO  [02:34:23.325] [bbotk]        cost kernel degree gamma classif.auc warnings errors runtime_learners
+#&gt; INFO  [02:34:23.325] [bbotk]  -0.5680516 linear     NA    NA   0.9692524        0      0            0.508
+#&gt; INFO  [02:34:23.325] [bbotk]                                 uhash
+#&gt; INFO  [02:34:23.325] [bbotk]  c5421ad2-d77f-433e-8f9f-0ba5d4e22b8c
+#&gt; INFO  [02:34:23.333] [bbotk] Evaluating 1 configuration(s)
+#&gt; INFO  [02:34:23.340] [mlr3] Running benchmark with 1 resampling iterations
+#&gt; INFO  [02:34:23.344] [mlr3] Applying learner 'classif.svm' on task 'spam' (iter 1/1)
+#&gt; INFO  [02:34:23.993] [mlr3] Finished benchmark
+#&gt; INFO  [02:34:24.009] [bbotk] Result of batch 40:
+#&gt; INFO  [02:34:24.011] [bbotk]       cost  kernel degree      gamma classif.auc warnings errors
+#&gt; INFO  [02:34:24.011] [bbotk]  0.1828651 sigmoid     NA 0.01471691   0.9411093        0      0
+#&gt; INFO  [02:34:24.011] [bbotk]  runtime_learners                                uhash
+#&gt; INFO  [02:34:24.011] [bbotk]             0.643 a1b45290-ef44-4982-a181-27dd717fa0e5
+#&gt; INFO  [02:34:24.030] [bbotk] Finished optimizing after 40 evaluation(s)
+#&gt; INFO  [02:34:24.031] [bbotk] Result:
+#&gt; INFO  [02:34:24.032] [bbotk]        cost kernel degree gamma learner_param_vals  x_domain classif.auc
+#&gt; INFO  [02:34:24.032] [bbotk]       &lt;num&gt; &lt;char&gt;  &lt;int&gt; &lt;num&gt;             &lt;list&gt;    &lt;list&gt;       &lt;num&gt;
+#&gt; INFO  [02:34:24.032] [bbotk]  -0.5680516 linear     NA    NA          &lt;list[3]&gt; &lt;list[2]&gt;   0.9692524</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate!</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span><span class="fu">predict</span>(spam_task, <span class="at">row_ids =</span> spam_split<span class="sc">$</span>test)<span class="sc">$</span><span class="fu">score</span>(<span class="fu">msr</span>(</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"classif.auc"</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate!</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span><span class="fu">predict</span>(spam_task, <span class="at">row_ids =</span> spam_split<span class="sc">$</span>test)<span class="sc">$</span><span class="fu">score</span>(<span class="fu">msr</span>(</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"classif.auc"</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; classif.auc 
 #&gt;   0.9702688</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparam winner:</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparam winner:</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;          cost kernel degree gamma learner_param_vals  x_domain classif.auc
 #&gt;         &lt;num&gt; &lt;char&gt;  &lt;int&gt; &lt;num&gt;             &lt;list&gt;    &lt;list&gt;       &lt;num&gt;
 #&gt; 1: -0.5680516 linear     NA    NA          &lt;list[3]&gt; &lt;list[2]&gt;   0.9692524</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remember that we transformed `cost`, here's the best value on the original scale</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result<span class="sc">$</span>x_domain</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remember that we transformed `cost`, here's the best value on the original scale</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result<span class="sc">$</span>x_domain</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [[1]]
 #&gt; [[1]]$cost
@@ -1172,7 +1169,7 @@ Example solution
 #&gt; [[1]]$kernel
 #&gt; [1] "linear"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_svm<span class="sc">$</span>tuning_instance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_svm<span class="sc">$</span>tuning_instance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1197,21 +1194,21 @@ SVM with categorical features
 <p>We have not covered this so far, but if you want to tran an SVM (or many other learners) on tasks with categorical (“nominal”) features (usually <code>factor</code> in R), we first need to encode them in a numeric format. The simplest way is to perform dummy- or one-hot encoding, and mlr3 has a whole slew of these sorts of rpeprocessing capabilities.</p>
 <p>This works by creating a <em>pipeline</em> using the <code>%&gt;&gt;%</code> oeprator (not to be confused with the magrittr-pipe <code>%&gt;%</code> you might be familiar with!). We take the <code>encode</code> pipeline operation (<code>PipeOp</code>) and stack it on top of our learner we create as usual. At the end we convert it to a regular learner, and <code>lrn_svm</code> is now a regular mlr3 learner we can use like any other, but with built-in encoding!</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>lrn_svm_base <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">predict_type =</span> <span class="st">"prob"</span>)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, lrn_svm_base) <span class="sc">|&gt;</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin task (including categoricals!)</span></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick demo</span></span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">predict</span>(penguin_task)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>lrn_svm_base <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">predict_type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, lrn_svm_base) <span class="sc">|&gt;</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin task (including categoricals!)</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick demo</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">predict</span>(penguin_task)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; 
 #&gt; ── &lt;PredictionClassif&gt; for 333 observations: ───────────────────────────────────
