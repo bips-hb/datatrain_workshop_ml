@@ -7,7 +7,6 @@
 .cache
 .config
 .local
-
 # Notebook previews & renders
 *.nb.html
 0*.html
@@ -21,5 +20,6 @@ site_libs/
 # Temporary stuff
 attic
 scratch.R
+notes.md
 
 *.rmarkdown
