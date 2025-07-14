@@ -7,8 +7,8 @@ editor_options:
 ```{r setup}
 #| message: false
 library(ggplot2) # For plotting
-library(kknn) # For kNN models
-library(rpart) # For decision trees
+library(kknn) # For kNN learner
+library(rpart) # For decision tree learners
 library(palmerpenguins) # For penguins
 ```
 
@@ -161,10 +161,16 @@ Some things to try:
     Is higher == better? (You can stick to odd numbers)
     - After you've tried a couple `k`'s, does it get cumbersome yet?
 
-
-
 ```{r knn-your-turn}
 # your code
+knn_penguins <- kknn(
+  formula = species ~ .,
+  k = 7, # Hyperparameter: How many neighbors to consider
+  train = penguins_train, # Training data used to make predictions
+  test = penguins_test # Data to make predictions on
+)
+penguins_test$knn_predicted_species <- fitted(knn_penguins)
+mean(penguins_test$species == penguins_test$knn_predicted_species)
 ```
 
 
@@ -237,7 +243,6 @@ We haven't picked any hyperparameter settings for our tree yet, maybe we should 
 
 So, what seems to work better here?  
 kNN or trees?
-
 
 
 ```{r rpart-your-turn}
