@@ -138,7 +138,7 @@ The above should get you started to...
 
 1.  Create a `search_space_svm` like above, tuning...
 
--   `cost` from 0.1 to 1 (hint: `trafo = function(x) 10^x`)
+-   `cost` from 0.1 to 1 (hint: `logscale = TRUE` or e.g. `trafo = function(x) 10^x`)
 -   `kernel`, (like above example)
 -   `degree`, as above, **only if** `kernel == "polynomial"`
 -   `gamma`, from e.g. 0.01 to 0.2, **only if** `kernel` is polynomial, radial, sigmoid (hint: you can't use `kernel != "linear"` unfortunately, but `kernel %in% c(...)`) works
