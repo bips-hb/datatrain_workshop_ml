@@ -8,6 +8,8 @@ editor_options:
 #| message: false
 library(mlr3verse) # All the mlr3 things
 library(ggplot2) # For plotting
+# Silence output during tuning, mostly for cleaner output on the website
+lgr::get_logger("mlr3")$set_threshold("error")
 
 # Spam Task setup
 spam_task <- tsk("spam")
