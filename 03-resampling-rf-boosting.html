@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2025-07-14">
+<meta name="dcterms.date" content="2025-07-15">
 
 <title>Resampling, Random Forest &amp; Boosting – DataTrain ML</title>
 <style>
@@ -417,7 +417,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 14, 2025</p>
+      <p class="date">July 15, 2025</p>
     </div>
   </div>
   
@@ -589,9 +589,9 @@ Now we have a look at our predictions, but <em>per resampling iteration</em>, fo
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;    iteration acc_train  acc_test
 #&gt;        &lt;int&gt;     &lt;num&gt;     &lt;num&gt;
-#&gt; 1:         1 0.9494620 0.9224250
-#&gt; 2:         2 0.9543528 0.9237288
-#&gt; 3:         3 0.9507823 0.9099804</code></pre>
+#&gt; 1:         1 0.9530486 0.9106910
+#&gt; 2:         2 0.9517444 0.9165580
+#&gt; 3:         3 0.9478488 0.9015003</code></pre>
 </div>
 </div>
 <p>And on average over the resampling iterations:</p>
@@ -599,7 +599,7 @@ Now we have a look at our predictions, but <em>per resampling iteration</em>, fo
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">aggregate</span>(traintest_acc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; acc_train  acc_test 
-#&gt; 0.9515324 0.9187114</code></pre>
+#&gt; 0.9508806 0.9095831</code></pre>
 </div>
 </div>
 <p>As expected, our learner performed better on the training data than on the test data. By default, <code>{mlr3}</code> only gives us the results for the test data, which we’ll be focusing on going forward. Being able to compare train-/test-performance is useful though to make sure you’re not hopelessly overfitting on your training data!</p>
@@ -609,7 +609,7 @@ Now we have a look at our predictions, but <em>per resampling iteration</em>, fo
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">aggregate</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; classif.ce 
-#&gt; 0.08128857</code></pre>
+#&gt; 0.09041688</code></pre>
 </div>
 </div>
 <section id="one-more-thing-measures" class="level2" data-number="2.1">
@@ -809,15 +809,15 @@ Example solution
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;                                   uhash               task
 #&gt;                                  &lt;char&gt;             &lt;list&gt;
-#&gt; 1: a284168a-202e-4c62-8b02-8adcf6869ac6 &lt;TaskClassif:spam&gt;
-#&gt; 2: a284168a-202e-4c62-8b02-8adcf6869ac6 &lt;TaskClassif:spam&gt;
-#&gt; 3: a284168a-202e-4c62-8b02-8adcf6869ac6 &lt;TaskClassif:spam&gt;
-#&gt; 4: ed0b5301-9742-4e5b-9894-678f98005f25 &lt;TaskClassif:spam&gt;
-#&gt; 5: ed0b5301-9742-4e5b-9894-678f98005f25 &lt;TaskClassif:spam&gt;
-#&gt; 6: ed0b5301-9742-4e5b-9894-678f98005f25 &lt;TaskClassif:spam&gt;
-#&gt; 7: a9ea4da8-4791-4acc-aa7b-62c06d3d7716 &lt;TaskClassif:spam&gt;
-#&gt; 8: a9ea4da8-4791-4acc-aa7b-62c06d3d7716 &lt;TaskClassif:spam&gt;
-#&gt; 9: a9ea4da8-4791-4acc-aa7b-62c06d3d7716 &lt;TaskClassif:spam&gt;
+#&gt; 1: 618667dc-297e-47fd-9972-5d6eabb7e5eb &lt;TaskClassif:spam&gt;
+#&gt; 2: 618667dc-297e-47fd-9972-5d6eabb7e5eb &lt;TaskClassif:spam&gt;
+#&gt; 3: 618667dc-297e-47fd-9972-5d6eabb7e5eb &lt;TaskClassif:spam&gt;
+#&gt; 4: 93f718f0-107b-48c0-b6fd-8097d44569e8 &lt;TaskClassif:spam&gt;
+#&gt; 5: 93f718f0-107b-48c0-b6fd-8097d44569e8 &lt;TaskClassif:spam&gt;
+#&gt; 6: 93f718f0-107b-48c0-b6fd-8097d44569e8 &lt;TaskClassif:spam&gt;
+#&gt; 7: 74eb48a0-c4cc-443d-b58a-f17250b347e9 &lt;TaskClassif:spam&gt;
+#&gt; 8: 74eb48a0-c4cc-443d-b58a-f17250b347e9 &lt;TaskClassif:spam&gt;
+#&gt; 9: 74eb48a0-c4cc-443d-b58a-f17250b347e9 &lt;TaskClassif:spam&gt;
 #&gt;                                 learner     resampling iteration
 #&gt;                                  &lt;list&gt;         &lt;list&gt;     &lt;int&gt;
 #&gt; 1:             &lt;LearnerClassifKKNN:knn&gt; &lt;ResamplingCV&gt;         1
