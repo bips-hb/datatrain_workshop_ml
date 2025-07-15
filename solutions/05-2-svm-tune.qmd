@@ -1,5 +1,9 @@
 ::: {.callout-tip title="Example solution" collapse ="true"}
 
+::: {.panel-tabset}
+
+
+### Task: `spam`
 
 ```{r example-svm-searchspace}
 search_space_svm = ps(
@@ -52,5 +56,75 @@ tuned_svm$tuning_result$x_domain
 
 autoplot(tuned_svm$tuning_instance)
 ```
+
+### Task: `penguins`
+
+Since the penguins data is a bit different we need to make a few tweaks to our setup:
+
+- The AUC is only defined for binary classification targets, and while there are different versions of the AUC suitable for multiclass prediction, we just switch to the classification error as our tuning metric
+- The data has categorical features, such as `island`. We dummy- (or treatment-) encode our data using the `"encode"` PipeOp (see docs at `?mlr3pipelines:::PipeOpEncode`).
+- Because we add a PipeOp to the learner, we need to prefix its parameters in the search space definition with its ID, which we also assign. That ID used to be `classif.svm`, but giving it a short name is convenient. This is an easy to overlook detail in a live workshop setting *cough*.
+
+```{r example-svm-tune-penguins-setup}
+# Penguin task setup
+penguin_task = as_task_classif(
+  na.omit(palmerpenguins::penguins),
+  target = "species"
+)
+penguin_splits = partition(penguin_task)
+```
+
+```{r example-svm-tune-penguins-baselrn}
+base_svm = po("encode") %>>%
+  po(
+    "learner",
+    lrn(
+      "classif.svm",
+      predict_type = "prob",
+      type = "C-classification",
+      id = "svm" # give it an ID to identify its parameters more easily
+    )
+  ) |>
+  as_learner()
+```
+
+In the parameter search space we need to prefix the parameters for the SVM with it's ID we set above, because technically other preprocessing pipeline parameters could also have parameters to tune, such and the `"encode"` PipeOp where we could technically tune `"method"` in `c("treatment", "one-hot", "helmert", "poly", "sum")` if we wanted to compare different methods of encoding categorical features. In this case though there's not really any point, because dummy (here "treatment") encoding is the default methid and is usually fine, and one-hot is the only alternative we might care about.
+
+```{r example-svm-tune-penguins-tuner}
+tuned_svm = auto_tuner(
+  learner = base_svm,
+  resampling = rsmp("holdout"),
+  measure = msr("classif.ce"),
+  search_space = ps(
+    svm.cost = p_dbl(-1, 1, trafo = function(x) 10^x),
+    svm.kernel = p_fct(c("linear", "polynomial", "radial", "sigmoid")),
+    svm.degree = p_int(1, 7, depends = svm.kernel == "polynomial"),
+    svm.gamma = p_dbl(
+      lower = 0.01,
+      upper = 0.2,
+      depends = svm.kernel %in% c("polynomial", "radial", "sigmoid")
+    )
+  ),
+  terminator = trm("evals", n_evals = 100),
+  tuner = tnr("random_search")
+)
+
+# Tune!
+tuned_svm$train(penguin_task, row_ids = penguin_splits$train)
+tuned_svm$tuning_result
+
+# Predict and evaluate
+svm_preds = tuned_svm$predict(penguin_task, row_ids = penguin_splits$test)
+svm_preds$score(msr("classif.acc"))
+
+
+# Remember that we transformed `cost`, here's the best value on the original scale
+tuned_svm$tuning_result$x_domain[[1]]$svm.cost
+
+autoplot(tuned_svm$tuning_instance)
+```
+
+
+:::
 
 :::

@@ -165,7 +165,7 @@ What parameter settings worked best?
 ::: {.callout-tip title="SVM with categorical features"}
 We have not covered this so far, but if you want to tran an SVM (or many other learners) on tasks with categorical ("nominal") features (usually `factor` in R), we first need to encode them in a numeric format. The simplest way is to perform dummy- or one-hot encoding, and mlr3 has a whole slew of these sorts of rpeprocessing capabilities.
 
-This works by creating a *pipeline* using the `%>>%` oeprator (not to be confused with the magrittr-pipe `%>%` you might be familiar with!). We take the `encode` pipeline operation (`PipeOp`) and stack it on top of our learner we create as usual. At the end we convert it to a regular learner, and `lrn_svm` is now a regular mlr3 learner we can use like any other, but with built-in encoding!
+This works by creating a *pipeline* using the `%>>%` oeprator (not to be confused with the magrittr-pipe `%>%` you might be familiar with!). We take the `encode` pipeline operation (`PipeOp`) and stack it on top of our learner we create as usual. At the end we convert it to a regular learner, and `lrn_svm` is now a regular `mlr3` learner we can use like any other, but with built-in encoding!
 
 ```{r svm-encode-demo}
 lrn_svm_base <- lrn("classif.svm", predict_type = "prob")
@@ -186,4 +186,6 @@ lrn_svm$predict(penguin_task)
 ```
 
 Pipelines are extremely useful and part of any reasonably complex machine learning pipeline, and to learn more you can read the [chapter in the mlr3book](https://mlr3book.mlr-org.com/chapters/chapter7/sequential_pipelines.html).
+
+Note that PipeOps can have their own parameters, which could also be subject to tuning!
 :::
