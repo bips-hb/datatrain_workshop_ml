@@ -719,6 +719,10 @@ Example solution
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" aria-current="page">Task: <code>spam</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Task: <code>penguins</code></a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>search_space_svm <span class="ot">=</span> <span class="fu">ps</span>(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">trafo =</span> <span class="cf">function</span>(x) <span class="dv">10</span><span class="sc">^</span>x),</span>
@@ -806,6 +810,90 @@ Example solution
 </div>
 </div>
 </div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p>Since the penguins data is a bit different we need to make a few tweaks to our setup:</p>
+<ul>
+<li>The AUC is only defined for binary classification targets, and while there are different versions of the AUC suitable for multiclass prediction, we just switch to the classification error as our tuning metric</li>
+<li>The data has categorical features, such as <code>island</code>. We dummy- (or treatment-) encode our data using the <code>"encode"</code> PipeOp (see docs at <code>?mlr3pipelines:::PipeOpEncode</code>).</li>
+<li>Because we add a PipeOp to the learner, we need to prefix its parameters in the search space definition with its ID, which we also assign. That ID used to be <code>classif.svm</code>, but giving it a short name is convenient. This is an easy to overlook detail in a live workshop setting <em>cough</em>.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin task setup</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">=</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>penguin_splits <span class="ot">=</span> <span class="fu">partition</span>(penguin_task)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>base_svm <span class="ot">=</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"learner"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lrn</span>(</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"classif.svm"</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">predict_type =</span> <span class="st">"prob"</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">type =</span> <span class="st">"C-classification"</span>,</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">id =</span> <span class="st">"svm"</span> <span class="co"># give it an ID to identify its parameters more easily</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the parameter search space we need to prefix the parameters for the SVM with it’s ID we set above, because technically other preprocessing pipeline parameters could also have parameters to tune, such and the <code>"encode"</code> PipeOp where we could technically tune <code>"method"</code> in <code>c("treatment", "one-hot", "helmert", "poly", "sum")</code> if we wanted to compare different methods of encoding categorical features. In this case though there’s not really any point, because dummy (here “treatment”) encoding is the default methid and is usually fine, and one-hot is the only alternative we might care about.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>tuned_svm <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">learner =</span> base_svm,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">"holdout"</span>),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">"classif.ce"</span>),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">search_space =</span> <span class="fu">ps</span>(</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">svm.cost =</span> <span class="fu">p_dbl</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">trafo =</span> <span class="cf">function</span>(x) <span class="dv">10</span><span class="sc">^</span>x),</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">svm.kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">"linear"</span>, <span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)),</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">svm.degree =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">7</span>, <span class="at">depends =</span> svm.kernel <span class="sc">==</span> <span class="st">"polynomial"</span>),</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">svm.gamma =</span> <span class="fu">p_dbl</span>(</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">lower =</span> <span class="fl">0.01</span>,</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">upper =</span> <span class="fl">0.2</span>,</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">depends =</span> svm.kernel <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">"evals"</span>, <span class="at">n_evals =</span> <span class="dv">100</span>),</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(<span class="st">"random_search"</span>)</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Tune!</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span><span class="fu">train</span>(penguin_task, <span class="at">row_ids =</span> penguin_splits<span class="sc">$</span>train)</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;      svm.cost svm.kernel svm.degree svm.gamma learner_param_vals  x_domain
+#&gt;         &lt;num&gt;     &lt;char&gt;      &lt;int&gt;     &lt;num&gt;             &lt;list&gt;    &lt;list&gt;
+#&gt; 1: -0.4159897     linear         NA        NA          &lt;list[4]&gt; &lt;list[2]&gt;
+#&gt;    classif.ce
+#&gt;         &lt;num&gt;
+#&gt; 1:          0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict and evaluate</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>svm_preds <span class="ot">=</span> tuned_svm<span class="sc">$</span><span class="fu">predict</span>(penguin_task, <span class="at">row_ids =</span> penguin_splits<span class="sc">$</span>test)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>svm_preds<span class="sc">$</span><span class="fu">score</span>(<span class="fu">msr</span>(<span class="st">"classif.acc"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; classif.acc 
+#&gt;           1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remember that we transformed `cost`, here's the best value on the original scale</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>tuned_svm<span class="sc">$</span>tuning_result<span class="sc">$</span>x_domain[[<span class="dv">1</span>]]<span class="sc">$</span>svm.cost</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.3837163</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_svm<span class="sc">$</span>tuning_instance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="05-svm-tuning_files/figure-html/example-svm-tune-penguins-tuner-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="05-svm-tuning_files/figure-html/example-svm-tune-penguins-tuner-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="SVM with categorical features">
@@ -819,37 +907,38 @@ SVM with categorical features
 </div>
 <div class="callout-body-container callout-body">
 <p>We have not covered this so far, but if you want to tran an SVM (or many other learners) on tasks with categorical (“nominal”) features (usually <code>factor</code> in R), we first need to encode them in a numeric format. The simplest way is to perform dummy- or one-hot encoding, and mlr3 has a whole slew of these sorts of rpeprocessing capabilities.</p>
-<p>This works by creating a <em>pipeline</em> using the <code>%&gt;&gt;%</code> oeprator (not to be confused with the magrittr-pipe <code>%&gt;%</code> you might be familiar with!). We take the <code>encode</code> pipeline operation (<code>PipeOp</code>) and stack it on top of our learner we create as usual. At the end we convert it to a regular learner, and <code>lrn_svm</code> is now a regular mlr3 learner we can use like any other, but with built-in encoding!</p>
+<p>This works by creating a <em>pipeline</em> using the <code>%&gt;&gt;%</code> oeprator (not to be confused with the magrittr-pipe <code>%&gt;%</code> you might be familiar with!). We take the <code>encode</code> pipeline operation (<code>PipeOp</code>) and stack it on top of our learner we create as usual. At the end we convert it to a regular learner, and <code>lrn_svm</code> is now a regular <code>mlr3</code> learner we can use like any other, but with built-in encoding!</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>lrn_svm_base <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">predict_type =</span> <span class="st">"prob"</span>)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, lrn_svm_base) <span class="sc">|&gt;</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin task (including categoricals!)</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick demo</span></span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">predict</span>(penguin_task)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>lrn_svm_base <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">predict_type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, lrn_svm_base) <span class="sc">|&gt;</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin task (including categoricals!)</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick demo</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>lrn_svm<span class="sc">$</span><span class="fu">predict</span>(penguin_task)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; 
 #&gt; ── &lt;PredictionClassif&gt; for 333 observations: ───────────────────────────────────
 #&gt;  row_ids     truth  response  prob.Adelie prob.Chinstrap prob.Gentoo
-#&gt;        1    Adelie    Adelie 0.9897186263    0.004709601 0.005571773
-#&gt;        2    Adelie    Adelie 0.9794937270    0.010353218 0.010153055
-#&gt;        3    Adelie    Adelie 0.9754507758    0.014019113 0.010530111
+#&gt;        1    Adelie    Adelie 0.9902015480    0.004221288 0.005577164
+#&gt;        2    Adelie    Adelie 0.9809077769    0.009140092 0.009952131
+#&gt;        3    Adelie    Adelie 0.9774767198    0.012267394 0.010255886
 #&gt;      ---       ---       ---          ---            ---         ---
-#&gt;      331 Chinstrap Chinstrap 0.0131531135    0.979987515 0.006859371
-#&gt;      332 Chinstrap Chinstrap 0.0049911109    0.986551962 0.008456927
-#&gt;      333 Chinstrap Chinstrap 0.0005266358    0.993014315 0.006459049</code></pre>
+#&gt;      331 Chinstrap Chinstrap 0.0162354405    0.976858790 0.006905770
+#&gt;      332 Chinstrap Chinstrap 0.0061838595    0.985258938 0.008557203
+#&gt;      333 Chinstrap Chinstrap 0.0006315615    0.992851159 0.006517280</code></pre>
 </div>
 </div>
 <p>Pipelines are extremely useful and part of any reasonably complex machine learning pipeline, and to learn more you can read the <a href="https://mlr3book.mlr-org.com/chapters/chapter7/sequential_pipelines.html">chapter in the mlr3book</a>.</p>
+<p>Note that PipeOps can have their own parameters, which could also be subject to tuning!</p>
 </div>
 </div>
 
