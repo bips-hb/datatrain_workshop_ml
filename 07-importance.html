@@ -454,15 +454,14 @@ window.Quarto = {
 <pre><code>#&gt; Loading required package: mlr3</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(effectplots) <span class="co"># For effects plotting</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin Task setup</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  penguins,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>lgr<span class="sc">::</span><span class="fu">get_logger</span>(<span class="st">"mlr3"</span>)<span class="sc">$</span><span class="fu">set_threshold</span>(<span class="st">"error"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lgr<span class="sc">::</span><span class="fu">get_logger</span>(<span class="st">"mlr3"</span>)<span class="sc">$</span><span class="fu">set_threshold</span>(<span class="st">"error"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin Task setup</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  penguins,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Goals of this part:</p>
 <ol type="1">
@@ -484,10 +483,10 @@ window.Quarto = {
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(lrn_ranger<span class="sc">$</span><span class="fu">importance</span>(), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>#&gt;    bill_length_mm flipper_length_mm     bill_depth_mm       body_mass_g 
-#&gt;        54.7109039        36.0525986        25.8922433        22.2040068 
-#&gt;            island               sex              year 
-#&gt;        21.7103410         0.6494120         0.1714471</code></pre>
+<pre><code>#&gt;    bill_length_mm flipper_length_mm     bill_depth_mm            island 
+#&gt;        56.2526808        36.2323379        27.1374795        23.0795870 
+#&gt;       body_mass_g               sex              year 
+#&gt;        21.3267219         0.5792755        -0.0353058</code></pre>
 </div>
 </div>
 <p>Which shows us that for our penguins, <code>bill_length_mm</code> is probably the most relevant feature, whereas <code>body_mass_g</code> does not turn out to be as important with regard to species classification. THe <code>year</code> doesn’t seem to be useful for prediction at all — which is perfectly plausible!</p>
@@ -538,13 +537,13 @@ window.Quarto = {
 #&gt; Packages: mlr3, mlr3learners, ranger
 #&gt; Feature types: logical, integer, numeric, character, factor, ordered
 #&gt;              feature      score
-#&gt; 1:    bill_length_mm 52.2371665
-#&gt; 2: flipper_length_mm 33.0179234
-#&gt; 3:     bill_depth_mm 27.5392018
-#&gt; 4:       body_mass_g 25.1099515
-#&gt; 5:            island 23.0539305
-#&gt; 6:               sex  0.7127981
-#&gt; 7:              year  0.1410306</code></pre>
+#&gt; 1:    bill_length_mm 53.3800945
+#&gt; 2: flipper_length_mm 35.9230817
+#&gt; 3:     bill_depth_mm 26.5714948
+#&gt; 4:       body_mass_g 25.4052059
+#&gt; 5:            island 22.6948773
+#&gt; 6:               sex  0.6515657
+#&gt; 7:              year  0.2737070</code></pre>
 </div>
 </div>
 <p><code>mlr3filters</code> also provides a general implementation for PFI that retrains the learner repeatedly with one feature randomly shuffled.</p>
@@ -561,14 +560,14 @@ window.Quarto = {
 #&gt; Task Properties: -
 #&gt; Packages: mlr3, mlr3learners, ranger, mlr3measures
 #&gt; Feature types: logical, integer, numeric, character, factor, ordered
-#&gt;              feature       score
-#&gt; 1:    bill_length_mm  1.00000000
-#&gt; 2:            island  0.02290076
-#&gt; 3:     bill_depth_mm  0.01984733
-#&gt; 4:               sex  0.01832061
-#&gt; 5:              year -0.00610687
-#&gt; 6:       body_mass_g -0.01832061
-#&gt; 7: flipper_length_mm -0.02137405</code></pre>
+#&gt;              feature      score
+#&gt; 1:    bill_length_mm 1.00000000
+#&gt; 2:       body_mass_g 0.08885542
+#&gt; 3:               sex 0.08885542
+#&gt; 4:     bill_depth_mm 0.08584337
+#&gt; 5: flipper_length_mm 0.07530120
+#&gt; 6:            island 0.07530120
+#&gt; 7:              year 0.01506024</code></pre>
 </div>
 </div>
 <p>But that also means we can use PFI for <em>any other</em> learner, such the SVM or XGBoost!</p>
@@ -633,14 +632,14 @@ Example solution
 #&gt; Packages: mlr3, mlr3pipelines, stats, mlr3learners, e1071, mlr3measures
 #&gt; Feature types: logical, integer, numeric, character, factor, ordered,
 #&gt;   POSIXct, Date
-#&gt;              feature        score
-#&gt; 1:    bill_length_mm  1.000000000
-#&gt; 2:            island  0.041835358
-#&gt; 3:               sex -0.002699055
-#&gt; 4: flipper_length_mm -0.010796221
-#&gt; 5:     bill_depth_mm -0.010796221
-#&gt; 6:       body_mass_g -0.021592443
-#&gt; 7:              year -0.022941970</code></pre>
+#&gt;              feature       score
+#&gt; 1:    bill_length_mm  1.00000000
+#&gt; 2:            island  0.02615193
+#&gt; 3:       body_mass_g -0.00996264
+#&gt; 4:               sex -0.00996264
+#&gt; 5: flipper_length_mm -0.01867995
+#&gt; 6:     bill_depth_mm -0.01867995
+#&gt; 7:              year -0.01992528</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pfi_ranger <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"importance"</span>, <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">importance =</span> <span class="st">"permutation"</span>))</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pfi_ranger<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
@@ -653,13 +652,13 @@ Example solution
 #&gt; Packages: mlr3, mlr3learners, ranger
 #&gt; Feature types: logical, integer, numeric, character, factor, ordered
 #&gt;              feature        score
-#&gt; 1:    bill_length_mm 0.2456445948
-#&gt; 2: flipper_length_mm 0.1728776850
-#&gt; 3:            island 0.1286690809
-#&gt; 4:     bill_depth_mm 0.1154904760
-#&gt; 5:       body_mass_g 0.0755719832
-#&gt; 6:               sex 0.0124934428
-#&gt; 7:              year 0.0004331667</code></pre>
+#&gt; 1:    bill_length_mm 0.2570768678
+#&gt; 2: flipper_length_mm 0.1637379672
+#&gt; 3:     bill_depth_mm 0.1273852721
+#&gt; 4:            island 0.1194188319
+#&gt; 5:       body_mass_g 0.0776365173
+#&gt; 6:               sex 0.0135382493
+#&gt; 7:              year 0.0005177563</code></pre>
 </div>
 </div>
 </div>
