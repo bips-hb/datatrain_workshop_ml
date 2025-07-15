@@ -63,8 +63,7 @@ To continue with our kNN and tree experiments, we'll now enter resampling territ
 You probably realized that predicting on just one test dataset doesn't give us
 too much of a useful idea of our model, which is why we use resampling.
 
-There are [lots of resampling strategies](https://mlr3.mlr-org.com/reference/index.html#resampling-strategies), 
-but you usually can't go too wrong with cross validation (CV), which should not 
+There are [lots of resampling strategies](https://mlr3.mlr-org.com/reference/index.html#resampling-strategies), but you usually can't go too wrong with cross validation (CV), which should not 
 take too much time and computing power on small datasets like ours.
 
 Instead of training our model just once, we're going to train it 5 times with 
