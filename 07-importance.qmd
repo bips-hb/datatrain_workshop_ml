@@ -8,6 +8,7 @@ editor_options:
 #| messages: false
 library(mlr3verse) # All the mlr3 things
 library(effectplots) # For effects plotting
+lgr::get_logger("mlr3")$set_threshold("error")
 
 # Penguin Task setup
 penguins <- na.omit(palmerpenguins::penguins)
@@ -15,8 +16,6 @@ penguin_task <- as_task_classif(
   penguins,
   target = "species"
 )
-
-lgr::get_logger("mlr3")$set_threshold("error")
 ```
 
 Goals of this part:
