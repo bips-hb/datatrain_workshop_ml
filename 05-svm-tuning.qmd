@@ -121,7 +121,7 @@ The interesting thing here is that some parameters are only relevant for some ke
 ```{r svm-search-space-short}
 search_space_svm = ps(
   kernel = p_fct(c("linear", "polynomial", "radial", "sigmoid")),
-  # Degree is onoly relevant if "kernel" is "polynomial"
+  # Degree is only relevant if "kernel" is "polynomial"
   degree = p_int(lower = 1, upper = 7, depends = kernel == "polynomial")
 )
 ```
