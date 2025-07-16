@@ -5,7 +5,7 @@ editor_options:
 ---
 
 ```{r setup}
-#| messages: false
+#| message: false
 library(mlr3verse) # All the mlr3 things
 library(effectplots) # For effects plotting
 lgr::get_logger("mlr3")$set_threshold("error")
