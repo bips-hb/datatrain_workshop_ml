@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2025-07-15">
+<meta name="dcterms.date" content="2025-07-16">
 
 <title>Feature Importance – DataTrain ML</title>
 <style>
@@ -436,7 +436,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 15, 2025</p>
+      <p class="date">July 16, 2025</p>
     </div>
   </div>
   
@@ -448,20 +448,17 @@ window.Quarto = {
 </header>
 
 
-<div class="cell" data-layout-align="center" data-messages="false">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlr3verse) <span class="co"># All the mlr3 things</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>#&gt; Loading required package: mlr3</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(effectplots) <span class="co"># For effects plotting</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lgr<span class="sc">::</span><span class="fu">get_logger</span>(<span class="st">"mlr3"</span>)<span class="sc">$</span><span class="fu">set_threshold</span>(<span class="st">"error"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin Task setup</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  penguins,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlr3verse) <span class="co"># All the mlr3 things</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(effectplots) <span class="co"># For effects plotting</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>lgr<span class="sc">::</span><span class="fu">get_logger</span>(<span class="st">"mlr3"</span>)<span class="sc">$</span><span class="fu">set_threshold</span>(<span class="st">"error"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Penguin Task setup</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>penguins <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  penguins,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Goals of this part:</p>
 <ol type="1">
@@ -478,15 +475,15 @@ window.Quarto = {
 </ul>
 <p>Before we get started with the general methods, it should be noted that some learners bring their own method-specific importance measures. Random Forests (via <code>{ranger}</code>) for example has some built-in importance metrics, like the corrected Gini impurity:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity_corrected"</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>lrn_ranger<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(lrn_ranger<span class="sc">$</span><span class="fu">importance</span>(), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity_corrected"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>lrn_ranger<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(lrn_ranger<span class="sc">$</span><span class="fu">importance</span>(), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;    bill_length_mm flipper_length_mm     bill_depth_mm            island 
-#&gt;        56.2526808        36.2323379        27.1374795        23.0795870 
+#&gt;        54.2401385        36.3183500        26.7463551        22.5503396 
 #&gt;       body_mass_g               sex              year 
-#&gt;        21.3267219         0.5792755        -0.0353058</code></pre>
+#&gt;        21.5675075         0.8636880        -0.5303487</code></pre>
 </div>
 </div>
 <p>Which shows us that for our penguins, <code>bill_length_mm</code> is probably the most relevant feature, whereas <code>body_mass_g</code> does not turn out to be as important with regard to species classification. THe <code>year</code> doesn’t seem to be useful for prediction at all — which is perfectly plausible!</p>
@@ -494,7 +491,7 @@ window.Quarto = {
 <h2 data-number="1.1" class="anchored" data-anchor-id="feature-importance-with-mlr3filters"><span class="header-section-number">1.1</span> Feature Importance with <code>{mlr3filters}</code></h2>
 <p>The <code>mlr3filters</code> package provides some <em>global</em>, <em>marginal</em> importance methods, meaning they consider the relationship between the target and one feature at a time.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.table</span>(mlr_filters)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, .(key, label)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.table</span>(mlr_filters)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, .(key, label)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; Key: &lt;key&gt;
 #&gt;                  key                                                    label
@@ -524,11 +521,11 @@ window.Quarto = {
 </div>
 <p>One “trick” of the filters package is that it can be used to access the <code>$importance()</code> that some learners provide on their own, and <code>ranger</code> provides the impurtiy-importance and permutation feature importance (PFI). We can access either with <code>mlr3filters</code> directly, but note it retrains the learner:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity_corrected"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>filter_importance <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"importance"</span>, <span class="at">learner =</span> lrn_ranger)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>filter_importance<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>filter_importance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity_corrected"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>filter_importance <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"importance"</span>, <span class="at">learner =</span> lrn_ranger)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>filter_importance<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>filter_importance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; &lt;FilterImportance:importance&gt;: Importance Score
 #&gt; Task Types: classif
@@ -536,23 +533,23 @@ window.Quarto = {
 #&gt; Task Properties: -
 #&gt; Packages: mlr3, mlr3learners, ranger
 #&gt; Feature types: logical, integer, numeric, character, factor, ordered
-#&gt;              feature      score
-#&gt; 1:    bill_length_mm 53.3800945
-#&gt; 2: flipper_length_mm 35.9230817
-#&gt; 3:     bill_depth_mm 26.5714948
-#&gt; 4:       body_mass_g 25.4052059
-#&gt; 5:            island 22.6948773
-#&gt; 6:               sex  0.6515657
-#&gt; 7:              year  0.2737070</code></pre>
+#&gt;              feature        score
+#&gt; 1:    bill_length_mm 50.976878008
+#&gt; 2: flipper_length_mm 36.856975328
+#&gt; 3:     bill_depth_mm 25.799481552
+#&gt; 4:       body_mass_g 21.751449304
+#&gt; 5:            island 20.717986260
+#&gt; 6:               sex  0.848159529
+#&gt; 7:              year -0.003874481</code></pre>
 </div>
 </div>
 <p><code>mlr3filters</code> also provides a general implementation for PFI that retrains the learner repeatedly with one feature randomly shuffled.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>filter_permutation <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"permutation"</span>, <span class="at">learner =</span> lrn_ranger)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>filter_permutation<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>filter_permutation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>filter_permutation <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"permutation"</span>, <span class="at">learner =</span> lrn_ranger)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>filter_permutation<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>filter_permutation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; &lt;FilterPermutation:permutation&gt;: Permutation Score
 #&gt; Task Types: classif
@@ -562,12 +559,12 @@ window.Quarto = {
 #&gt; Feature types: logical, integer, numeric, character, factor, ordered
 #&gt;              feature      score
 #&gt; 1:    bill_length_mm 1.00000000
-#&gt; 2:       body_mass_g 0.08885542
-#&gt; 3:               sex 0.08885542
-#&gt; 4:     bill_depth_mm 0.08584337
-#&gt; 5: flipper_length_mm 0.07530120
-#&gt; 6:            island 0.07530120
-#&gt; 7:              year 0.01506024</code></pre>
+#&gt; 2:     bill_depth_mm 0.09626437
+#&gt; 3:            island 0.09195402
+#&gt; 4:               sex 0.08764368
+#&gt; 5:       body_mass_g 0.06896552
+#&gt; 6: flipper_length_mm 0.04885057
+#&gt; 7:              year 0.02442529</code></pre>
 </div>
 </div>
 <p>But that also means we can use PFI for <em>any other</em> learner, such the SVM or XGBoost!</p>
@@ -580,7 +577,7 @@ window.Quarto = {
 <li>Comapre the two methods. Do they agree?</li>
 </ul>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="mlr3 preprocessing pipelines">
 <div class="callout-header d-flex align-content-center">
@@ -593,9 +590,9 @@ mlr3 preprocessing pipelines
 </div>
 <div class="callout-body-container callout-body">
 <p>Note that we need to use the encoding <code>PipeOp</code> to train the SVM of these on the penguins task, as they can’t handle categorical features automatically:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> <span class="st">"radial"</span>, <span class="sc">&lt;</span>any other parameter<span class="sc">&gt;</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>, <span class="at">kernel =</span> <span class="st">"radial"</span>, <span class="sc">&lt;</span>any other parameter<span class="sc">&gt;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Example solution">
@@ -612,18 +609,18 @@ Example solution
 <div class="callout-body-container callout-body">
 <p>This is just for demonstration — we’d need to use tuned hyperparameters for the SVM for a proper comparison!</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>pfi_svm <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"permutation"</span>, <span class="at">learner =</span> lrn_svm)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>pfi_svm<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>pfi_svm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>penguin_task <span class="ot">&lt;-</span> <span class="fu">as_task_classif</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>(palmerpenguins<span class="sc">::</span>penguins),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"species"</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>lrn_svm <span class="ot">&lt;-</span> <span class="fu">po</span>(<span class="st">"encode"</span>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">"learner"</span>, <span class="fu">lrn</span>(<span class="st">"classif.svm"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_learner</span>()</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>pfi_svm <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"permutation"</span>, <span class="at">learner =</span> lrn_svm)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>pfi_svm<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>pfi_svm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; &lt;FilterPermutation:permutation&gt;: Permutation Score
 #&gt; Task Types: classif
@@ -634,16 +631,16 @@ Example solution
 #&gt;   POSIXct, Date
 #&gt;              feature       score
 #&gt; 1:    bill_length_mm  1.00000000
-#&gt; 2:            island  0.02615193
-#&gt; 3:       body_mass_g -0.00996264
-#&gt; 4:               sex -0.00996264
-#&gt; 5: flipper_length_mm -0.01867995
-#&gt; 6:     bill_depth_mm -0.01867995
-#&gt; 7:              year -0.01992528</code></pre>
+#&gt; 2:            island -0.03846154
+#&gt; 3:     bill_depth_mm -0.07122507
+#&gt; 4:               sex -0.07122507
+#&gt; 5: flipper_length_mm -0.08974359
+#&gt; 6:       body_mass_g -0.09116809
+#&gt; 7:              year -0.10113960</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pfi_ranger <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"importance"</span>, <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">importance =</span> <span class="st">"permutation"</span>))</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pfi_ranger<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>pfi_ranger</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pfi_ranger <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">"importance"</span>, <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">importance =</span> <span class="st">"permutation"</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>pfi_ranger<span class="sc">$</span><span class="fu">calculate</span>(penguin_task)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>pfi_ranger</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; &lt;FilterImportance:importance&gt;: Importance Score
 #&gt; Task Types: classif
@@ -651,14 +648,14 @@ Example solution
 #&gt; Task Properties: -
 #&gt; Packages: mlr3, mlr3learners, ranger
 #&gt; Feature types: logical, integer, numeric, character, factor, ordered
-#&gt;              feature        score
-#&gt; 1:    bill_length_mm 0.2570768678
-#&gt; 2: flipper_length_mm 0.1637379672
-#&gt; 3:     bill_depth_mm 0.1273852721
-#&gt; 4:            island 0.1194188319
-#&gt; 5:       body_mass_g 0.0776365173
-#&gt; 6:               sex 0.0135382493
-#&gt; 7:              year 0.0005177563</code></pre>
+#&gt;              feature         score
+#&gt; 1:    bill_length_mm  0.2502032220
+#&gt; 2: flipper_length_mm  0.1517506849
+#&gt; 3:     bill_depth_mm  0.1254753264
+#&gt; 4:            island  0.1247705530
+#&gt; 5:       body_mass_g  0.0887346455
+#&gt; 6:               sex  0.0130695250
+#&gt; 7:              year -0.0002554921</code></pre>
 </div>
 </div>
 </div>
@@ -671,17 +668,17 @@ Example solution
 <p>One approach to visualize feature effects is via <em>Partial Dependence Plots</em> or preferably via <em>Accumulated Local Effect</em> plots (ALE), which we get from the <code>{effectplots}</code> thankfully offers.</p>
 <p>Let’s recycle our <code>ranger</code> learner and plot some effects, using the partial dependence plot (PDP) as an example:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger_cl <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">predict_type =</span> <span class="st">"prob"</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>lrn_ranger_cl<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>pd_penguins <span class="ot">&lt;-</span> <span class="fu">partial_dependence</span>(</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">object =</span> lrn_ranger_cl<span class="sc">$</span>model,</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">v =</span> penguin_task<span class="sc">$</span>feature_names,</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> penguin_task<span class="sc">$</span><span class="fu">data</span>(),</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">which_pred =</span> <span class="st">"Adelie"</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pd_penguins)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>lrn_ranger_cl <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"classif.ranger"</span>, <span class="at">predict_type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>lrn_ranger_cl<span class="sc">$</span><span class="fu">train</span>(penguin_task)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>pd_penguins <span class="ot">&lt;-</span> <span class="fu">partial_dependence</span>(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">object =</span> lrn_ranger_cl<span class="sc">$</span>model,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">v =</span> penguin_task<span class="sc">$</span>feature_names,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> penguin_task<span class="sc">$</span><span class="fu">data</span>(),</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">which_pred =</span> <span class="st">"Adelie"</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pd_penguins)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -711,7 +708,7 @@ Note
 <li>Stick with the <code>ranger</code> learner as <code>{effectplots}</code> supports it directly.</li>
 </ul>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Example solution">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -728,17 +725,17 @@ Example solution
 <p>The <code>bike_sharing</code> task is a regression task, so make sure to switch to the regression version of the learner.</p>
 <p>The target is <code>bikers</code>, the number of people using a specific bike sharing service. More information can be found on the <a href="https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset">UCI website</a>.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>task <span class="ot">&lt;-</span> <span class="fu">tsk</span>(<span class="st">"bike_sharing"</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"regr.ranger"</span>)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>lrn_ranger<span class="sc">$</span><span class="fu">train</span>(task)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>pd_bikeshare <span class="ot">&lt;-</span> <span class="fu">partial_dependence</span>(</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">object =</span> lrn_ranger<span class="sc">$</span>model,</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v =</span> task<span class="sc">$</span>feature_names,</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> task<span class="sc">$</span><span class="fu">data</span>()</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pd_bikeshare)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>task <span class="ot">&lt;-</span> <span class="fu">tsk</span>(<span class="st">"bike_sharing"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>lrn_ranger <span class="ot">&lt;-</span> <span class="fu">lrn</span>(<span class="st">"regr.ranger"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>lrn_ranger<span class="sc">$</span><span class="fu">train</span>(task)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>pd_bikeshare <span class="ot">&lt;-</span> <span class="fu">partial_dependence</span>(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">object =</span> lrn_ranger<span class="sc">$</span>model,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v =</span> task<span class="sc">$</span>feature_names,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> task<span class="sc">$</span><span class="fu">data</span>()</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pd_bikeshare)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
