@@ -483,7 +483,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">create_from_github</span>(<span class="at">repo =</span> <span class="st">"https://github.com/bips-hb/datatrain_workshop_ml.git"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This will create a new project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with <code>fork = FALSE</code> but there’s no harm in forking).</p>
-<ol type="1">
+<ol start="2" type="1">
 <li><p>Install dependencies: Open the project and run <code>renv::restore(prompt = FALSE)</code> to install required R packages.</p></li>
 <li><p>Verify: If the following example code produces a plot, you’re probably good to go:</p></li>
 </ol>
@@ -498,9 +498,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rsmp</span>(<span class="st">"cv"</span>, <span class="at">folds =</span> <span class="dv">3</span>)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>#&gt; INFO  [23:22:53.306] [mlr3] Applying learner 'classif.ranger' on task 'sonar' (iter 1/3)
-#&gt; INFO  [23:22:53.651] [mlr3] Applying learner 'classif.ranger' on task 'sonar' (iter 2/3)
-#&gt; INFO  [23:22:53.706] [mlr3] Applying learner 'classif.ranger' on task 'sonar' (iter 3/3)</code></pre>
+<pre><code>#&gt; INFO  [13:18:53.704] [mlr3] Applying learner 'classif.ranger' on task 'sonar' (iter 1/3)
+#&gt; INFO  [13:18:54.048] [mlr3] Applying learner 'classif.ranger' on task 'sonar' (iter 2/3)
+#&gt; INFO  [13:18:54.110] [mlr3] Applying learner 'classif.ranger' on task 'sonar' (iter 3/3)</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(rr, <span class="at">type =</span> <span class="st">"roc"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -517,22 +517,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup-instructions" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Setup Instructions</h1>
 <ol type="1">
-<li>Install R for your platform: <a href="https://cran.r-project.org/" class="uri">https://cran.r-project.org/</a></li>
-</ol>
+<li>Install R for your platform: <a href="https://cran.r-project.org/" class="uri">https://cran.r-project.org/</a>
 <ul>
 <li>Installation instructions depend in whether you’re using Windows, Linux (whichever flavor), or macOS.</li>
-<li>We assumethe most recent R version, but all recent versions should work fine.</li>
-</ul>
-<ol start="2" type="1">
+<li>We assume the most recent R version, but all recent versions should work fine.</li>
+</ul></li>
 <li>If you have neither <a href="https://positron.posit.co/download.html">Positron</a> nor <a href="https://posit.co/download/rstudio-desktop/">RStudio</a> installed, install wither (Positron probably preferred)</li>
-<li>Create a local copy of this workshop repository (<code>https://github.com/bips-hb/datatrain_workshop_ml.git</code>), using any one of these options (use whichever you are most familiar with):</li>
-</ol>
+<li>Create a local copy of this workshop repository (<code>https://github.com/bips-hb/datatrain_workshop_ml.git</code>), using any one of these options (use whichever you are most familiar with):
 <ol type="a">
 <li>Using R and the <code>usethis</code> package: <code>usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")</code></li>
 <li>Running this in the terminal: <code>git clone https://github.com/bips-hb/datatrain_workshop_ml.git</code></li>
 <li>Using RStudio’s <code>New Project -&gt; Version Control</code> dialog to clone the repository (analogously for whichever editor you’re using).</li>
-</ol>
-<ol type="1">
+</ol></li>
 <li>Install R packages required for the workshop by opening the workshop repository in Positron or RStudio and run <code>renv::restore(prompt = FALSE)</code>.<br>
 <a href="https://rstudio.github.io/renv/"><code>{renv}</code></a> will automatically install all R packages with the correct versions listed in <code>renv.lock</code>.</li>
 </ol>
@@ -609,8 +605,8 @@ Click to expand
 <h2 data-number="4.2" class="anchored" data-anchor-id="free-lectures-online-with-slides-videos"><span class="header-section-number">4.2</span> Free Lectures (online with slides + videos)</h2>
 <p>Lecture materials take inspiration from these free and open-source lectures:</p>
 <ul>
-<li>Introduction to Machine Learning (“I2ML”): https://slds-lmu.github.io/i2ml</li>
-<li>Interpretable Machine Learning: https://slds-lmu.github.io/iml</li>
+<li><a href="https://slds-lmu.github.io/i2ml">Introduction to Machine Learning (“I2ML”)</a></li>
+<li><a href="https://slds-lmu.github.io/iml">Interpretable Machine Learning</a></li>
 </ul>
 </section>
 <section id="textbooks" class="level2" data-number="4.3">
