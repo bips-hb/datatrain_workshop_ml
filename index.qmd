@@ -48,7 +48,7 @@ usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_worksho
 
 This will create a new project with the workshop materials on your local machine, and it will also fork the repository to your GitHub account (you can suppress this with `fork = FALSE` but there's no harm in forking).  
 
-1. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
+2. Install dependencies: Open the project and run `renv::restore(prompt = FALSE)` to install required R packages.
 
 
 3. Verify: If the following example code produces a plot, you're probably good to go:
@@ -71,16 +71,15 @@ If `renv` gives you trouble, see below for manual R package installation instruc
 # Setup Instructions
 
 1. Install R for your platform: <https://cran.r-project.org/>
-  - Installation instructions depend in whether you're using Windows, Linux (whichever flavor), or macOS.
-  - We assumethe most recent R version, but all recent versions should work fine.
+     - Installation instructions depend in whether you're using Windows, Linux (whichever flavor), or macOS.
+     - We assume the most recent R version, but all recent versions should work fine.
 2. If you have neither [Positron](https://positron.posit.co/download.html) nor [RStudio](https://posit.co/download/rstudio-desktop/) installed, install wither (Positron probably preferred)
-3. Create a local copy of this workshop repository (`https://github.com/bips-hb/datatrain_workshop_ml.git`), 
-    using any one of these options (use whichever you are most familiar with):
-  a) Using R and the `usethis` package: `usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")`
-  b) Running this in the terminal: `git clone https://github.com/bips-hb/datatrain_workshop_ml.git`
-  c) Using RStudio's `New Project -> Version Control` dialog to clone the repository (analogously for whichever editor you're using). 
+3. Create a local copy of this workshop repository (`https://github.com/bips-hb/datatrain_workshop_ml.git`), using any one of these options (use whichever you are most familiar with):
+    a) Using R and the `usethis` package: `usethis::create_from_github(repo = "https://github.com/bips-hb/datatrain_workshop_ml.git")`
+    b) Running this in the terminal: `git clone https://github.com/bips-hb/datatrain_workshop_ml.git`
+    c) Using RStudio's `New Project -> Version Control` dialog to clone the repository (analogously for whichever editor you're using). 
 
-1. Install R packages required for the workshop by opening the workshop repository in Positron or RStudio and run `renv::restore(prompt = FALSE)`.  
+4. Install R packages required for the workshop by opening the workshop repository in Positron or RStudio and run `renv::restore(prompt = FALSE)`.  
 [`{renv}`](https://rstudio.github.io/renv/) will automatically install all R packages with the correct versions listed in `renv.lock`.
 
 In some cases, installation with `{renv}` might fail, and if that happens move on to the next section to install packages manually.
@@ -169,8 +168,8 @@ We rely on the `mlr3` framework and its free online book for the hands-on part o
 
 Lecture materials take inspiration from these free and open-source lectures:
 
-- Introduction to Machine Learning ("I2ML"): https://slds-lmu.github.io/i2ml
-- Interpretable Machine Learning: https://slds-lmu.github.io/iml
+- [Introduction to Machine Learning ("I2ML")](https://slds-lmu.github.io/i2ml)
+- [Interpretable Machine Learning](https://slds-lmu.github.io/iml)
 
 ## Textbooks
 
